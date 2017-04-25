@@ -22,16 +22,16 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_user_map">UserMapActivity</string>
 
-    <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_register">Crear Cuenta</string>
     <string name="dummy_button">Siguiente</string>
     <string name="button_ult_paso">Siguiente y último paso</string>
     <string name="button_terminar">Terminar</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="title_activity_register_p1">RegisterActivityP1</string>
-    <string name="title_activity_register_step1">Paso 1: Ingresa tu Nombre y Apellido</string>
+    <string name="title_activity_register_step1">Paso 1: Nombre y Apellido</string>
 
-    <string name="title_activity_register_step2">Paso 2: Ingresa tu Correo Electrónico</string>
+    <string name="title_activity_register_step2">Paso 2: Correo Electrónico</string>
 
     <string name="title_activity_register_step3">Paso 3: Crea una Contraseña</string>
     <string name="title_activity_chofer_map">ChoferMapActivity</string>

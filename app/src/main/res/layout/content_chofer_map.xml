@@ -7,5 +7,23 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.android.micros.sistemaandroidmicros.ChoferMapActivity"
     tools:showIn="@layout/app_bar_chofer_map">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_height="516dp"
+        android:layout_width="364dp"
+        android:orientation="vertical">
+        <fragment
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            tools:context="com.android.micros.sistemaandroidmicros.MapsActivity"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
