@@ -62,18 +62,6 @@ public class UserMapActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Intent i = getIntent();
-        Bundle bundle = i.getExtras();
-
-        correoFacebook = (String) bundle.get("correo");
-        nombreFacebook = (String) bundle.get("nombre");
-
-        nombreNavHeader = (TextView)findViewById(R.id.nameUser);
-        correoNavHeader = (TextView)findViewById(R.id.emailUser);
-
-        nombreNavHeader.setText(nombreFacebook);
-        correoNavHeader.setText(correoFacebook);
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -197,11 +185,10 @@ public class UserMapActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng hcmus = new LatLng(10.762963, 106.682394);
+        LatLng hcmus = new LatLng(-40.5769389,-73.1260218);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
 
         originMarkers.add(mMap.addMarker(new MarkerOptions()
-                .title("Đại học Khoa học tự nhiên")
                 .position(hcmus)));
 
         //TODO: Dar permisos para utilizar la ubicación de GPS
