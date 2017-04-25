@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">SistemaAndroidMicros</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_login">Iniciar Sesión</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Correo</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="action_sign_in">Iniciar</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">El correo no es válido</string>
+    <string name="error_invalid_password">La contraseña es demasiado corta</string>
+    <string name="error_incorrect_password">La contraseña es incorrecta</string>
+    <string name="error_field_required">Este campo es requerido</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
+    <string name="title_activity_chofer_maps">Map</string>
+    <string name="title_activity_example">ExampleActivity</string>
+    <string name="facebook_app_id">1845113782417404</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_user_map">UserMapActivity</string>
+
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="dummy_button">Siguiente</string>
+    <string name="button_ult_paso">Siguiente y último paso</string>
+    <string name="button_terminar">Terminar</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_register_p1">RegisterActivityP1</string>
+    <string name="title_activity_register_step1">Paso 1: Ingresa tu Nombre y Apellido</string>
+
+    <string name="title_activity_register_step2">Paso 2: Ingresa tu Correo Electrónico</string>
+
+    <string name="title_activity_register_step3">Paso 3: Crea una Contraseña</string>
+    <string name="title_activity_chofer_map">ChoferMapActivity</string>
+</resources>

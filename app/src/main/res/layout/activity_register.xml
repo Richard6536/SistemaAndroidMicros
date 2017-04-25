@@ -1,0 +1,70 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    tools:context="com.android.micros.sistemaandroidmicros.RegisterActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="300dp">
+        <TextView
+            android:id="@+id/fullscreen_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:text="Únete a MicrosAndroid"
+            android:textColor="#43ad44"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+ <LinearLayout
+     android:layout_width="match_parent"
+     android:layout_height="match_parent">
+     <TextView
+         android:id="@+id/txtLa"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:gravity="center"
+         android:keepScreenOn="true"
+         android:text="Te ayudaremos a crear una nueva cuenta en tan sólo 3 pasos."
+         android:textColor="#a5a8a4"
+         android:textSize="20sp"
+         android:textStyle="bold" />
+ </LinearLayout>
+
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:id="@+id/fullscreen_content_controls"
+            style="?metaButtonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="#258928"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent">
+
+            <Button
+                android:id="@+id/btnPaso1"
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
+                android:textColor="#ffff"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/dummy_button" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
