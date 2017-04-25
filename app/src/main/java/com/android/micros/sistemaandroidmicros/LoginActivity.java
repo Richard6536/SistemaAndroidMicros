@@ -142,6 +142,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         String cancelMessage = "Login Cancelado.";
                         info.setText(cancelMessage);
                         makeToast(cancelMessage);
+
                     }
 
 
