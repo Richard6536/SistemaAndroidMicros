@@ -93,6 +93,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        //Hola
         // Inicializar Facebook SDK
         //FacebookSdk.sdkInitialize(getApplicationContext());
         FacebookSdk.sdkInitialize(getApplicationContext());
