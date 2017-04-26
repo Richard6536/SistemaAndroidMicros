@@ -15,7 +15,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
     <string name="title_activity_chofer_maps">Map</string>
     <string name="title_activity_example">ExampleActivity</string>
-    <string name="facebook_app_id">1845113782417404</string>
+    <string name="facebook_app_id">189368904916190</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -35,4 +35,5 @@
 
     <string name="title_activity_register_step3">Paso 3: Crea una Contraseña</string>
     <string name="title_activity_chofer_map">ChoferMapActivity</string>
+    <string name="title_activity_login2">Sign in</string>
 </resources>

@@ -41,6 +41,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -73,13 +74,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
+
     private UserLoginTask mAuthTask = null;
 
-    private CallbackManager callM;
-    private LoginButton loginB;
+    private CallbackManager callBackManager;
+    private LoginButton loginFacebookButton;
     private Button btnRegister;
     private TextView info;
 
@@ -95,69 +94,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Inicializar Facebook SDK
         //FacebookSdk.sdkInitialize(getApplicationContext());
-        FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_login);
-        // Establecer las devoluciones de llamada
-        callM = CallbackManager.Factory.create();
-        loginB = (LoginButton) findViewById(R.id.login_button);
-        // Inicializar el Texview
-        info = (TextView) findViewById(R.id.info);
-        loginB.setReadPermissions(Arrays.asList("public_profile, email, user_birthday"));
+        initializeControls();
 
         btnRegister = (Button)findViewById(R.id.btnRegister);
-
-
         btnRegister.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 RegActivity();
             }
         });
-
-        // Registrar las devoluciones de llamada
-        loginB.registerCallback(callM,
-                new FacebookCallback<LoginResult>() {
-
-                    public void onSuccess(LoginResult loginResult) {
-                        GraphRequest request = GraphRequest.newMeRequest(
-                                loginResult.getAccessToken(),
-                                new GraphRequest.GraphJSONObjectCallback() {
-
-                                    @Override
-                                    public void onCompleted(JSONObject object, GraphResponse response) {
-                                        Log.v("Main", response.toString());
-                                        setProfileToView(object);
-                                    }
-                                });
-
-                        Bundle parameters = new Bundle();
-                        parameters.putString("fields", "id,name,email,gender, birthday");
-                        request.setParameters(parameters);
-                        request.executeAsync();
-                    }
-
-
-                    public void onCancel() {
-                        String cancelMessage = "Login Cancelado.";
-                        info.setText(cancelMessage);
-                        makeToast(cancelMessage);
-
-                    }
-
-
-                    public void onError(FacebookException exception) {
-                        String errorMessage = "Login error.";
-                        info.setText(errorMessage);
-                        makeToast(errorMessage);
-                    }
-                }
-        );
-
-
-        if(isLoggedIn())
-            info.setText("User ID: "
-                    + AccessToken.getCurrentAccessToken().getUserId());
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -187,63 +134,63 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    private void setProfileToView(JSONObject jsonObject) {
-        try {
-            //String name = jsonObject.getString("name");
-            //String email = jsonObject.getString("email");
 
-            info.setText(jsonObject.getString("email")+" "+jsonObject.getString("gender")+" "+jsonObject.getString("name"));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    private void initializeControls()
+    {
+        callBackManager = CallbackManager.Factory.create();
+        info = (TextView) findViewById(R.id.info);
+        loginFacebookButton = (LoginButton) findViewById(R.id.login_button);
+        loginFacebookButton.setReadPermissions(Arrays.asList("public_profile, email, user_birthday"));
     }
 
-    /*Comprueba si el usuario ha iniciado sesión en Facebook y el
-    token de acceso está activo
-     * @return */
+    private void loginFacebook()
+    {
 
-    public boolean isLoggedIn() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        return (accessToken != null) && (!accessToken.isExpired());
+        LoginManager.getInstance().registerCallback(callBackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                Log.v("Main", response.toString());
+                                try
+                                {
+                                    info.setText(object.getString("email")+" "+object.getString("gender")+" "+object.getString("name"));
+                                }
+                                catch(JSONException json)
+                                {
+                                    json.printStackTrace();
+                                }
+
+                            }
+                        });
+
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id,name,email,gender, birthday");
+                request.setParameters(parameters);
+                request.executeAsync();
+                //info.setText("Login Success\n"+loginResult.getAccessToken());
+
+            }
+
+            @Override
+            public void onCancel() {
+                info.setText("Login Cancelled");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                info.setText("Login Error: "+error.getMessage());
+            }
+        });
     }
 
-    /**
-     * datos de interés en el gestor de devolución de llamada
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callM.onActivityResult(requestCode, resultCode, data)
-        ;
-    }
-
-    /**
-     * creamos los toast
-     * @param text
-     */
-    private void makeToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        //los logs de 'instalar' y 'aplicación activa' App Eventos.
-        AppEventsLogger.activateApp(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // Logs de'app desactivada' App Eventos.
-        AppEventsLogger.deactivateApp(this);
+        callBackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void populateAutoComplete() {
@@ -288,11 +235,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }
     }
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
+
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -452,6 +395,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmail = email;
             mPassword = password;
         }
+
 
         @Override
         protected Boolean doInBackground(Void... params) {
