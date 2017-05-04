@@ -249,10 +249,10 @@ public class UserMapActivity extends AppCompatActivity
                     .title(route.endAddress)
                     .position(route.endLocation)));
 
-            PolylineOptions polylineOptions = new PolylineOptions().
-                    geodesic(true).
-                    color(Color.BLUE).
-                    width(10);
+            PolylineOptions polylineOptions = new PolylineOptions()
+                    .geodesic(true)
+                    .color(Color.BLUE)
+                    .width(10);
 
             polylineOptions.add(route.startLocation);
             for (int i = 0; i < route.points.size(); i++)

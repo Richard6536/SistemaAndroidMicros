@@ -92,8 +92,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inicializar Facebook SDK
-        //FacebookSdk.sdkInitialize(getApplicationContext());
+        //Obsoleto: FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_login);
         initializeControls();
@@ -137,6 +136,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void initializeControls()
     {
+        //Inicialización de Componentes Facebook
         callBackManager = CallbackManager.Factory.create();
         info = (TextView) findViewById(R.id.info);
         loginFacebookButton = (LoginButton) findViewById(R.id.login_button);
@@ -163,7 +163,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 {
                                     json.printStackTrace();
                                 }
-
                             }
                         });
 
@@ -177,12 +176,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             @Override
             public void onCancel() {
-                info.setText("Login Cancelled");
+                info.setText("Inicio de Sesión cancelado");
             }
 
             @Override
             public void onError(FacebookException error) {
-                info.setText("Login Error: "+error.getMessage());
+                info.setText("Error al iniciar sesión: "+error.getMessage());
             }
         });
     }
@@ -426,7 +425,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                Intent i = new Intent(LoginActivity.this, UserMapActivity.class);
+                Intent i = new Intent(LoginActivity.this, InfoUserActivity.class);
                 startActivity(i);
 
             } else {
