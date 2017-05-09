@@ -18,11 +18,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
+import com.android.micros.sistemaandroidmicros.Clases.Linea;
+import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,19 +44,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserMapActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, DirectionFinderListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private Button btnFindPath;
+    private Button btnBuscar;
     private EditText etOrigin, etDestination;
 
     //NavHeader
     private TextView nombreNavHeader, correoNavHeader;
 
+
+
+    Polyline polylineIda;
+    Polyline polylineVuelta;
+    List<Polyline> polylinesLista = new ArrayList<Polyline>();
+    boolean rutaDeVuelta = false;
+    int cont = 0;
+
     private List<Marker> originMarkers = new ArrayList<>();
     private List<Marker> destinationMarkers = new ArrayList<>();
     private List<Polyline> polylinePaths = new ArrayList<>();
     private ProgressDialog progressDialog;
+    private Spinner spinner;
+    ArrayAdapter<String> adapter;
 
     //Datos de Facebook
     private String nombreFacebook, correoFacebook;
@@ -61,7 +77,9 @@ public class UserMapActivity extends AppCompatActivity
         setContentView(R.layout.activity_user_map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        spinner = (Spinner)findViewById(R.id.spLineas);
 
+        cargarSpinner();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -85,15 +103,35 @@ public class UserMapActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        btnFindPath = (Button)findViewById(R.id.btnFindPath);
-        etOrigin = (EditText)findViewById(R.id.etOrigin);
-        etDestination = (EditText)findViewById(R.id.etDestination);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 
 
-        btnFindPath.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendRequest();
+                if(polylineIda != null && polylineVuelta != null)
+                {
+                    polylineIda.remove();
+                    polylineVuelta.remove();
+
+                }
+                Object item = parent.getItemAtPosition(pos);
+                String itemStr = item.toString();
+                Linea linea = new Linea();
+                Rutas rutaIda = new Rutas();
+                Rutas rutaVuelta = new Rutas();
+
+
+                int idLinea = linea.buscarLineaSpinner(itemStr);
+                linea = Linea.BuscarLineaPorId(idLinea);
+                rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
+                rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
+
+                crearRutaIda(rutaIda.listaCoordenadas);
+                crearRutaVuelta(rutaVuelta.listaCoordenadas);
+                //Envía id para obtener las rutas de la linea seleccionada.
+
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
     }
@@ -155,32 +193,6 @@ public class UserMapActivity extends AppCompatActivity
         return true;
     }
 
-    //TODO: Validaciones de Dirección de Inicio y Termino
-    private void sendRequest(){
-        String origin = etOrigin.getText().toString();
-        String destination = etDestination.getText().toString();
-
-        if(origin.isEmpty())
-        {
-            Toast.makeText(this, "Por favor ingrese una dirección de Inicio", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if(destination.isEmpty())
-        {
-            Toast.makeText(this, "Por favor ingrese una dirección de Destino", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        try
-        {
-            //TODO: Si es correcto, envía los datos hacia "DirectionFinder"
-            new DirectionFinder(this, origin, destination).execute();
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -205,61 +217,44 @@ public class UserMapActivity extends AppCompatActivity
         mMap.setMyLocationEnabled(true);
     }
 
-    public void onDirectionFinderStart() {
+    public void crearRutaIda(ArrayList<Coordenada> coordenadas)
+    {
 
-        //TODO: Esperar por la busqueda de dirección
-        progressDialog = ProgressDialog.show(this, "Por favor espere.",
-                "Buscando Dirección..!", true);
 
-        if (originMarkers != null) {
-            for (Marker marker : originMarkers) {
-                marker.remove();
-            }
+        PolylineOptions polylinesIda = new PolylineOptions();
+        for (Coordenada c : coordenadas)
+        {
+
+            polylinesIda.color(Color.RED);
+            polylinesIda.add(new LatLng(c.latitud, c.longitud));
+
+
         }
-
-        if (destinationMarkers != null) {
-            for (Marker marker : destinationMarkers) {
-                marker.remove();
-            }
-        }
-
-        if (polylinePaths != null) {
-            for (Polyline polyline:polylinePaths ) {
-                polyline.remove();
-            }
-        }
+        polylineIda = mMap.addPolyline(polylinesIda);
     }
 
+    public void crearRutaVuelta(ArrayList<Coordenada> coordenadas)
+    {
 
-    public void onDirectionFinderSuccess(List<Route> routes) {
-        progressDialog.dismiss();
-        polylinePaths = new ArrayList<>();
-        originMarkers = new ArrayList<>();
-        destinationMarkers = new ArrayList<>();
 
-        for (Route route : routes) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.startLocation, 16));
-            ((TextView) findViewById(R.id.txtTime)).setText(route.duration.text);
-            ((TextView) findViewById(R.id.txtKM)).setText(route.distance.text);
+        PolylineOptions polylinesVuelta = new PolylineOptions();
+        for (Coordenada c : coordenadas)
+        {
 
-            originMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .title(route.startAddress)
-                    .position(route.startLocation)));
-            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .title(route.endAddress)
-                    .position(route.endLocation)));
+            polylinesVuelta.color(Color.BLUE);
+            polylinesVuelta.add(new LatLng(c.latitud, c.longitud));
 
-            PolylineOptions polylineOptions = new PolylineOptions()
-                    .geodesic(true)
-                    .color(Color.BLUE)
-                    .width(10);
-
-            polylineOptions.add(route.startLocation);
-            for (int i = 0; i < route.points.size(); i++)
-                polylineOptions.add(route.points.get(i));
-            polylineOptions.add(route.endLocation);
-
-            polylinePaths.add(mMap.addPolyline(polylineOptions));
         }
+        polylineVuelta = mMap.addPolyline(polylinesVuelta);
+
+    }
+
+    public void cargarSpinner()
+    {
+        Linea linea = new Linea();
+        ArrayList<String> items = linea.obtenerNombres();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 }

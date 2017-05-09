@@ -33,6 +33,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.micros.sistemaandroidmicros.Clases.Linea;
+import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -96,7 +98,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         setContentView(R.layout.activity_login);
         initializeControls();
-
+        obtenerDatos();
         btnRegister = (Button)findViewById(R.id.btnRegister);
         btnRegister.setOnClickListener(new OnClickListener() {
             @Override
@@ -425,7 +427,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                Intent i = new Intent(LoginActivity.this, InfoUserActivity.class);
+                Intent i = new Intent(LoginActivity.this, UserMapActivity.class);
                 startActivity(i);
 
             } else {
@@ -445,6 +447,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         Intent in = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivity(in);
+    }
+
+
+    public void obtenerDatos()
+    {
+        String URL = "http://localhost:8081/odata/Lineas";
+        String URLRutas = "http://localhost:8081/odata/Rutas";
+        AsyncTask asf = new Linea.ObtenerLineas().execute(URL);
+        AsyncTask asf2 = new Rutas.ObtenerRutas().execute(URLRutas);
+
+        //while(asf.getStatus() != AsyncTask.Status.FINISHED && asf2.getStatus() != AsyncTask.Status.FINISHED)
+
+
+
     }
 }
 

@@ -1,21 +1,30 @@
 package com.android.micros.sistemaandroidmicros.Clases;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.micros.sistemaandroidmicros.InfoUserActivity;
+import com.android.micros.sistemaandroidmicros.UserMapActivity;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by Richard on 03/05/2017.
@@ -28,9 +37,14 @@ public class Rutas
     public int tipoRuta;
     public int idInicio;
     public int idLinea;
+    public ArrayList<Coordenada> listaCoordenadas;
 
-    public ArrayList<Rutas> listaRutas = new ArrayList<Rutas>();
-    private String URLRutas = "http://localhost:8081/odata/Rutas";
+
+
+    public static ArrayList<Rutas> listaRutas = new ArrayList<>();
+    //public static ArrayList<Coordenada> listaCoordenadas = new ArrayList<>();
+    ArrayList<LatLng> rutas = new ArrayList<LatLng>();
+    //public static int IdLatLng = 0;
 
     public Rutas(){}
 
@@ -74,12 +88,10 @@ public class Rutas
         this.idLinea = idLinea;
     }
 
-    public void obtenerTodasLasRutas()
-    {
-        new ObtenerRutas().execute(URLRutas);
-    }
 
-     private class ObtenerRutas extends AsyncTask<String, String, String>
+    //Obtiene todas las rutas de la base de datos, usando el web service
+    //pero aun no les asigna su lista de coordenaddas a cada una de ellas
+     public static class ObtenerRutas extends AsyncTask<String, String, ArrayList<Rutas>>
      {
 
             HttpURLConnection connection = null;
@@ -87,7 +99,7 @@ public class Rutas
 
 
             @Override
-            protected String doInBackground(String... params) {
+            protected ArrayList<Rutas> doInBackground(String... params) {
                 int id;
                 String nombre;
                 int tipo;
@@ -116,22 +128,17 @@ public class Rutas
                     for (int i = 0; i < listaJson.length(); i++) {
                         JSONObject jsonobject = listaJson.getJSONObject(i);
 
-                        id = jsonobject.getInt("Id");
-                        nombre = jsonobject.getString("Nombre");
-                        tipo = jsonobject.getInt("TipoDeRuta");
-                        idIn = jsonobject.getInt("InicioId");
-                        idLi = jsonobject.getInt("LineaId");
-
                         Rutas ruta = new Rutas();
-                        ruta.idRuta = id;
-                        ruta.nombreRuta = nombre;
-                        ruta.tipoRuta = tipo;
-                        ruta.idInicio = idIn;
-                        ruta.idLinea = idLi;
+                        ruta.idRuta = jsonobject.getInt("Id");
+                        ruta.nombreRuta = jsonobject.getString("Nombre");
+                        ruta.tipoRuta = jsonobject.getInt("TipoDeRuta");
+                        ruta.idInicio = jsonobject.getInt("InicioId");
+                        ruta.idLinea = jsonobject.getInt("LineaId");
 
                         listaRutas.add(ruta);
-
                     }
+
+                    return listaRutas;
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -152,13 +159,10 @@ public class Rutas
             }
 
             @Override
-            protected void onPostExecute(String result) {
-                Log.i("ServicioRest", "onPostExecute");
+            protected void onPostExecute(ArrayList<Rutas> result) {
+               super.onPostExecute(result);
 
-                // JSONObject resultadoJSON = null;
-                //LISTA
-                //JSONArray lista = resultadoJSON.getJSONArray("movies");
-                //JSONObject finalObject = lista.getJSONObject(0);
+                Rutas.CargarCoordenadasRutas();
 
             }
 
@@ -168,6 +172,152 @@ public class Rutas
             }
     }
 
+    //Recorre la lista estatica de todas las rutas y por cada una de ellas llama al metodo ObtenerCoordenadas
+    public static void CargarCoordenadasRutas()
+    {
+        for(int c = 0; c < listaRutas.size(); c++)
+        {
+            String idRuta = listaRutas.get(c).idRuta+"";
+            //String URLCoordenadas = "http://localhost:8081/odata/Rutas("+IdLatLng+")/ListaCoordenadas";
+            new ObtenerCoordenadas().execute(idRuta);
+        }
 
+    }
+
+    //Por cada ruta que se envia a este metodo se le rellena su lista de coordenadas
+    private static class ObtenerCoordenadas extends AsyncTask <String,String,String>
+    {
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+
+            String JsonResponse = "";
+            HttpURLConnection urlConnection = null;
+            String JsonData =params[0];
+
+            Rutas rutaARellenar = null;
+
+            for (int i = 0; i < listaRutas.size(); i++)
+            {
+                if(listaRutas.get(i).idRuta == Integer.parseInt(params[0]))
+                {
+                    rutaARellenar = listaRutas.get(i);
+                }
+            }
+
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Rutas("+JsonData+")/ListaCoordenadas");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8"));
+                //writer.write(JsonDATA);
+                //writer.close();
+
+                InputStream inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                    return "Error 1";
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                if (buffer.length() == 0) {
+                    return "Error 2";
+                }
+                JsonResponse = buffer.toString();
+
+                JSONObject resultadoJSON = new JSONObject(JsonResponse);
+
+                int idruta = Integer.parseInt(JsonData);
+                JSONArray listaJson = resultadoJSON.getJSONArray("value");
+
+                ArrayList<Coordenada> coordenadasRuta = new ArrayList<>();
+
+                for (int i = 0; i < listaJson.length(); i++) {
+                    JSONObject jsonobject = listaJson.getJSONObject(i);
+
+                    Coordenada latLng = new Coordenada();
+                    latLng.idRuta = idruta;
+                    latLng.latitud = jsonobject.getDouble("Latitud");
+                    latLng.longitud = jsonobject.getDouble("Longitud");
+
+                    coordenadasRuta.add(latLng);
+
+                }
+
+                rutaARellenar.listaCoordenadas = coordenadasRuta;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+
+        }
+    }
+
+    //Se envia la id de la linea y retorna una lista de objetos ruta asociadas a ella
+    public ArrayList<Rutas> obtenerRutasPorLinea(int id)
+    {
+        ArrayList<Rutas> rutas = new ArrayList<>();
+
+        for(int r = 0; r < listaRutas.size(); r++)
+        {
+            if(id == listaRutas.get(r).idLinea)
+            {
+               rutas.add(listaRutas.get(r));
+            }
+        }
+        return rutas;
+    }
+
+    public static Rutas BuscarRutaPorId(int _idRuta)
+    {
+        for (int i = 0; i < listaRutas.size(); i++)
+        {
+            if(listaRutas.get(i).idRuta == _idRuta)
+            {
+                return listaRutas.get(i);
+            }
+        }
+
+        return null;
+    }
 
 }
+
+

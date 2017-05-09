@@ -7,12 +7,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 
 import org.json.JSONArray;
@@ -36,10 +39,12 @@ public class InfoUserActivity extends AppCompatActivity {
     private Button btnBuscar, btnIngreso;
     private TextView lblId, lblNombre, lblCorreo, info, info2;
     private EditText txtId, txtNombre, txtEdad;
-    private String URL;
     private int identificador;
-    private ListView lst_Route;
-    private ArrayAdapter<Rutas> adapter;
+    private Spinner spinner;
+    ArrayAdapter<String> adapter;
+    String URL = "http://localhost:8081/odata/Lineas";
+    String URLRutas = "http://localhost:8081/odata/Rutas";
+    Linea linea = new Linea();
 
     private String nombre;
     private String edad;
@@ -48,62 +53,28 @@ public class InfoUserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_user);
-        lst_Route = (ListView)findViewById(R.id.listView);
+        info = (TextView)findViewById(R.id.textView2);
+        spinner = (Spinner)findViewById(R.id.spLineas);
 
-        Rutas rutas = new Rutas();
-        rutas.obtenerTodasLasRutas();
 
-        ArrayList<Rutas> ListRutas = rutas.listaRutas;
+        //TODO: obtengo el item del spinner ------------
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                Object item = parent.getItemAtPosition(pos);
 
-        adapter = new ArrayAdapter<Rutas>(getApplicationContext(), android.R.layout.simple_spinner_item, ListRutas);
-        lst_Route.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+                //Retorna el id de la linea seleccionada del spinner.
+                Linea line = new Linea();
+                int idLinea = line.buscarLineaSpinner(item.toString());
 
-        lblCorreo = (TextView) findViewById(R.id.textView3);
-        info = (TextView) findViewById(R.id.textView9);
-        info2 = (TextView) findViewById(R.id.info2);
+                //Envía id para obtener las rutas de la linea seleccionada.
 
-        txtId = (EditText) findViewById(R.id.editText);
-        txtNombre = (EditText) findViewById(R.id.editText2);
-        txtEdad = (EditText) findViewById(R.id.editText3);
-
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         //String idUser = txtId.getText().toString();
         //identificador = Integer.parseInt(idUser);
-        btnIngreso = (Button) findViewById(R.id.btnIngresarNombreEdad);
-        btnIngreso.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                nombre = txtNombre.getText().toString();
-                edad = txtEdad.getText().toString();
-
-                JSONObject pPost = new JSONObject();
-
-                try {
-
-                    pPost.put("Nombre", nombre);
-                    pPost.put("Edad", edad);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                if (pPost.length() > 0) {
-
-                    info.setText(pPost.toString());
-                    new JsonAlServidor().execute(String.valueOf(pPost));
-                }
-            }
-        });
-
-        btnBuscar = (Button) findViewById(R.id.btnBuscar);
-        btnBuscar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                URL = "http://localhost:8081/odata/Usuarios(" + txtId.getText().toString() + ")";
-                new ObtenerDatosUsuario().execute(URL);
-            }
-        });
     }
     private class JsonAlServidor extends AsyncTask <String,String,String>{
 
@@ -258,4 +229,12 @@ public class InfoUserActivity extends AppCompatActivity {
     }
 
 
+    public void cargarSpinner()
+    {
+        Linea linea = new Linea();
+        ArrayList<String> nombres = linea.obtenerNombres();
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, nombres);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+    }
 }
