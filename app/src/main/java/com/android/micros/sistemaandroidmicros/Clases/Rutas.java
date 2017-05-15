@@ -38,13 +38,11 @@ public class Rutas
     public int idInicio;
     public int idLinea;
     public ArrayList<Coordenada> listaCoordenadas;
+    public ArrayList<Paradero> listaParaderos;
 
 
 
     public static ArrayList<Rutas> listaRutas = new ArrayList<>();
-    //public static ArrayList<Coordenada> listaCoordenadas = new ArrayList<>();
-    ArrayList<LatLng> rutas = new ArrayList<LatLng>();
-    //public static int IdLatLng = 0;
 
     public Rutas(){}
 
@@ -90,21 +88,15 @@ public class Rutas
 
 
     //Obtiene todas las rutas de la base de datos, usando el web service
-    //pero aun no les asigna su lista de coordenaddas a cada una de ellas
+    //pero aun no les asigna su lista de coordenadas y tampoco sus paraderos a cada una de ellas
      public static class ObtenerRutas extends AsyncTask<String, String, ArrayList<Rutas>>
      {
 
             HttpURLConnection connection = null;
             BufferedReader reader = null;
 
-
             @Override
             protected ArrayList<Rutas> doInBackground(String... params) {
-                int id;
-                String nombre;
-                int tipo;
-                int idIn;
-                int idLi;
 
                 try {
                     URL url = new URL(params[0]);
@@ -163,6 +155,7 @@ public class Rutas
                super.onPostExecute(result);
 
                 Rutas.CargarCoordenadasRutas();
+                Paradero.cargarParaderosPorRuta();
 
             }
 
@@ -195,7 +188,7 @@ public class Rutas
 
             String JsonResponse = "";
             HttpURLConnection urlConnection = null;
-            String JsonData =params[0];
+            String idRuta =params[0];
 
             Rutas rutaARellenar = null;
 
@@ -210,7 +203,7 @@ public class Rutas
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Rutas("+JsonData+")/ListaCoordenadas");
+                URL url = new URL("http://localhost:8081/odata/Rutas("+idRuta+")/ListaCoordenadas");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -245,7 +238,7 @@ public class Rutas
 
                 JSONObject resultadoJSON = new JSONObject(JsonResponse);
 
-                int idruta = Integer.parseInt(JsonData);
+                int idruta = Integer.parseInt(idRuta);
                 JSONArray listaJson = resultadoJSON.getJSONArray("value");
 
                 ArrayList<Coordenada> coordenadasRuta = new ArrayList<>();
@@ -283,8 +276,7 @@ public class Rutas
             return null;
         }
 
-        @Override
-        protected void onPostExecute(String result)
+        protected void onPostExecute(Boolean result)
         {
 
         }
@@ -317,6 +309,8 @@ public class Rutas
 
         return null;
     }
+
+
 
 }
 

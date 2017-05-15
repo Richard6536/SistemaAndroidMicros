@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 /**
@@ -18,16 +19,14 @@ import android.widget.TextView;
 public class RegisterStep1Activity extends AppCompatActivity {
 
     private Button btnPaso2;
-    private TextView txtNombre, txtApellido;
-
+    private EditText nombre;
+    private String name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_register_step1);
-        txtNombre = (TextView)findViewById(R.id.txtNombre);
-        txtApellido = (TextView)findViewById(R.id.txtApellido);
 
+        nombre = (EditText)findViewById(R.id.txtNombre);
 
 
         btnPaso2 = (Button)findViewById(R.id.btnPaso2);
@@ -41,7 +40,14 @@ public class RegisterStep1Activity extends AppCompatActivity {
     }
     private void ClickPasoDos()
     {
-        Intent in = new Intent(RegisterStep1Activity.this, RegisterStep2Activity.class);
-        startActivity(in);
+
+        if(nombre.getText().toString().length() >= 3 && nombre.getText().toString().length() <= 25)
+        {
+            Intent intent = new Intent(RegisterStep1Activity.this, RegisterStep2Activity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("name", nombre.getText().toString());
+            intent.putExtras(bundle);
+            startActivity(intent);
+        }
     }
 }

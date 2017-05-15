@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
+import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -90,6 +91,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    String email = "";
+    String password = "";
+    View focusView = null;
+
+    boolean cancel = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,8 +117,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
-
         mPasswordView = (EditText) findViewById(R.id.password);
+
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -247,11 +255,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
+        email = mEmailView.getText().toString();
+        password = mPasswordView.getText().toString();
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
@@ -270,7 +275,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView = mEmailView;
             cancel = true;
         }
-
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -281,8 +285,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
+
+        /*
+        JSONObject parametros = new JSONObject();
+
+        try {
+
+            parametros.put("Email", email);
+            parametros.put("Password", password);
+
+            new Usuario.ValidarUsuario().execute(parametros.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+*/
     }
 
+    public void mostrarProgreso()
+    {
+        Intent i = new Intent(LoginActivity.this, UserMapActivity.class);
+        startActivity(i);
+    }
     private boolean isEmailValid(String email) {
 
         return email.contains("@");
@@ -427,8 +451,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                Intent i = new Intent(LoginActivity.this, UserMapActivity.class);
-                startActivity(i);
+
+                JSONObject parametros = new JSONObject();
+
+                try {
+
+                    parametros.put("Email", email);
+                    parametros.put("Password", password);
+
+                    Usuario us = new Usuario();
+                    us.new ValidarUsuario().execute(parametros.toString());
+
+                    //new Usuario.ValidarUsuario().execute(parametros.toString());
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

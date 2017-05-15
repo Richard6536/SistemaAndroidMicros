@@ -56,19 +56,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center">
+
             <EditText
                 android:id="@+id/txtNombre"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nombre"
                 android:layout_gravity="center"/>
-
-            <EditText
-                android:id="@+id/txtApellido"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:hint="Apellido" />
         </LinearLayout>
 
     </FrameLayout>

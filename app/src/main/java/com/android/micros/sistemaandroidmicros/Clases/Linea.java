@@ -156,6 +156,7 @@ public class Linea {
         return nombres;
     }
 
+    //Se recive el nombre de la linea y busca su id
     public int buscarLineaSpinner(String nombre)
     {
         String nombreLinea = nombre;
@@ -174,6 +175,7 @@ public class Linea {
         return idLineaSelecionada;
     }
 
+    //Recive el id de la linea y retorna la linea completa
     public static Linea BuscarLineaPorId(int id)
     {
         for(int i = 0; i < listaLineas.size(); i++)

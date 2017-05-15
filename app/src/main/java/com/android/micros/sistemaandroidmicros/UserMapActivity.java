@@ -4,11 +4,14 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,11 +31,13 @@ import android.widget.Toast;
 
 import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
+import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -53,17 +58,11 @@ public class UserMapActivity extends AppCompatActivity
     //NavHeader
     private TextView nombreNavHeader, correoNavHeader;
 
-
-
     Polyline polylineIda;
     Polyline polylineVuelta;
-    List<Polyline> polylinesLista = new ArrayList<Polyline>();
-    boolean rutaDeVuelta = false;
-    int cont = 0;
 
-    private List<Marker> originMarkers = new ArrayList<>();
-    private List<Marker> destinationMarkers = new ArrayList<>();
-    private List<Polyline> polylinePaths = new ArrayList<>();
+    private List<Marker> paraderosRutaIda = new ArrayList<>();
+    private List<Marker> paraderosRutaVuelta = new ArrayList<>();
     private ProgressDialog progressDialog;
     private Spinner spinner;
     ArrayAdapter<String> adapter;
@@ -101,6 +100,7 @@ public class UserMapActivity extends AppCompatActivity
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
         mapFragment.getMapAsync(this);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -108,10 +108,11 @@ public class UserMapActivity extends AppCompatActivity
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 
 
-                if(polylineIda != null && polylineVuelta != null)
+                if(polylineIda != null && polylineVuelta != null && paraderosRutaIda !=  null && paraderosRutaVuelta != null)
                 {
                     polylineIda.remove();
                     polylineVuelta.remove();
+                    removerParaderos();
 
                 }
                 Object item = parent.getItemAtPosition(pos);
@@ -121,14 +122,20 @@ public class UserMapActivity extends AppCompatActivity
                 Rutas rutaVuelta = new Rutas();
 
 
+                //Retorna el Id de la linea que se selecciona en el spinner
                 int idLinea = linea.buscarLineaSpinner(itemStr);
+
+                //Envío el Id de la linea y recibo la linea completa
                 linea = Linea.BuscarLineaPorId(idLinea);
+
+
                 rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
                 rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
 
-                crearRutaIda(rutaIda.listaCoordenadas);
-                crearRutaVuelta(rutaVuelta.listaCoordenadas);
-                //Envía id para obtener las rutas de la linea seleccionada.
+                //Envío la ruta de ida y vuelta con su lista de coordenadas y paraderos
+                //para que sean dibujados en el mapa
+                crearRutaIda(rutaIda.listaCoordenadas, rutaIda.listaParaderos);
+                crearRutaVuelta(rutaVuelta.listaCoordenadas, rutaVuelta.listaParaderos);
 
             }
             public void onNothingSelected(AdapterView<?> parent) {
@@ -200,8 +207,6 @@ public class UserMapActivity extends AppCompatActivity
         LatLng hcmus = new LatLng(-40.5769389,-73.1260218);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
 
-        originMarkers.add(mMap.addMarker(new MarkerOptions()
-                .position(hcmus)));
 
         //TODO: Dar permisos para utilizar la ubicación de GPS
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -216,11 +221,10 @@ public class UserMapActivity extends AppCompatActivity
         }
         mMap.setMyLocationEnabled(true);
     }
-
-    public void crearRutaIda(ArrayList<Coordenada> coordenadas)
+    public void crearRutaIda(ArrayList<Coordenada> coordenadas, ArrayList<Paradero> paraderosIda)
     {
 
-
+        Bitmap icon = markerIcon();
         PolylineOptions polylinesIda = new PolylineOptions();
         for (Coordenada c : coordenadas)
         {
@@ -231,12 +235,22 @@ public class UserMapActivity extends AppCompatActivity
 
         }
         polylineIda = mMap.addPolyline(polylinesIda);
+
+        for(Paradero p : paraderosIda)
+        {
+            paraderosRutaIda.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .title("Paradero")));
+            //marker.position(new LatLng(p.latitud,p.longitud));
+            //marcadorIda = mMap.addMarker(marker);
+        }
+
     }
 
-    public void crearRutaVuelta(ArrayList<Coordenada> coordenadas)
+    public void crearRutaVuelta(ArrayList<Coordenada> coordenadas, ArrayList<Paradero> paraderosVuelta)
     {
 
-
+        Bitmap icon = markerIcon();
         PolylineOptions polylinesVuelta = new PolylineOptions();
         for (Coordenada c : coordenadas)
         {
@@ -247,6 +261,15 @@ public class UserMapActivity extends AppCompatActivity
         }
         polylineVuelta = mMap.addPolyline(polylinesVuelta);
 
+        for(Paradero p : paraderosVuelta)
+        {
+            paraderosRutaVuelta.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .title("Paradero")));
+            //marker.position(new LatLng(p.latitud,p.longitud));
+            //marcadorVuelta = mMap.addMarker(marker);
+        }
+
     }
 
     public void cargarSpinner()
@@ -256,5 +279,33 @@ public class UserMapActivity extends AppCompatActivity
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+    }
+
+    //Obtengo desde "drawable" el diseño del marcador y lo envío al 'crearRuta'
+    public Bitmap markerIcon()
+    {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw=(BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        Bitmap b=bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
+    //Remuevo la lista de Paraderos
+    private void removerParaderos() {
+        for (Marker paradero: paraderosRutaIda) {
+            paradero.remove();
+        }
+        paraderosRutaIda.clear();
+
+        for (Marker paradero: paraderosRutaVuelta) {
+            paradero.remove();
+        }
+        paraderosRutaVuelta.clear();
     }
 }
