@@ -211,9 +211,6 @@ public class Rutas
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 urlConnection.setRequestProperty("Accept", "application/json");
 
-                //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8"));
-                //writer.write(JsonDATA);
-                //writer.close();
 
                 InputStream inputStream = urlConnection.getInputStream();
 

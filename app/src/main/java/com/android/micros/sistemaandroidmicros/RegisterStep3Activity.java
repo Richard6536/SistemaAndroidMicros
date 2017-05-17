@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 
 import org.json.JSONException;
@@ -32,12 +33,14 @@ public class RegisterStep3Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_step3);
-        //Bundle bundle = getIntent().getExtras();
-        //email =  bundle.getString("correo").toString();
-        //nombre = bundle.getString("name").toString();
+        Bundle bundle = getIntent().getExtras();
+        email =  bundle.getString("correo").toString();
+        nombre = bundle.getString("name").toString();
         txtPass = (EditText)findViewById(R.id.txtPass);
 
         btnTerminar = (Button)findViewById(R.id.btnTerminar);
+
+        ActivityController.activiyAbiertaActual = this;
 
         btnTerminar.setOnClickListener(new View.OnClickListener() {
             @Override

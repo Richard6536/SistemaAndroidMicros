@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -134,8 +135,11 @@ public class UserMapActivity extends AppCompatActivity
 
                 //Envío la ruta de ida y vuelta con su lista de coordenadas y paraderos
                 //para que sean dibujados en el mapa
-                crearRutaIda(rutaIda.listaCoordenadas, rutaIda.listaParaderos);
-                crearRutaVuelta(rutaVuelta.listaCoordenadas, rutaVuelta.listaParaderos);
+
+                //crearRutaIda(rutaIda.listaCoordenadas, rutaIda.listaParaderos);
+                //crearRutaVuelta(rutaVuelta.listaCoordenadas, rutaVuelta.listaParaderos);
+                polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
+                polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
 
             }
             public void onNothingSelected(AdapterView<?> parent) {
@@ -221,6 +225,8 @@ public class UserMapActivity extends AppCompatActivity
         }
         mMap.setMyLocationEnabled(true);
     }
+
+    /*
     public void crearRutaIda(ArrayList<Coordenada> coordenadas, ArrayList<Paradero> paraderosIda)
     {
 
@@ -269,6 +275,38 @@ public class UserMapActivity extends AppCompatActivity
             //marker.position(new LatLng(p.latitud,p.longitud));
             //marcadorVuelta = mMap.addMarker(marker);
         }
+
+    }
+*/
+    public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color)
+    {
+
+
+        ArrayList<Coordenada> coordenadas = ruta.listaCoordenadas;
+        ArrayList<Paradero> paraderos = ruta.listaParaderos;
+
+        Bitmap icon = markerIcon();
+        PolylineOptions polyLineaNueva = new PolylineOptions();
+        for (Coordenada c : coordenadas)
+        {
+
+            polyLineaNueva.color(_color);
+            polyLineaNueva.add(new LatLng(c.latitud, c.longitud));
+
+        }
+        Polyline nuevaPolyline = mMap.addPolyline(polyLineaNueva);
+
+
+        for(Paradero p : paraderos)
+        {
+            marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .title("Paradero")));
+            //marker.position(new LatLng(p.latitud,p.longitud));
+            //marcadorVuelta = mMap.addMarker(marker);
+        }
+
+        return nuevaPolyline;
 
     }
 

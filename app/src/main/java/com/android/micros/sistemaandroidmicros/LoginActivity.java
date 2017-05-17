@@ -33,6 +33,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
@@ -90,6 +91,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private TextView mensaje;
 
     String email = "";
     String password = "";
@@ -102,11 +104,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
 
         //Obsoleto: FacebookSdk.sdkInitialize(getApplicationContext());
+        ActivityController.activiyAbiertaActual = this;
 
         setContentView(R.layout.activity_login);
         initializeControls();
         obtenerDatos();
+        mensaje = (TextView)findViewById(R.id.w);
         btnRegister = (Button)findViewById(R.id.btnRegister);
+
         btnRegister.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -302,10 +307,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 */
     }
 
-    public void mostrarProgreso()
+    public void recibirValidacion(JSONObject usuario)
     {
-        Intent i = new Intent(LoginActivity.this, UserMapActivity.class);
-        startActivity(i);
+        try {
+            int id = usuario.getInt("Id");
+            int rol = usuario.getInt("Rol");
+            int microId = usuario.getInt("MicroChoferId");
+            if(rol == 0)
+            {
+                //Interfaz del pasajero
+                Intent intent = new Intent(LoginActivity.this, UserMapActivity.class);
+                startActivity(intent);
+
+            }
+            if(rol == 1)
+            {
+
+                Intent intent = new Intent(LoginActivity.this, ChoferMapActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("Id", id);
+                bundle.putInt("MicroId", microId);
+                intent.putExtras(bundle);
+                startActivity(intent);
+
+                //Interfaz del chofer
+
+            }
+            if(rol == -1)
+            {
+                mensaje.setText("El usuario no existe");
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
     private boolean isEmailValid(String email) {
 
@@ -314,7 +349,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isPasswordValid(String password) {
 
-        return password.length() > 4;
+        return password.length() > 2;
     }
 
     /**
@@ -452,6 +487,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
 
+                //Intent in = new Intent(LoginActivity.this, UserMapActivity.class);
+                //startActivity(in);
+
                 JSONObject parametros = new JSONObject();
 
                 try {
@@ -467,7 +505,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

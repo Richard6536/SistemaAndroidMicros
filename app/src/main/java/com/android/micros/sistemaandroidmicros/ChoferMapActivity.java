@@ -2,10 +2,14 @@ package com.android.micros.sistemaandroidmicros;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,22 +19,54 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
+import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
+import com.android.micros.sistemaandroidmicros.Clases.Linea;
+import com.android.micros.sistemaandroidmicros.Clases.Micro;
+import com.android.micros.sistemaandroidmicros.Clases.Paradero;
+import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChoferMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private GoogleMap cMap;
+    private int idChofer;
+    private int idMicro;
+
+    private TextView lblMensaje;
+
+    Polyline polylineIda;
+    Polyline polylineVuelta;
+
+    private List<Marker> paraderosRutaIda = new ArrayList<>();
+    private List<Marker> paraderosRutaVuelta = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chofer_map);
+        ActivityController.activiyAbiertaActual = this;
+
+        Bundle bundle = getIntent().getExtras();
+        idChofer = bundle.getInt("Id");
+        idMicro = bundle.getInt("MicroId");
+
+        lblMensaje = (TextView)findViewById(R.id.lblMensaje);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -55,6 +91,84 @@ public class ChoferMapActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        if(idMicro == 0)
+        {
+            //Mensaje: El chofer no tiene una micro asignada.
+            lblMensaje.setText("Usted no tiene una micro asignada");
+        }
+        if(idMicro == 1)
+        {
+            new Micro.ObtenerMicro().execute(idChofer+"");
+        }
+    }
+
+    public void validarLinea(int microIdLinea)
+    {
+        if(microIdLinea != 0)
+        {
+            Rutas rutaIda = new Rutas();
+            Rutas rutaVuelta = new Rutas();
+
+            Linea linea = new Linea();
+            linea = Linea.BuscarLineaPorId(microIdLinea);
+
+            rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
+            rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
+
+            polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
+            polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+
+        }
+        else
+        {
+            lblMensaje.setText("Su micro no está asignada a una linea");
+        }
+    }
+    public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color)
+    {
+
+
+        ArrayList<Coordenada> coordenadas = ruta.listaCoordenadas;
+        ArrayList<Paradero> paraderos = ruta.listaParaderos;
+
+        Bitmap icon = markerIcon();
+        PolylineOptions polyLineaNueva = new PolylineOptions();
+        for (Coordenada c : coordenadas)
+        {
+
+            polyLineaNueva.color(_color);
+            polyLineaNueva.add(new LatLng(c.latitud, c.longitud));
+
+        }
+        Polyline nuevaPolyline = cMap.addPolyline(polyLineaNueva);
+
+
+        for(Paradero p : paraderos)
+        {
+            marcadoresParaderos.add(cMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .title("Paradero")));
+            //marker.position(new LatLng(p.latitud,p.longitud));
+            //marcadorVuelta = mMap.addMarker(marker);
+        }
+
+        return nuevaPolyline;
+
+    }
+
+    public Bitmap markerIcon()
+    {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw=(BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        Bitmap b=bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
     }
 
     @Override
