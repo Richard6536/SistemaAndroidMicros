@@ -3,6 +3,10 @@ package com.android.micros.sistemaandroidmicros.Clases;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.micros.sistemaandroidmicros.FirstTimeActivity;
+import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
+import com.android.micros.sistemaandroidmicros.UserMapActivity;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -134,6 +138,8 @@ public class Linea {
         protected void onPostExecute(ArrayList<Linea> result) {
             super.onPostExecute(result);
 
+            FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+            reg.RecibirCargaDeLineas();
         }
 
         @Override
@@ -141,7 +147,6 @@ public class Linea {
             Log.i("ServicioRest", "onPreExecute");
         }
     }
-
     public ArrayList<String> obtenerNombres(){
 
         Linea linea = null;

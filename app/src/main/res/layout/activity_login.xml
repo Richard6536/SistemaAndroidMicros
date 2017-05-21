@@ -12,13 +12,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.android.micros.sistemaandroidmicros.LoginActivity">
 
-    <!--
-    #ddffde
-    Login progress -->
+
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="354dp"
-        android:layout_height="114dp" />
+        android:layout_width="313dp"
+        android:layout_height="114dp"
+        android:src="@drawable/transoft"/>
 
     <ProgressBar
         android:id="@+id/login_progress"

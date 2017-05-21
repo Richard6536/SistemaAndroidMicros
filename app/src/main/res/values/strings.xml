@@ -36,4 +36,6 @@
     <string name="title_activity_register_step3">Paso 3: Crea una Contraseña</string>
     <string name="title_activity_chofer_map">ChoferMapActivity</string>
     <string name="title_activity_login2">Sign in</string>
+
+    <string name="title_activity_first_time">FirstTimeActivity</string>
 </resources>

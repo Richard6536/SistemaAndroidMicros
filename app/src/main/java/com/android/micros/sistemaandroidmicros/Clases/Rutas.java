@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.android.micros.sistemaandroidmicros.FirstTimeActivity;
 import com.android.micros.sistemaandroidmicros.InfoUserActivity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
 import com.google.android.gms.maps.model.LatLng;
@@ -87,6 +88,7 @@ public class Rutas
     }
 
 
+    static int cont = 0;
     //Obtiene todas las rutas de la base de datos, usando el web service
     //pero aun no les asigna su lista de coordenadas y tampoco sus paraderos a cada una de ellas
      public static class ObtenerRutas extends AsyncTask<String, String, ArrayList<Rutas>>
@@ -94,6 +96,7 @@ public class Rutas
 
             HttpURLConnection connection = null;
             BufferedReader reader = null;
+
 
             @Override
             protected ArrayList<Rutas> doInBackground(String... params) {
@@ -154,9 +157,8 @@ public class Rutas
             protected void onPostExecute(ArrayList<Rutas> result) {
                super.onPostExecute(result);
 
-                Rutas.CargarCoordenadasRutas();
-                Paradero.cargarParaderosPorRuta();
-
+                FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+                reg.RecibirCargaDeRutas();
             }
 
             @Override
@@ -173,17 +175,18 @@ public class Rutas
             String idRuta = listaRutas.get(c).idRuta+"";
             //String URLCoordenadas = "http://localhost:8081/odata/Rutas("+IdLatLng+")/ListaCoordenadas";
             new ObtenerCoordenadas().execute(idRuta);
+
         }
 
     }
 
     //Por cada ruta que se envia a este metodo se le rellena su lista de coordenadas
-    private static class ObtenerCoordenadas extends AsyncTask <String,String,String>
+    private static class ObtenerCoordenadas extends AsyncTask <String,String,ArrayList<Coordenada>>
     {
 
 
         @Override
-        protected String doInBackground(String... params) {
+        protected ArrayList<Coordenada> doInBackground(String... params) {
 
 
             String JsonResponse = "";
@@ -217,7 +220,6 @@ public class Rutas
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
 
-                    return "Error 1";
                 }
 
                 reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -229,7 +231,7 @@ public class Rutas
                 }
 
                 if (buffer.length() == 0) {
-                    return "Error 2";
+
                 }
                 JsonResponse = buffer.toString();
 
@@ -254,6 +256,8 @@ public class Rutas
 
                 rutaARellenar.listaCoordenadas = coordenadasRuta;
 
+                //return coordenadasRuta;
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -273,9 +277,16 @@ public class Rutas
             return null;
         }
 
-        protected void onPostExecute(Boolean result)
+        @Override
+        protected void onPostExecute(ArrayList<Coordenada> result)
         {
 
+            cont++;
+            if(cont == 1)
+            {
+                FirstTimeActivity ft = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+                ft.RecibirCargaDeCoordenadas();
+            }
         }
     }
 

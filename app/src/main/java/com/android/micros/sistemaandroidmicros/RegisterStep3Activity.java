@@ -40,8 +40,6 @@ public class RegisterStep3Activity extends AppCompatActivity {
 
         btnTerminar = (Button)findViewById(R.id.btnTerminar);
 
-        ActivityController.activiyAbiertaActual = this;
-
         btnTerminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -49,7 +47,11 @@ public class RegisterStep3Activity extends AppCompatActivity {
             }
         });
     }
-
+    protected void onResume()
+    {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
+    }
     private void finalizarRegistro()
     {
 

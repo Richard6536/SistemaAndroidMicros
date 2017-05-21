@@ -7,11 +7,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +31,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
@@ -47,6 +50,7 @@ import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class UserMapActivity extends AppCompatActivity
@@ -62,6 +66,8 @@ public class UserMapActivity extends AppCompatActivity
     Polyline polylineIda;
     Polyline polylineVuelta;
 
+    UserSessionManager session;
+
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
     private ProgressDialog progressDialog;
@@ -71,15 +77,32 @@ public class UserMapActivity extends AppCompatActivity
     //Datos de Facebook
     private String nombreFacebook, correoFacebook;
 
+    private TextView datosUsuario;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_map);
+        cargarSpinner();
+        session = new UserSessionManager(getApplicationContext());
+        datosUsuario = (TextView)findViewById(R.id.datosUsuario);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         spinner = (Spinner)findViewById(R.id.spLineas);
 
-        cargarSpinner();
+        Toast.makeText(getApplicationContext(),
+                "User Login Status: " + session.isUserLoggedIn(),
+                Toast.LENGTH_LONG).show();
+
+        if(session.checkLogin())
+            finish();
+
+        HashMap<String, String> user = session.obtenerDetallesUsuario();
+        String name = user.get(UserSessionManager.KEY_NAME);
+        String email = user.get(UserSessionManager.KEY_EMAIL);
+
+        datosUsuario.setText("Nombre: "+name+" Email: "+email);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -104,12 +127,13 @@ public class UserMapActivity extends AppCompatActivity
 
         mapFragment.getMapAsync(this);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
+            {
 
 
-                if(polylineIda != null && polylineVuelta != null && paraderosRutaIda !=  null && paraderosRutaVuelta != null)
+                if(polylineIda != null && polylineVuelta != null)
                 {
                     polylineIda.remove();
                     polylineVuelta.remove();
@@ -142,9 +166,37 @@ public class UserMapActivity extends AppCompatActivity
                 polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
 
             }
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
             }
         });
+
+    }
+
+    protected void onResume()
+    {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+        {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                    homeIntent.addCategory( Intent.CATEGORY_HOME );
+                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(homeIntent);
+                    return true;
+            }
+
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -172,7 +224,9 @@ public class UserMapActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_settings)
+        {
+            session.logoutUser();
             return true;
         }
 
@@ -226,58 +280,6 @@ public class UserMapActivity extends AppCompatActivity
         mMap.setMyLocationEnabled(true);
     }
 
-    /*
-    public void crearRutaIda(ArrayList<Coordenada> coordenadas, ArrayList<Paradero> paraderosIda)
-    {
-
-        Bitmap icon = markerIcon();
-        PolylineOptions polylinesIda = new PolylineOptions();
-        for (Coordenada c : coordenadas)
-        {
-
-            polylinesIda.color(Color.RED);
-            polylinesIda.add(new LatLng(c.latitud, c.longitud));
-
-
-        }
-        polylineIda = mMap.addPolyline(polylinesIda);
-
-        for(Paradero p : paraderosIda)
-        {
-            paraderosRutaIda.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
-                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero")));
-            //marker.position(new LatLng(p.latitud,p.longitud));
-            //marcadorIda = mMap.addMarker(marker);
-        }
-
-    }
-
-    public void crearRutaVuelta(ArrayList<Coordenada> coordenadas, ArrayList<Paradero> paraderosVuelta)
-    {
-
-        Bitmap icon = markerIcon();
-        PolylineOptions polylinesVuelta = new PolylineOptions();
-        for (Coordenada c : coordenadas)
-        {
-
-            polylinesVuelta.color(Color.BLUE);
-            polylinesVuelta.add(new LatLng(c.latitud, c.longitud));
-
-        }
-        polylineVuelta = mMap.addPolyline(polylinesVuelta);
-
-        for(Paradero p : paraderosVuelta)
-        {
-            paraderosRutaVuelta.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
-                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero")));
-            //marker.position(new LatLng(p.latitud,p.longitud));
-            //marcadorVuelta = mMap.addMarker(marker);
-        }
-
-    }
-*/
     public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color)
     {
 
@@ -296,7 +298,6 @@ public class UserMapActivity extends AppCompatActivity
         }
         Polyline nuevaPolyline = mMap.addPolyline(polyLineaNueva);
 
-
         for(Paradero p : paraderos)
         {
             marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
@@ -307,7 +308,6 @@ public class UserMapActivity extends AppCompatActivity
         }
 
         return nuevaPolyline;
-
     }
 
     public void cargarSpinner()

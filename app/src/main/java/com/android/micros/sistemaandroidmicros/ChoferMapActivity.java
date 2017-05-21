@@ -62,9 +62,6 @@ public class ChoferMapActivity extends AppCompatActivity
         setContentView(R.layout.activity_chofer_map);
         ActivityController.activiyAbiertaActual = this;
 
-        Bundle bundle = getIntent().getExtras();
-        idChofer = bundle.getInt("Id");
-        idMicro = bundle.getInt("MicroId");
 
         lblMensaje = (TextView)findViewById(R.id.lblMensaje);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -92,26 +89,33 @@ public class ChoferMapActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        if(idMicro == 0)
-        {
-            //Mensaje: El chofer no tiene una micro asignada.
-            lblMensaje.setText("Usted no tiene una micro asignada");
-        }
-        if(idMicro == 1)
-        {
-            new Micro.ObtenerMicro().execute(idChofer+"");
-        }
+        Bundle bundle = getIntent().getExtras();
+        idChofer = bundle.getInt("Id");
+
+        new Micro.ObtenerMicroDeChofer().execute(idChofer+"");
+
     }
 
-    public void validarLinea(int microIdLinea)
+    public void validarLinea(Micro micro)
     {
-        if(microIdLinea != 0)
+
+        if(micro.id == -1)
+        {
+            lblMensaje.setText("No está asociado a una micro");
+            //No está asociado a una micro
+        }
+        else if(micro.lineaId == null)
+        {
+            lblMensaje.setText("La micro no está asociada a una linea.");
+            //La micro no está asociada a una linea
+        }
+        else
         {
             Rutas rutaIda = new Rutas();
             Rutas rutaVuelta = new Rutas();
 
             Linea linea = new Linea();
-            linea = Linea.BuscarLineaPorId(microIdLinea);
+            linea = Linea.BuscarLineaPorId(micro.lineaId);
 
             rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
             rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
@@ -119,10 +123,6 @@ public class ChoferMapActivity extends AppCompatActivity
             polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
             polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
 
-        }
-        else
-        {
-            lblMensaje.setText("Su micro no está asignada a una linea");
         }
     }
     public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color)

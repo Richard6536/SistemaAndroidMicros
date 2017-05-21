@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -37,6 +39,12 @@ public class RegisterStep1Activity extends AppCompatActivity {
             }
         });
 
+    }
+
+    protected void onResume()
+    {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
     }
     private void ClickPasoDos()
     {

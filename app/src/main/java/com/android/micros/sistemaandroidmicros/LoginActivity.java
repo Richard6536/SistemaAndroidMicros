@@ -97,20 +97,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     String password = "";
     View focusView = null;
 
+    UserSessionManager session;
+
     boolean cancel = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Obsoleto: FacebookSdk.sdkInitialize(getApplicationContext());
-        ActivityController.activiyAbiertaActual = this;
-
         setContentView(R.layout.activity_login);
+        //Obsoleto: FacebookSdk.sdkInitialize(getApplicationContext());
+        session = new UserSessionManager(getApplicationContext());
         initializeControls();
-        obtenerDatos();
+        //obtenerDatos();
         mensaje = (TextView)findViewById(R.id.w);
         btnRegister = (Button)findViewById(R.id.btnRegister);
+
+        Toast.makeText(getApplicationContext(),
+                        		       "User Login Status: " + session.isUserLoggedIn(),
+                        		       Toast.LENGTH_LONG).show();
 
         btnRegister.setOnClickListener(new OnClickListener() {
             @Override
@@ -123,7 +127,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
         mPasswordView = (EditText) findViewById(R.id.password);
-
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -148,6 +151,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    protected void onResume()
+    {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+        {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                    homeIntent.addCategory( Intent.CATEGORY_HOME );
+                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(homeIntent);
+                    return true;
+            }
+
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     private void initializeControls()
     {
@@ -237,6 +263,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return false;
     }
 
+
     /**
      * Callback received when a permissions request has been completed.
      */
@@ -290,57 +317,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
-
-        /*
-        JSONObject parametros = new JSONObject();
-
-        try {
-
-            parametros.put("Email", email);
-            parametros.put("Password", password);
-
-            new Usuario.ValidarUsuario().execute(parametros.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-*/
     }
 
-    public void recibirValidacion(JSONObject usuario)
+    public void recibirValidacion(Usuario usuario)
     {
-        try {
-            int id = usuario.getInt("Id");
-            int rol = usuario.getInt("Rol");
-            int microId = usuario.getInt("MicroChoferId");
-            if(rol == 0)
+            if(usuario.id == -1)
+            {
+                mensaje.setText("El email/contraseña no son válidos");
+            }
+            else if(usuario.rol == 0)
             {
                 //Interfaz del pasajero
-                Intent intent = new Intent(LoginActivity.this, UserMapActivity.class);
-                startActivity(intent);
 
+                session.crearSesionUsuario(usuario);
+
+                Intent intent = new Intent(getApplicationContext(), UserMapActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
             }
-            if(rol == 1)
+            else if(usuario.rol == 1)
             {
 
                 Intent intent = new Intent(LoginActivity.this, ChoferMapActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt("Id", id);
-                bundle.putInt("MicroId", microId);
+                bundle.putInt("Id", usuario.id);
                 intent.putExtras(bundle);
                 startActivity(intent);
 
                 //Interfaz del chofer
 
             }
-            if(rol == -1)
-            {
-                mensaje.setText("El usuario no existe");
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
     private boolean isEmailValid(String email) {
 
@@ -387,6 +395,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
+    // Transoft
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -500,8 +509,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Usuario us = new Usuario();
                     us.new ValidarUsuario().execute(parametros.toString());
 
-                    //new Usuario.ValidarUsuario().execute(parametros.toString());
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -527,9 +534,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public void obtenerDatos()
     {
-        String URL = "http://localhost:8081/odata/Lineas";
+        String URLLineas = "http://localhost:8081/odata/Lineas";
+        AsyncTask asf = new Linea.ObtenerLineas().execute(URLLineas);
         String URLRutas = "http://localhost:8081/odata/Rutas";
-        AsyncTask asf = new Linea.ObtenerLineas().execute(URL);
         AsyncTask asf2 = new Rutas.ObtenerRutas().execute(URLRutas);
 
         //while(asf.getStatus() != AsyncTask.Status.FINISHED && asf2.getStatus() != AsyncTask.Status.FINISHED)

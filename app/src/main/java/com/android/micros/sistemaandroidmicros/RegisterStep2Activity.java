@@ -37,8 +37,6 @@ public class RegisterStep2Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_step2);
 
-        ActivityController.activiyAbiertaActual = this;
-
         Bundle bundle = getIntent().getExtras();
         nombre=bundle.getString("name").toString();
 
@@ -59,14 +57,18 @@ public class RegisterStep2Activity extends AppCompatActivity {
             }
         });
     }
-
+    protected void onResume()
+    {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
+    }
     private void ClickPasoTres() throws JSONException {
         /*
         Intent intent = new Intent(RegisterStep2Activity.this, RegisterStep3Activity.class);
 
         startActivity(intent);
         */
-        bar.setVisibility(View.VISIBLE);
+        //bar.setVisibility(View.VISIBLE);
         if(txtCorreo.getText().toString().length() >= 3 && txtCorreo.getText().toString().length() <= 50)
         {
             JSONObject params = new JSONObject();
@@ -83,7 +85,7 @@ public class RegisterStep2Activity extends AppCompatActivity {
 
         if(resultBool != true)
         {
-            bar.setVisibility(View.GONE);
+            //bar.setVisibility(View.GONE);
             Intent intent = new Intent(RegisterStep2Activity.this, RegisterStep3Activity.class);
             Bundle bundle = new Bundle();
             bundle.putString("correo", txtCorreo.getText().toString());
