@@ -9,20 +9,10 @@
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="300dp">
-        <TextView
-            android:id="@+id/fullscreen_content"
-            android:layout_width="360dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:keepScreenOn="true"
-            android:text="¿Cómo te llamas?"
-            android:textColor="#43ad44"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+    </LinearLayout>
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -51,20 +41,76 @@
                 android:text="@string/dummy_button" />
 
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="327dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center">
 
-            <EditText
-                android:id="@+id/txtNombre"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre"
-                android:layout_gravity="center"/>
-        </LinearLayout>
 
     </FrameLayout>
+    <RelativeLayout
+        android:layout_width="327dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="303dp"
+        android:layout_above="@+id/relativeLayout2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:id="@+id/fullscreen_content"
+            android:layout_width="360dp"
+            android:layout_height="513dp"
+            android:layout_marginBottom="67dp"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:text="Únete a Transoft"
+            android:textColor="#43ad44"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:layout_alignBottom="@+id/txtLa"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/txtLa"
+            android:layout_width="match_parent"
+            android:layout_height="136dp"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:text="Te ayudaremos a crear una nueva cuenta en tan sólo 3 pasos."
+            android:textColor="#a5a8a4"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+
+        <TextView
+            android:id="@+id/txt2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/txtLa"
+            android:layout_marginTop="97dp"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:text="¿Cómo te llamas?"
+            android:textColor="#43ad44"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/txtNombre"
+            android:layout_width="340dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="Nombre"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
 </FrameLayout>

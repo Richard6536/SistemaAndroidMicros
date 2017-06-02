@@ -2,17 +2,29 @@ package com.android.micros.sistemaandroidmicros;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,6 +35,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,11 +50,14 @@ import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,16 +65,31 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 
+import org.json.JSONObject;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 public class UserMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private Button btnBuscar;
+    private List<Marker> markers = new ArrayList<Marker>();
+    private final Handler mHandler = new Handler();
+    private Marker selectedMarker;
+    //private Animator animator = new Animator();
+
+    private Button btnBuscar, btnStart, btnStop, btnReset;
     private EditText etOrigin, etDestination;
 
     //NavHeader
@@ -66,16 +98,24 @@ public class UserMapActivity extends AppCompatActivity
     Polyline polylineIda;
     Polyline polylineVuelta;
 
-    UserSessionManager session;
-
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
+    private List<Marker> Paraderos = new ArrayList<>();
+    Marker marcador;
     private ProgressDialog progressDialog;
     private Spinner spinner;
     ArrayAdapter<String> adapter;
 
     //Datos de Facebook
     private String nombreFacebook, correoFacebook;
+
+    private TextView nameHeader, emailHeader, mensaje;
+
+    UserSessionManager session;
+    private String name;
+    private String email;
+
+    String GPS_FILTER = "MyGPSLocation";
 
     private TextView datosUsuario;
 
@@ -84,25 +124,48 @@ public class UserMapActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_map);
+        //ActivityCompat.requestPermissions(UserMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION, SINGLE_PERMISSION_REQUEST_CODE);
+
+        //Intent myGpsService = new Intent(this, ServicePosition.class);
+        //startService(myGpsService);
+
+        spinner = (Spinner) findViewById(R.id.spLineas);
         cargarSpinner();
         session = new UserSessionManager(getApplicationContext());
-        datosUsuario = (TextView)findViewById(R.id.datosUsuario);
+
+        datosUsuario = (TextView) findViewById(R.id.datosUsuario);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        spinner = (Spinner)findViewById(R.id.spLineas);
 
-        Toast.makeText(getApplicationContext(),
-                "User Login Status: " + session.isUserLoggedIn(),
-                Toast.LENGTH_LONG).show();
+        //TODO: -------------INICIO-----------------------------------------------
+        btnStart = (Button) findViewById(R.id.btnStart);
+        btnStop = (Button)findViewById(R.id.btnStop);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startService(new Intent(getBaseContext(), ServicePosition.class));
+            }
+        });
 
-        if(session.checkLogin())
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopService(new Intent(getBaseContext(), ServicePosition.class));
+            }
+        });
+
+
+        //TODO: ----------------FIN------------------------------------------------
+
+
+        //Toast.makeText(getApplicationContext(),"User Login Status: " + session.isUserLoggedIn(),Toast.LENGTH_LONG).show();
+
+        if (session.checkLogin())
             finish();
 
         HashMap<String, String> user = session.obtenerDetallesUsuario();
-        String name = user.get(UserSessionManager.KEY_NAME);
-        String email = user.get(UserSessionManager.KEY_EMAIL);
-
-        datosUsuario.setText("Nombre: "+name+" Email: "+email);
+        name = user.get(UserSessionManager.KEY_NAME);
+        email = user.get(UserSessionManager.KEY_EMAIL);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -127,17 +190,20 @@ public class UserMapActivity extends AppCompatActivity
 
         mapFragment.getMapAsync(this);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+        //TODO: -------------INICIO-----------------------------------------------
 
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
-            {
+        //TODO: -------------FIN-----------------------------------------------
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 
 
-                if(polylineIda != null && polylineVuelta != null)
-                {
+                if (polylineIda != null && polylineVuelta != null) {
                     polylineIda.remove();
                     polylineVuelta.remove();
                     removerParaderos();
+                    marcador.remove();
 
                 }
                 Object item = parent.getItemAtPosition(pos);
@@ -164,32 +230,38 @@ public class UserMapActivity extends AppCompatActivity
                 //crearRutaVuelta(rutaVuelta.listaCoordenadas, rutaVuelta.listaParaderos);
                 polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
                 polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+                //moveMarker(rutaIda);
+                //moveMarker(rutaVuelta);
 
             }
-            public void onNothingSelected(AdapterView<?> parent)
-            {
+
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
 
     }
 
-    protected void onResume()
-    {
+    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            Log.d(TAG,"Permission " + permissions[0] +" granted");
+        }
+    }
+
+    protected void onResume() {
         super.onResume();
         ActivityController.activiyAbiertaActual = this;
 
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if (event.getAction() == KeyEvent.ACTION_DOWN)
-        {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                    homeIntent.addCategory( Intent.CATEGORY_HOME );
+                    homeIntent.addCategory(Intent.CATEGORY_HOME);
                     homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(homeIntent);
                     return true;
@@ -213,6 +285,12 @@ public class UserMapActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.user_map, menu);
+
+        nameHeader = (TextView) findViewById(R.id.nameUser);
+        emailHeader = (TextView) findViewById(R.id.emailUser);
+        nameHeader.setText(name);
+        emailHeader.setText(email);
+
         return true;
     }
 
@@ -224,8 +302,7 @@ public class UserMapActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
+        if (id == R.id.action_settings) {
             session.logoutUser();
             return true;
         }
@@ -240,7 +317,7 @@ public class UserMapActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -262,7 +339,7 @@ public class UserMapActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng hcmus = new LatLng(-40.5769389,-73.1260218);
+        LatLng hcmus = new LatLng(-40.5769389, -73.1260218);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
 
 
@@ -278,10 +355,18 @@ public class UserMapActivity extends AppCompatActivity
             return;
         }
         mMap.setMyLocationEnabled(true);
+
+        /*
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                addMarkerToMap(latLng);
+                animator.startAnimation(false);
+            }
+        });*/
     }
 
-    public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color)
-    {
+    public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color) {
 
 
         ArrayList<Coordenada> coordenadas = ruta.listaCoordenadas;
@@ -289,8 +374,8 @@ public class UserMapActivity extends AppCompatActivity
 
         Bitmap icon = markerIcon();
         PolylineOptions polyLineaNueva = new PolylineOptions();
-        for (Coordenada c : coordenadas)
-        {
+
+        for (Coordenada c : coordenadas) {
 
             polyLineaNueva.color(_color);
             polyLineaNueva.add(new LatLng(c.latitud, c.longitud));
@@ -298,9 +383,10 @@ public class UserMapActivity extends AppCompatActivity
         }
         Polyline nuevaPolyline = mMap.addPolyline(polyLineaNueva);
 
-        for(Paradero p : paraderos)
-        {
-            marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+        for (Paradero p : paraderos) {
+            Paraderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))));
+
+            marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .title("Paradero")));
             //marker.position(new LatLng(p.latitud,p.longitud));
@@ -310,8 +396,7 @@ public class UserMapActivity extends AppCompatActivity
         return nuevaPolyline;
     }
 
-    public void cargarSpinner()
-    {
+    public void cargarSpinner() {
         Linea linea = new Linea();
         ArrayList<String> items = linea.obtenerNombres();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
@@ -320,15 +405,14 @@ public class UserMapActivity extends AppCompatActivity
     }
 
     //Obtengo desde "drawable" el diseño del marcador y lo envío al 'crearRuta'
-    public Bitmap markerIcon()
-    {
+    public Bitmap markerIcon() {
 
         Bitmap smallMarker;
 
         int largo = 68;
         int ancho = 42;
-        BitmapDrawable bitmapdraw=(BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
-        Bitmap b=bitmapdraw.getBitmap();
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        Bitmap b = bitmapdraw.getBitmap();
         smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
 
         return smallMarker;
@@ -336,12 +420,12 @@ public class UserMapActivity extends AppCompatActivity
 
     //Remuevo la lista de Paraderos
     private void removerParaderos() {
-        for (Marker paradero: paraderosRutaIda) {
+        for (Marker paradero : paraderosRutaIda) {
             paradero.remove();
         }
         paraderosRutaIda.clear();
 
-        for (Marker paradero: paraderosRutaVuelta) {
+        for (Marker paradero : paraderosRutaVuelta) {
             paradero.remove();
         }
         paraderosRutaVuelta.clear();

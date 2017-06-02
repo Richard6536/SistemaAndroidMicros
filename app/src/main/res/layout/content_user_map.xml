@@ -31,6 +31,17 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/datosUsuario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="135dp"
+                android:text="Selecciona una linea" />
             <RelativeLayout
                 android:layout_width="282dp"
                 android:layout_height="50dp"
@@ -56,19 +67,29 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
                     android:layout_gravity="center"
-                    android:src="@drawable/drop" />
+                    android:src="@drawable/drop"
+                    android:id="@+id/imageView3" />
+
 
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/datosUsuario"
+            <Button
+                android:id="@+id/btnStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="27dp"
-                android:text="" />
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:text="Start" />
 
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/btnStart"
+                android:layout_toEndOf="@+id/btnStart" />
 
         </RelativeLayout>
 

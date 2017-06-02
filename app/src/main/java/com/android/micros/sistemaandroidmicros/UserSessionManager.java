@@ -23,7 +23,7 @@ public class UserSessionManager
     private static final String PREFER_NAME = "AndroidExamplePref";
     private static final String IS_USER_LOGIN = "IsUserLoggedIn";
 
-    public static final String KEY = "id";
+    public static final String KEY_ID = "id";
     public static final String KEY_NAME = "name";
     public static final String KEY_EMAIL = "email";
     public static final String KEY_ROL = "rol";
@@ -37,12 +37,14 @@ public class UserSessionManager
 
     public void crearSesionUsuario(Usuario usuario)
     {
+        String rol = usuario.rol+"";
+        String id = usuario.id+"";
         editor.putBoolean(IS_USER_LOGIN, true);
 
-        editor.putInt(KEY, usuario.id);
+        editor.putString(KEY_ID, id);
         editor.putString(KEY_NAME, usuario.nombre);
         editor.putString(KEY_EMAIL, usuario.email);
-        editor.putInt(KEY_ROL, usuario.rol);
+        editor.putString(KEY_ROL, rol);
 
         editor.commit();
     }
@@ -72,6 +74,15 @@ public class UserSessionManager
         HashMap<String, String> user = new HashMap<String, String>();
         user.put(KEY_NAME, pref.getString(KEY_NAME, null));
         user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
+        //user.put(KEY_ROL, pref.getString(KEY_ROL, null));
+        return user;
+    }
+
+    public HashMap<String, String> obtenerRolyId()
+    {
+        HashMap<String, String> user = new HashMap<String, String>();
+        user.put(KEY_ROL, pref.getString(KEY_ROL, null));
+        user.put(KEY_ID, pref.getString(KEY_ID, null));
         return user;
     }
 

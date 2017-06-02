@@ -19,6 +19,7 @@ import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -34,10 +35,15 @@ public class FirstTimeActivity extends AppCompatActivity {
     private boolean terminoCargarParaderos = false;
     private boolean terminoCargarCoordenadas = false;
 
+    private int numeroRutas;
+    private int rutasAsignadas;
+
     private boolean terminoProgressBar = false;
 
     protected boolean mbActive;
     protected ProgressBar mProgressBar;
+    int progressStatusCounter = 0;
+    Handler progressHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +62,25 @@ public class FirstTimeActivity extends AppCompatActivity {
         new Rutas.ObtenerRutas().execute(URLRutas);
         new Linea.ObtenerLineas().execute(URLLineas);
         new Paradero.ObtenerParaderos().execute(URLParaderos);
+
+        //Start progressing
+        new Thread(new Runnable() {
+            public void run() {
+                while (progressStatusCounter < 100)
+                {
+                    progressHandler.post(new Runnable() {
+                        public void run() {
+                            mProgressBar.setProgress(progressStatusCounter);
+                        }
+                    });
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     protected void onResume()
@@ -66,8 +91,10 @@ public class FirstTimeActivity extends AppCompatActivity {
 
     public void RecibirCargaDeLineas()
     {
-        //String status = AsyncLineas.getStatus().toString();
-            //aqui llega del onPostExecute del validar usuario
+
+            int aumentarProgreso = 20;
+            progreso(aumentarProgreso);
+
             terminoCargarLineas = true;
             EsperarWebService();
 
@@ -75,6 +102,9 @@ public class FirstTimeActivity extends AppCompatActivity {
 
     public void RecibirCargaDeRutas()
     {
+        int aumentarProgreso = 20;
+        progreso(aumentarProgreso);
+
         //String status = AsyncRutas.getStatus().toString();
             terminoCargarRutas = true;
             EsperarWebService();
@@ -83,6 +113,9 @@ public class FirstTimeActivity extends AppCompatActivity {
 
     public void RecibirCargaDeParaderos()
     {
+        int aumentarProgreso = 20;
+        progreso(aumentarProgreso);
+
         //String status = AsyncRutas.getStatus().toString();
         terminoCargarParaderos = true;
         EsperarWebService();
@@ -107,26 +140,44 @@ public class FirstTimeActivity extends AppCompatActivity {
 
     public void EsperarCoordenadas()
     {
-        //if(terminoCargarCoordenadas == true && terminoCargarParaderos == true)
-        if(terminoCargarCoordenadas == true)
+
+        rutasAsignadas++;
+
+        if(rutasAsignadas == numeroRutas)
         {
-            terminoCargarCoordenadas = false;
-            //terminoCargarParaderos = false;
+            int aumentarProgreso = 20;
+            progreso(aumentarProgreso);
 
-            if(session.checkLogin() == false)
-            {
+                if(session.checkLogin() == false)
+                {
 
-                Intent intent = new Intent(FirstTimeActivity.this, UserMapActivity.class);
-                startActivity(intent);
-                finish();
-            }
-            else
-            {
 
-                Intent intent = new Intent(FirstTimeActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
+                    HashMap<String, String> user = session.obtenerRolyId();
+
+                    String rolUsuario = user.get(UserSessionManager.KEY_ROL);
+
+                    if(rolUsuario.equals("0"))
+                    {
+                        Intent intent = new Intent(FirstTimeActivity.this, UserMapActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    }
+                    else if(rolUsuario.equals("1"))
+                    {
+                        Intent intent = new Intent(FirstTimeActivity.this, ChoferMapActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+
+                }
+                else
+                {
+
+                    Intent intent = new Intent(FirstTimeActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
         }
     }
 
@@ -137,9 +188,16 @@ public class FirstTimeActivity extends AppCompatActivity {
         if(terminoCargarLineas == true && terminoCargarRutas == true && terminoCargarParaderos == true)
         {
 
+            int aumentarProgreso = 20;
+            progreso(aumentarProgreso);
+
             //Necesito asociar los paraderos por ruta cuando haya cargado los paraderos y rutas.
             Paradero paradero = new Paradero();
             paradero.CargarParaderosPorRutas();
+
+            numeroRutas = Rutas.listaRutas.size();
+            rutasAsignadas = 0;
+
             Rutas.CargarCoordenadasRutas();
 
             //Se reinician los bool
@@ -149,5 +207,10 @@ public class FirstTimeActivity extends AppCompatActivity {
 
 
         }
+    }
+
+    public void progreso(int contadorProgreso)
+    {
+        progressStatusCounter += contadorProgreso;
     }
 }

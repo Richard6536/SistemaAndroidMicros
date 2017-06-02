@@ -1,8 +1,10 @@
 package com.android.micros.sistemaandroidmicros;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
@@ -29,10 +32,15 @@ public class RegisterStep3Activity extends AppCompatActivity {
     Intent intent = getIntent();
     String nombre, email;
 
+    ProgressBar bar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_step3);
+        bar = (ProgressBar)findViewById(R.id.progressBar3);
+        bar.setVisibility(View.GONE);
+
         Bundle bundle = getIntent().getExtras();
         email =  bundle.getString("correo").toString();
         nombre = bundle.getString("name").toString();
@@ -54,7 +62,7 @@ public class RegisterStep3Activity extends AppCompatActivity {
     }
     private void finalizarRegistro()
     {
-
+        bar.setVisibility(View.VISIBLE);
         JSONObject parametros = new JSONObject();
 
         try {
@@ -73,8 +81,21 @@ public class RegisterStep3Activity extends AppCompatActivity {
 
     public void fin()
     {
-        Intent intent = new Intent(RegisterStep3Activity.this, LoginActivity.class);
-        startActivity(intent);
+        bar.setVisibility(View.GONE);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterStep3Activity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Cuenta creada con éxito");
+        dialog.setMessage("Presione Aceptar para iniciar sesión con su nueva cuenta." );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                Intent intent = new Intent(RegisterStep3Activity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
     }
 
 }

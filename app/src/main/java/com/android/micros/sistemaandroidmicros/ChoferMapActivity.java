@@ -1,6 +1,7 @@
 package com.android.micros.sistemaandroidmicros;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -39,6 +41,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ChoferMapActivity extends AppCompatActivity
@@ -50,6 +53,10 @@ public class ChoferMapActivity extends AppCompatActivity
 
     private TextView lblMensaje;
 
+    UserSessionManager session;
+    private String name;
+    private String email;
+    private String idSession;
     Polyline polylineIda;
     Polyline polylineVuelta;
 
@@ -62,6 +69,17 @@ public class ChoferMapActivity extends AppCompatActivity
         setContentView(R.layout.activity_chofer_map);
         ActivityController.activiyAbiertaActual = this;
 
+        session = new UserSessionManager(getApplicationContext());
+
+        if(session.checkLogin())
+            finish();
+
+        HashMap<String, String> user = session.obtenerDetallesUsuario();
+        HashMap<String, String> chofer = session.obtenerRolyId();
+
+        idSession = chofer.get(UserSessionManager.KEY_ID);
+        name = user.get(UserSessionManager.KEY_NAME);
+        email = user.get(UserSessionManager.KEY_EMAIL);
 
         lblMensaje = (TextView)findViewById(R.id.lblMensaje);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -89,10 +107,7 @@ public class ChoferMapActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Bundle bundle = getIntent().getExtras();
-        idChofer = bundle.getInt("Id");
-
-        new Micro.ObtenerMicroDeChofer().execute(idChofer+"");
+        new Micro.ObtenerMicroDeChofer().execute(idSession);
 
     }
 
@@ -197,10 +212,29 @@ public class ChoferMapActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            session.logoutUser();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+        {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                    homeIntent.addCategory( Intent.CATEGORY_HOME );
+                    homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(homeIntent);
+                    return true;
+            }
+
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

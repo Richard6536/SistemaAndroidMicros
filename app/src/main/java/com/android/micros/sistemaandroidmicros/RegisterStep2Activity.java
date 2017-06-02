@@ -41,10 +41,11 @@ public class RegisterStep2Activity extends AppCompatActivity {
         nombre=bundle.getString("name").toString();
 
         mensaje = (TextView)findViewById(R.id.mensaje8);
-        bar = (ProgressBar)findViewById(R.id.progressBar);
-
+        bar = (ProgressBar)findViewById(R.id.progressBar2);
+        bar.setVisibility(View.GONE);
         txtCorreo = (EditText)findViewById(R.id.txtCorreo);
         btnPaso3 = (Button)findViewById(R.id.btnPaso3);
+
 
         btnPaso3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,6 +62,8 @@ public class RegisterStep2Activity extends AppCompatActivity {
     {
         super.onResume();
         ActivityController.activiyAbiertaActual = this;
+        bar.setVisibility(View.GONE);
+        btnPaso3.setEnabled(true);
     }
     private void ClickPasoTres() throws JSONException {
         /*
@@ -71,6 +74,8 @@ public class RegisterStep2Activity extends AppCompatActivity {
         //bar.setVisibility(View.VISIBLE);
         if(txtCorreo.getText().toString().length() >= 3 && txtCorreo.getText().toString().length() <= 50)
         {
+            bar.setVisibility(View.VISIBLE);
+            btnPaso3.setEnabled(false);
             JSONObject params = new JSONObject();
             params.put("Email", txtCorreo.getText().toString());
 

@@ -281,12 +281,9 @@ public class Rutas
         protected void onPostExecute(ArrayList<Coordenada> result)
         {
 
-            cont++;
-            if(cont == 1)
-            {
                 FirstTimeActivity ft = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
                 ft.RecibirCargaDeCoordenadas();
-            }
+
         }
     }
 

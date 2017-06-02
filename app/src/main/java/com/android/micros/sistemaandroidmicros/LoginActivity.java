@@ -313,9 +313,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView.requestFocus();
         } else {
 
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            //Intent in = new Intent(LoginActivity.this, UserMapActivity.class);
+            //startActivity(in);
+
+            JSONObject parametros = new JSONObject();
+
+            try {
+
+                parametros.put("Email", email);
+                parametros.put("Password", password);
+
+                Usuario us = new Usuario();
+                us.new ValidarUsuario().execute(parametros.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            //showProgress(true);
+            //mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask.execute((Void) null);
         }
     }
 
@@ -325,29 +342,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             {
                 mensaje.setText("El email/contraseña no son válidos");
             }
-            else if(usuario.rol == 0)
+            else
             {
-                //Interfaz del pasajero
 
                 session.crearSesionUsuario(usuario);
 
-                Intent intent = new Intent(getApplicationContext(), UserMapActivity.class);
+                Intent intent = new Intent(getApplicationContext(), FirstTimeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
-            }
-            else if(usuario.rol == 1)
-            {
-
-                Intent intent = new Intent(LoginActivity.this, ChoferMapActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putInt("Id", usuario.id);
-                intent.putExtras(bundle);
-                startActivity(intent);
-
-                //Interfaz del chofer
-
             }
     }
     private boolean isEmailValid(String email) {
@@ -527,22 +531,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public void RegActivity ()
     {
-        Intent in = new Intent(LoginActivity.this, RegisterActivity.class);
+        Intent in = new Intent(LoginActivity.this, RegisterStep1Activity.class);
         startActivity(in);
-    }
-
-
-    public void obtenerDatos()
-    {
-        String URLLineas = "http://localhost:8081/odata/Lineas";
-        AsyncTask asf = new Linea.ObtenerLineas().execute(URLLineas);
-        String URLRutas = "http://localhost:8081/odata/Rutas";
-        AsyncTask asf2 = new Rutas.ObtenerRutas().execute(URLRutas);
-
-        //while(asf.getStatus() != AsyncTask.Status.FINISHED && asf2.getStatus() != AsyncTask.Status.FINISHED)
-
-
-
     }
 }
 
