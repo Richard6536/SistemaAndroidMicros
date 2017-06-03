@@ -42,6 +42,7 @@ public class ServicePosition extends Service
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
+    String userId="";
 
     UserSessionManager session;
 
@@ -56,22 +57,21 @@ public class ServicePosition extends Service
         @Override
         public void onLocationChanged(Location location)
         {
-            //Se actualiza cada vez que cambio de posición
 
-            double latitud = location.getLatitude();
-            double longitud = location.getLongitude();
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
 
             Log.e(TAG, "onLocationChanged: " + location);
             mLastLocation.set(location);
 
-            JSONObject posicionActual = new JSONObject();
+            JSONObject actualPosition = new JSONObject();
 
             try {
 
-                posicionActual.put("Latitud", latitud);
-                posicionActual.put("Longitud", longitud);
+                actualPosition.put("Latitud", latitude);
+                actualPosition.put("Longitud", longitude);
 
-                new AsyncTaskServerPosition.SendToServer().execute(posicionActual.toString());
+                new AsyncTaskServerPosition.SendToServer().execute(actualPosition.toString(), userId);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -108,6 +108,16 @@ public class ServicePosition extends Service
     {
         Log.e(TAG, "onStartCommand");
         super.onStartCommand(intent, flags, startId);
+        Bundle extras = intent.getExtras();
+
+        if(extras == null) {
+            Log.d("Service","null");
+        } else {
+            Log.d("Service","not null");
+            userId = (String) extras.get("usuarioId");
+            Log.e(TAG, "usuario start: " + userId);
+        }
+
         return START_NOT_STICKY;
     }
     @Override
@@ -116,8 +126,7 @@ public class ServicePosition extends Service
         Log.e(TAG, "onCreate");
         initializeLocationManager();
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
                     mLocationListeners[1]);
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "No puede solicitar la actualización de la ubicacion", ex);
@@ -125,8 +134,7 @@ public class ServicePosition extends Service
             Log.d(TAG, "El proveedor de gps no existe, " + ex.getMessage());
         }
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
                     mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "No puede solicitar la actualización de la ubicacion", ex);

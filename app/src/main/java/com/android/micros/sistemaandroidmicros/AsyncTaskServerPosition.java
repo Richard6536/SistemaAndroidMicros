@@ -21,7 +21,6 @@ public class AsyncTaskServerPosition
 {
 
     private static final String TAG = "ASYNCTASK";
-    private static UserSessionManager session;
 
 
     public static class SendToServer extends AsyncTask<String, String, String>
@@ -29,20 +28,22 @@ public class AsyncTaskServerPosition
 
         @Override
         protected void onPreExecute() {
+            Log.d(TAG, "Asynctask funcionando");
 
         }
 
         @Override
-        protected String doInBackground(String... coordenadas) {
+        protected String doInBackground(String... parametros) {
 
             try {
 
-                HashMap<String, String> user = session.obtenerRolyId();
-                String usuarioId = user.get(UserSessionManager.KEY_ID);
+                String posicionActual = parametros[0];
+                String usuarioId = parametros[1];
 
-                Log.d(TAG, "Location: " +coordenadas);
+                Log.d(TAG, "Coordenadas: " + posicionActual);
+                Log.d(TAG, "Usuario: " + usuarioId);
+
                 HttpURLConnection urlConnection = null;
-                String posicionActual = coordenadas[0];
                 BufferedReader reader = null;
                 OutputStream os = null;
                 InputStream inputStream = null;

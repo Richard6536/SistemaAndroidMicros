@@ -124,15 +124,13 @@ public class UserMapActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_map);
-        //ActivityCompat.requestPermissions(UserMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION, SINGLE_PERMISSION_REQUEST_CODE);
+        session = new UserSessionManager(getApplicationContext());
 
-        //Intent myGpsService = new Intent(this, ServicePosition.class);
-        //startService(myGpsService);
+        HashMap<String, String> userid = session.obtenerRolyId();
+        final String idUser = userid.get(UserSessionManager.KEY_ID);
 
         spinner = (Spinner) findViewById(R.id.spLineas);
         cargarSpinner();
-        session = new UserSessionManager(getApplicationContext());
-
         datosUsuario = (TextView) findViewById(R.id.datosUsuario);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -143,7 +141,10 @@ public class UserMapActivity extends AppCompatActivity
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startService(new Intent(getBaseContext(), ServicePosition.class));
+
+                Intent intent = new Intent(getBaseContext(), ServicePosition.class);
+                intent.putExtra("usuarioId", idUser);
+                startService(intent);
             }
         });
 
@@ -384,7 +385,6 @@ public class UserMapActivity extends AppCompatActivity
         Polyline nuevaPolyline = mMap.addPolyline(polyLineaNueva);
 
         for (Paradero p : paraderos) {
-            Paraderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))));
 
             marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
