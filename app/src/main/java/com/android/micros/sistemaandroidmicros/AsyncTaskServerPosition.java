@@ -23,12 +23,12 @@ public class AsyncTaskServerPosition
     private static final String TAG = "ASYNCTASK";
 
 
-    public static class SendToServer extends AsyncTask<String, String, String>
+    public static class SendPosition extends AsyncTask<String, String, String>
     {
 
         @Override
         protected void onPreExecute() {
-            Log.d(TAG, "Asynctask funcionando");
+            Log.d(TAG, "Asynctask iniciado");
 
         }
 
@@ -63,6 +63,57 @@ public class AsyncTaskServerPosition
 
                 os.flush();
                 os.close();
+
+                int serverResponse = urlConnection.getResponseCode();
+                String serverMsg = urlConnection.getResponseMessage();
+                urlConnection.disconnect();
+
+                Log.d(TAG, "Code: " + serverResponse + " - Menssage: " + serverMsg);
+
+
+            } catch (Exception e) {
+                Log.i("error", e.toString());
+            }
+
+            return "call";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+        }
+
+    }
+
+    public static class StopPosition extends AsyncTask<String, String, String>
+    {
+
+        @Override
+        protected void onPreExecute() {
+            Log.d(TAG, "Asynctask funcionando");
+
+        }
+
+        @Override
+        protected String doInBackground(String... parametros) {
+
+            try {
+
+                String usuarioId = parametros[0];
+
+                HttpURLConnection urlConnection = null;
+                BufferedReader reader = null;
+                OutputStream os = null;
+                InputStream inputStream = null;
+
+                URL url = new URL("http://localhost:8081/odata/Usuarios("+usuarioId+")/DetenerPosicionUpdate");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
 
                 int serverResponse = urlConnection.getResponseCode();
                 String serverMsg = urlConnection.getResponseMessage();
