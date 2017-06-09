@@ -11,10 +11,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 
 public class Paradero
 {
+    public int id;
     public double latitud;
     public double longitud;
     public int rutaId;
@@ -33,6 +36,15 @@ public class Paradero
     public static ArrayList<Paradero> paraderos = new ArrayList<>();
 
     public Paradero() {}
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public double getLatitud() {
         return latitud;
     }
@@ -95,6 +107,7 @@ public class Paradero
                     JSONObject jsonobject = listaJson.getJSONObject(i);
 
                     Paradero paradero = new Paradero();
+                    paradero.id = jsonobject.getInt("Id");
                     paradero.latitud = jsonobject.getDouble("Latitud");
                     paradero.longitud = jsonobject.getDouble("Longitud");
                     paradero.rutaId = jsonobject.getInt("RutaId");
@@ -146,6 +159,78 @@ public class Paradero
                 }
             }
         }
+    }
+
+    public static class AsociarParaderoChofer extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected String doInBackground(String... params) {
+
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idMicro =params[0];
+            String idParadero = params[1];
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/SeleccionarParadero");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(idParadero.getBytes());
+                os.flush();
+
+
+                JSONObject resultadoJSON = new JSONObject("");
+
+                return "";
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String p)
+        {
+
+        }
+
     }
 }
 //ASDF

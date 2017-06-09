@@ -21,7 +21,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
@@ -43,13 +45,18 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import android.os.Handler;
+import java.util.logging.LogRecord;
 
 public class ChoferMapActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback{
 
     private GoogleMap cMap;
     private int idChofer;
     private int idMicro;
+    private int idLineaActual;
 
     private TextView lblMensaje;
 
@@ -59,6 +66,9 @@ public class ChoferMapActivity extends AppCompatActivity
     private String idSession;
     Polyline polylineIda;
     Polyline polylineVuelta;
+    Micro microActual;
+
+    private Button btnStart, btnStop;
 
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
@@ -80,6 +90,23 @@ public class ChoferMapActivity extends AppCompatActivity
         idSession = chofer.get(UserSessionManager.KEY_ID);
         name = user.get(UserSessionManager.KEY_NAME);
         email = user.get(UserSessionManager.KEY_EMAIL);
+
+        btnStart = (Button) findViewById(R.id.btnComenzar);
+        btnStop = (Button)findViewById(R.id.btnParar);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                iniciarServicio();
+
+            }
+        });
+
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopService(new Intent(getBaseContext(), ServicePosition.class));
+            }
+        });
 
         lblMensaje = (TextView)findViewById(R.id.lblMensaje);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -126,11 +153,15 @@ public class ChoferMapActivity extends AppCompatActivity
         }
         else
         {
+
+            microActual = micro;
+
             Rutas rutaIda = new Rutas();
             Rutas rutaVuelta = new Rutas();
 
             Linea linea = new Linea();
             linea = Linea.BuscarLineaPorId(micro.lineaId);
+            idLineaActual = linea.idLinea;
 
             rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
             rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
@@ -161,9 +192,12 @@ public class ChoferMapActivity extends AppCompatActivity
 
         for(Paradero p : paraderos)
         {
-            marcadoresParaderos.add(cMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
+            Marker paradero = cMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud,p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero")));
+                    .title("Paradero"));
+
+            paradero.setTag(p.id);
+            marcadoresParaderos.add(paradero);
             //marker.position(new LatLng(p.latitud,p.longitud));
             //marcadorVuelta = mMap.addMarker(marker);
         }
@@ -212,6 +246,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            detenerServicio();
             session.logoutUser();
             return true;
         }
@@ -279,5 +314,43 @@ public class ChoferMapActivity extends AppCompatActivity
             return;
         }
         cMap.setMyLocationEnabled(true);
+
+        cMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker paraderoSeleccionado) {
+                Toast.makeText(ChoferMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
+
+                String id = microActual.id+"";
+                new Paradero.AsociarParaderoChofer().execute(id, paraderoSeleccionado.getTag().toString());
+            }
+        });
+    }
+
+    public void detenerServicio()
+    {
+        stopService(new Intent(getBaseContext(), ServicePosition.class));
+        new AsyncTaskServerPosition.StopPosition().execute(idSession);
+    }
+
+    public void iniciarServicio()
+    {
+        Intent intent = new Intent(getBaseContext(), ServicePosition.class);
+        intent.putExtra("usuarioId", idSession);
+        startService(intent);
+    }
+    @Override
+    protected void onStop()
+    {
+        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
+        super.onStop();
+        detenerServicio();
+    }
+
+    @Override
+    protected void onRestart()
+    {
+        Toast.makeText(this, "onRestart", Toast.LENGTH_SHORT).show();
+        super.onRestart();
+        iniciarServicio();
     }
 }

@@ -3,6 +3,7 @@ package com.android.micros.sistemaandroidmicros;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -51,7 +52,7 @@ public class RegisterStep3Activity extends AppCompatActivity {
         btnTerminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finalizarRegistro();
+                verificarConeccionInternet();
             }
         });
     }
@@ -60,22 +61,33 @@ public class RegisterStep3Activity extends AppCompatActivity {
         super.onResume();
         ActivityController.activiyAbiertaActual = this;
     }
-    private void finalizarRegistro()
+    public void verificarConeccionInternet()
     {
-        bar.setVisibility(View.VISIBLE);
-        JSONObject parametros = new JSONObject();
+        new InternetConnection.hasInternetAccess().execute(getApplicationContext());
+    }
+    public void finalizarRegistro(boolean internetConectado)
+    {
+        if(internetConectado == true)
+        {
+            bar.setVisibility(View.VISIBLE);
+            JSONObject parametros = new JSONObject();
 
-        try {
+            try {
 
-            parametros.put("Nombre", nombre);
-            parametros.put("Email", email);
-            parametros.put("Password", txtPass.getText().toString());
-            parametros.put("Rol", 0);
+                parametros.put("Nombre", nombre);
+                parametros.put("Email", email);
+                parametros.put("Password", txtPass.getText().toString());
+                parametros.put("Rol", 0);
 
-            new Usuario.CrearUsuario().execute(parametros.toString());
+                new Usuario.CrearUsuario().execute(parametros.toString());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            internetAlert();
         }
     }
 
@@ -97,5 +109,28 @@ public class RegisterStep3Activity extends AppCompatActivity {
         final AlertDialog alert = dialog.create();
         alert.show();
     }
+    public void internetAlert()
+    {
+        bar.setVisibility(View.GONE);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterStep3Activity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Error de conexión");
+        dialog.setMessage("Por favor, verifique su conexión a internet e intente nuevamente." );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
 
+                dialog.cancel();
+            }
+        });
+        dialog.setPositiveButton("Config.", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
+    }
 }

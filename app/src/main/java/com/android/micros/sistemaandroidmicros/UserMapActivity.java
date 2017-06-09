@@ -48,6 +48,7 @@ import android.widget.Toast;
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
+import com.android.micros.sistemaandroidmicros.Clases.Micro;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.google.android.gms.maps.CameraUpdate;
@@ -65,6 +66,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
@@ -77,6 +80,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.content.ContentValues.TAG;
 
@@ -100,7 +105,11 @@ public class UserMapActivity extends AppCompatActivity
 
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
+
+    private List<Marker> microsMarker = new ArrayList<>();
+
     private List<Marker> Paraderos = new ArrayList<>();
+
     Marker marcador;
     private ProgressDialog progressDialog;
     private Spinner spinner;
@@ -114,6 +123,9 @@ public class UserMapActivity extends AppCompatActivity
     UserSessionManager session;
     private String name;
     private String email;
+    private String idUser;
+
+    int idLineaSeleccionada;
 
     String GPS_FILTER = "MyGPSLocation";
 
@@ -127,7 +139,7 @@ public class UserMapActivity extends AppCompatActivity
         session = new UserSessionManager(getApplicationContext());
 
         HashMap<String, String> userid = session.obtenerRolyId();
-        final String idUser = userid.get(UserSessionManager.KEY_ID);
+        idUser = userid.get(UserSessionManager.KEY_ID);
 
         spinner = (Spinner) findViewById(R.id.spLineas);
         cargarSpinner();
@@ -151,7 +163,7 @@ public class UserMapActivity extends AppCompatActivity
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopService(new Intent(getBaseContext(), ServicePosition.class));
+                detenerServicio();
             }
         });
 
@@ -204,35 +216,28 @@ public class UserMapActivity extends AppCompatActivity
                     polylineIda.remove();
                     polylineVuelta.remove();
                     removerParaderos();
-                    marcador.remove();
-
+                    removerMicros();
                 }
+
                 Object item = parent.getItemAtPosition(pos);
                 String itemStr = item.toString();
                 Linea linea = new Linea();
-                Rutas rutaIda = new Rutas();
-                Rutas rutaVuelta = new Rutas();
-
+                Rutas rutaIda;
+                Rutas rutaVuelta;
 
                 //Retorna el Id de la linea que se selecciona en el spinner
-                int idLinea = linea.buscarLineaSpinner(itemStr);
+                idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
+
 
                 //Envío el Id de la linea y recibo la linea completa
-                linea = Linea.BuscarLineaPorId(idLinea);
-
+                linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
 
                 rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
                 rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
 
-                //Envío la ruta de ida y vuelta con su lista de coordenadas y paraderos
-                //para que sean dibujados en el mapa
-
-                //crearRutaIda(rutaIda.listaCoordenadas, rutaIda.listaParaderos);
-                //crearRutaVuelta(rutaVuelta.listaCoordenadas, rutaVuelta.listaParaderos);
                 polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
                 polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
-                //moveMarker(rutaIda);
-                //moveMarker(rutaVuelta);
+                actualizarPosicionMicros();
 
             }
 
@@ -302,9 +307,10 @@ public class UserMapActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        //Cerrar Sesion del usuario
         if (id == R.id.action_settings) {
             session.logoutUser();
+            detenerServicio();
             return true;
         }
 
@@ -315,7 +321,7 @@ public class UserMapActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
 
@@ -341,7 +347,7 @@ public class UserMapActivity extends AppCompatActivity
         mMap = googleMap;
 
         LatLng hcmus = new LatLng(-40.5769389, -73.1260218);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 13));
 
 
         //TODO: Dar permisos para utilizar la ubicación de GPS
@@ -367,6 +373,90 @@ public class UserMapActivity extends AppCompatActivity
         });*/
     }
 
+
+
+    public void agregarMicros(JSONArray choferes)
+    {
+        if(choferes.length() != 0)
+        {
+            for (int i = 0; i < choferes.length(); i++) {
+                JSONObject jsonobject = null;
+                try {
+                    jsonobject = choferes.getJSONObject(i);
+                    double lat = jsonobject.getDouble("Latitud");
+                    double lng = jsonobject.getDouble("Longitud");
+                    int idChofer = jsonobject.getInt("Id");
+                    boolean estaActivo = jsonobject.getBoolean("TransmitiendoPosicion");
+
+                    if(estaActivo)
+                    {
+
+                        //revisar si en la lista microsmarker existe un marcador con tag == id chofer
+                        Marker marcadorChofer = obtenerChoferMarcador(idChofer);
+                        if(marcadorChofer != null)
+                        {
+                            marcadorChofer.setPosition(new LatLng(lat, lng));
+                            //a ese marker se le cambia la posicion que se recibio
+                        }
+                        else
+                        {
+                            //si no existe se crea un nuevo marcador
+                            //se le asigna como tag el id del chofer
+                            //ese marcador se agrega a la lista
+
+
+                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title("Soy una micro"));
+                            m.setTag(idChofer);
+                            microsMarker.add(m);
+                        }
+
+                    }
+                    else
+                    {
+                        //chofer esta inactivo
+//
+                        //revisar si chofer esta en la lista de marcadores usando el tag
+                        Marker marcadorChofer = obtenerChoferMarcador(idChofer);
+                        if(marcadorChofer != null)
+                        {
+                            Marker choferSeleccionado = null;
+                            for (Marker chofer : microsMarker) {
+                                if(chofer.getTag() == marcadorChofer.getTag())
+                                {
+
+                                    choferSeleccionado = chofer;
+                                    chofer.remove();
+                                }
+                            }
+                            if(choferSeleccionado != null)
+                            {
+                                microsMarker.remove(choferSeleccionado);
+                            }
+
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private Marker obtenerChoferMarcador(int id)
+    {
+        Marker mChofer = null;
+        String idString = id+"";
+        for(Marker m : microsMarker )
+        {
+            if(m.getTag().toString().equals(idString))
+            {
+                mChofer = m;
+            }
+        }
+        return mChofer;
+    }
+
     public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color) {
 
 
@@ -386,14 +476,15 @@ public class UserMapActivity extends AppCompatActivity
 
         for (Paradero p : paraderos) {
 
+
             marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .title("Paradero")));
             //marker.position(new LatLng(p.latitud,p.longitud));
             //marcadorVuelta = mMap.addMarker(marker);
         }
-
         return nuevaPolyline;
+
     }
 
     public void cargarSpinner() {
@@ -429,5 +520,53 @@ public class UserMapActivity extends AppCompatActivity
             paradero.remove();
         }
         paraderosRutaVuelta.clear();
+    }
+
+    private void removerMicros()
+    {
+        for(Marker micro : microsMarker)
+        {
+            micro.remove();
+        }
+        microsMarker.clear();
+    }
+
+    public void detenerServicio()
+    {
+        stopService(new Intent(getBaseContext(), ServicePosition.class));
+        new AsyncTaskServerPosition.StopPosition().execute(idUser);
+    }
+
+    @Override
+    protected void onStop()
+    {
+        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
+        super.onStop();
+        detenerServicio();
+    }
+
+    public void actualizarPosicionMicros()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new Micro.ObtenerMicrosPorLinea().execute(idLineaSeleccionada+"");
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
     }
 }

@@ -3,11 +3,14 @@ package com.android.micros.sistemaandroidmicros;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.nfc.Tag;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -69,6 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Id to identity READ_CONTACTS permission request.
      */
+    String LOG_TAG = "LOGINTEST";
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
@@ -313,15 +317,56 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView.requestFocus();
         } else {
 
-            //Intent in = new Intent(LoginActivity.this, UserMapActivity.class);
-            //startActivity(in);
+            //Verifica si hay coneción a internet antes de iniciar sesión
+            new InternetConnection.hasInternetAccess().execute(getApplicationContext());
 
+            //showProgress(true);
+            //mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask.execute((Void) null);
+        }
+    }
+    public void internetAlert()
+    {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Error de conexión");
+        dialog.setMessage("Por favor, verifique su conexión a internet e intente nuevamente." );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                dialog.cancel();
+            }
+        });
+        dialog.setPositiveButton("Config.", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
+    }
+
+    public void validar(boolean isConnectionEnable)
+    {
+        if(isConnectionEnable == false)
+        {
+            internetAlert();
+        }
+        else
+        {
+            //Regresa de InternetConnection
             JSONObject parametros = new JSONObject();
+
 
             try {
 
                 parametros.put("Email", email);
                 parametros.put("Password", password);
+
+                Log.e(LOG_TAG, "Está conectado a internet");
 
                 Usuario us = new Usuario();
                 us.new ValidarUsuario().execute(parametros.toString());
@@ -329,10 +374,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            //showProgress(true);
-            //mAuthTask = new UserLoginTask(email, password);
-            //mAuthTask.execute((Void) null);
         }
     }
 

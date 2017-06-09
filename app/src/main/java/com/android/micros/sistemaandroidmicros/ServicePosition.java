@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -43,6 +44,7 @@ public class ServicePosition extends Service
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
     String userId="";
+    Location ultimaLocalizacion = null;
 
     UserSessionManager session;
 
@@ -57,36 +59,45 @@ public class ServicePosition extends Service
         @Override
         public void onLocationChanged(Location location)
         {
+                ultimaLocalizacion = location;
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
 
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
+                Log.e(TAG, "onLocationChanged: " + location);
+                mLastLocation.set(location);
 
-            Log.e(TAG, "onLocationChanged: " + location);
-            mLastLocation.set(location);
+                JSONObject actualPosition = new JSONObject();
 
-            JSONObject actualPosition = new JSONObject();
+                try {
 
-            try {
+                    actualPosition.put("Latitud", latitude);
+                    actualPosition.put("Longitud", longitude);
 
-                actualPosition.put("Latitud", latitude);
-                actualPosition.put("Longitud", longitude);
+                    new AsyncTaskServerPosition.SendPosition().execute(actualPosition.toString(), userId);
 
-                new AsyncTaskServerPosition.SendToServer().execute(actualPosition.toString(), userId);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
         }
         @Override
         public void onProviderDisabled(String provider)
         {
             Log.e(TAG, "onProviderDisabled: " + provider);
+            new AsyncTaskServerPosition.StopPosition().execute(userId);
+
+                //Abre las configuraciones de GPS del teléfono
+            //Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            //startActivity(intent);
         }
         @Override
         public void onProviderEnabled(String provider)
         {
             Log.e(TAG, "onProviderEnabled: " + provider);
+            if(ultimaLocalizacion != null)
+            {
+                onLocationChanged(ultimaLocalizacion);
+            }
         }
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras)

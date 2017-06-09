@@ -1,8 +1,11 @@
 package com.android.micros.sistemaandroidmicros;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -68,19 +71,36 @@ public class RegisterStep2Activity extends AppCompatActivity {
     private void ClickPasoTres() throws JSONException {
         /*
         Intent intent = new Intent(RegisterStep2Activity.this, RegisterStep3Activity.class);
-
         startActivity(intent);
         */
         //bar.setVisibility(View.VISIBLE);
-        if(txtCorreo.getText().toString().length() >= 3 && txtCorreo.getText().toString().length() <= 50)
+        new InternetConnection.hasInternetAccess().execute(getApplicationContext());
+    }
+
+    public void resultInternetConnection(boolean internetConectado)
+    {
+        if(internetConectado == true)
         {
-            bar.setVisibility(View.VISIBLE);
-            btnPaso3.setEnabled(false);
-            JSONObject params = new JSONObject();
-            params.put("Email", txtCorreo.getText().toString());
+            if(txtCorreo.getText().toString().length() >= 3 && txtCorreo.getText().toString().length() <= 50)
+            {
+                bar.setVisibility(View.VISIBLE);
+                btnPaso3.setEnabled(false);
+                try
+                {
+                    JSONObject params = new JSONObject();
+                    params.put("Email", txtCorreo.getText().toString());
 
-            new Usuario.ValidarEmail().execute(params.toString());
+                    new Usuario.ValidarEmail().execute(params.toString());
 
+                } catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else
+        {
+            internetAlert();
         }
     }
 
@@ -103,6 +123,31 @@ public class RegisterStep2Activity extends AppCompatActivity {
         {
             mensaje.setText(messaje);
         }
+    }
+
+    public void internetAlert()
+    {
+        bar.setVisibility(View.GONE);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterStep2Activity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Error de conexión");
+        dialog.setMessage("Por favor, verifique su conexión a internet e intente nuevamente." );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                dialog.cancel();
+            }
+        });
+        dialog.setPositiveButton("Config.", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
     }
 
 }
