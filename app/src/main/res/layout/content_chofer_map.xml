@@ -47,6 +47,7 @@
                 android:layout_alignParentStart="true"
                 android:text="Start" />
 
+
             <Button
                 android:id="@+id/btnParar"
                 android:layout_width="wrap_content"
@@ -55,7 +56,21 @@
                 android:layout_alignParentBottom="true"
                 android:layout_toRightOf="@+id/btnComenzar"
                 android:layout_toEndOf="@+id/btnComenzar" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="169dp">
+                <Button
+                    android:id="@+id/btnIniciarRecorrido"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:text="INICIAR RECORRIDO"
+                    android:layout_marginTop="31dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true" />
+            </RelativeLayout>
         </RelativeLayout>
+
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

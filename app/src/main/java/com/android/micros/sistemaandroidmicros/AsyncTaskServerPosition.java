@@ -25,7 +25,6 @@ public class AsyncTaskServerPosition
 
     public static class SendPosition extends AsyncTask<String, String, String>
     {
-
         @Override
         protected void onPreExecute() {
             Log.d(TAG, "Asynctask iniciado");
@@ -36,9 +35,8 @@ public class AsyncTaskServerPosition
         protected String doInBackground(String... parametros) {
 
             try {
-
-                String posicionActual = parametros[0];
-                String usuarioId = parametros[1];
+                String usuarioId = parametros[0];
+                String posicionActual = parametros[1];
 
                 Log.d(TAG, "Coordenadas: " + posicionActual);
                 Log.d(TAG, "Usuario: " + usuarioId);

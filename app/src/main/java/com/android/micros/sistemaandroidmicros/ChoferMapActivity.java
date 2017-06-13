@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.os.Handler;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.logging.LogRecord;
 
 public class ChoferMapActivity extends AppCompatActivity
@@ -59,6 +64,7 @@ public class ChoferMapActivity extends AppCompatActivity
     private int idLineaActual;
 
     private TextView lblMensaje;
+    private Switch switchTest;
 
     UserSessionManager session;
     private String name;
@@ -67,8 +73,9 @@ public class ChoferMapActivity extends AppCompatActivity
     Polyline polylineIda;
     Polyline polylineVuelta;
     Micro microActual;
+    Marker miMicroMarker;
 
-    private Button btnStart, btnStop;
+    private Button btnStart, btnStop, btnIniciarRecorrido;
 
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
@@ -78,6 +85,9 @@ public class ChoferMapActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chofer_map);
         ActivityController.activiyAbiertaActual = this;
+
+        switchTest = (Switch)findViewById(R.id.switchTest);
+
 
         session = new UserSessionManager(getApplicationContext());
 
@@ -91,13 +101,28 @@ public class ChoferMapActivity extends AppCompatActivity
         name = user.get(UserSessionManager.KEY_NAME);
         email = user.get(UserSessionManager.KEY_EMAIL);
 
+        iniciarServicio();
+
+        btnIniciarRecorrido = (Button)findViewById(R.id.btnIniciarRecorrido);
+        btnIniciarRecorrido.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                iniciarServicio();
+                new Micro.IniciarRecorrido().execute(microActual.id+"");
+                //obtenerPosicion();
+            }
+        });
+
+
         btnStart = (Button) findViewById(R.id.btnComenzar);
         btnStop = (Button)findViewById(R.id.btnParar);
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iniciarServicio();
-
+                obtenerPosicion();
             }
         });
 
@@ -352,5 +377,73 @@ public class ChoferMapActivity extends AppCompatActivity
         Toast.makeText(this, "onRestart", Toast.LENGTH_SHORT).show();
         super.onRestart();
         iniciarServicio();
+    }
+
+    public void recibirPosicion(JSONObject posicion)
+    {
+        try {
+            Bitmap icon = microsIcon();
+            //Por si acaso
+            double lat = posicion.getDouble("Latitud");
+            double lng = posicion.getDouble("Longitud");
+
+            if(miMicroMarker != null)
+            {
+                miMicroMarker.setPosition(new LatLng(lat,lng));
+            }
+            else
+            {
+                miMicroMarker = cMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng))
+                        .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                        .title("Mi posición"));
+            }
+
+            JSONObject latLng = new JSONObject();
+            latLng.put("Latitud", lat);
+            latLng.put("Longitud", lng);
+
+            new AsyncTaskServerPosition.SendPosition().execute(idSession, latLng.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void obtenerPosicion()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new Micro.CambiarPosicion().execute(microActual.id+"");
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
+    }
+
+    public Bitmap microsIcon() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.micro_activa);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
     }
 }

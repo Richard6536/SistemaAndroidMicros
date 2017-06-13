@@ -362,7 +362,16 @@ public class UserMapActivity extends AppCompatActivity
             return;
         }
         mMap.setMyLocationEnabled(true);
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker paraderoSeleccionado) {
+                Toast.makeText(UserMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
 
+                String id = paraderoSeleccionado.getTag().toString();
+                //Ejecuta el Thread
+                actualizarMicrosQueSeleccionaronParaderos(id);
+            }
+        });
         /*
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -379,20 +388,22 @@ public class UserMapActivity extends AppCompatActivity
     {
         if(choferes.length() != 0)
         {
+
+            Bitmap iconMicroActivo = microsIcon();
             for (int i = 0; i < choferes.length(); i++) {
                 JSONObject jsonobject = null;
                 try {
                     jsonobject = choferes.getJSONObject(i);
                     double lat = jsonobject.getDouble("Latitud");
                     double lng = jsonobject.getDouble("Longitud");
-                    int idChofer = jsonobject.getInt("Id");
+                    int idMicro = jsonobject.getInt("Id");
                     boolean estaActivo = jsonobject.getBoolean("TransmitiendoPosicion");
 
                     if(estaActivo)
                     {
 
                         //revisar si en la lista microsmarker existe un marcador con tag == id chofer
-                        Marker marcadorChofer = obtenerChoferMarcador(idChofer);
+                        Marker marcadorChofer = obtenerChoferMarcador(idMicro);
                         if(marcadorChofer != null)
                         {
                             marcadorChofer.setPosition(new LatLng(lat, lng));
@@ -405,8 +416,9 @@ public class UserMapActivity extends AppCompatActivity
                             //ese marcador se agrega a la lista
 
 
-                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title("Soy una micro"));
-                            m.setTag(idChofer);
+                            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title("Soy una micro")
+                                    .icon(BitmapDescriptorFactory.fromBitmap(iconMicroActivo)));
+                            m.setTag(idMicro);
                             microsMarker.add(m);
                         }
 
@@ -414,14 +426,13 @@ public class UserMapActivity extends AppCompatActivity
                     else
                     {
                         //chofer esta inactivo
-//
                         //revisar si chofer esta en la lista de marcadores usando el tag
-                        Marker marcadorChofer = obtenerChoferMarcador(idChofer);
-                        if(marcadorChofer != null)
+                        Marker marcadorMicro = obtenerChoferMarcador(idMicro);
+                        if(marcadorMicro != null)
                         {
                             Marker choferSeleccionado = null;
                             for (Marker chofer : microsMarker) {
-                                if(chofer.getTag() == marcadorChofer.getTag())
+                                if(chofer.getTag() == marcadorMicro.getTag())
                                 {
 
                                     choferSeleccionado = chofer;
@@ -457,6 +468,104 @@ public class UserMapActivity extends AppCompatActivity
         return mChofer;
     }
 
+    public void obtenerMicrosDelParadero(JSONObject microParadero)
+    {
+        Bitmap iconMicroParadero = microsParaderoIcon();
+        Bitmap iconMicro = microsIcon();
+                try {
+
+                    int id = microParadero.getInt("Id");
+
+                    if(id != -1)
+                    {
+                        //double distancia = microParadero.getDouble("DistanciaEntre");
+                        //String tiempoLlegada = calcularTiempo(distancia);
+
+                        int idMicro = microParadero.getInt("MicroId");
+                        Toast.makeText(UserMapActivity.this,"Micro "+idMicro, Toast.LENGTH_SHORT).show();
+                        for(Marker m : microsMarker)
+                        {
+                            m.setTitle("Soy una micro");
+                            m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicro));
+
+                            String tag = m.getTag().toString();
+                            if(tag.equals(idMicro+""))
+                            {
+                                m.setTitle("Primero");
+                                m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicroParadero));
+                            }
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+    }
+
+    private String calcularTiempo(double distancia)
+    {
+        String[] metros = String.valueOf(distancia).split("\\.");
+        double k= Integer.parseInt(metros[0]);
+        double kilometros = k/1000;
+
+        int kmh = 40;
+        double tiempo = (kilometros/kmh) * 60; //40 km/h
+
+        if(tiempo > 60)
+        {
+            double horasMin = tiempo/60;
+            if((horasMin-(int)horasMin)!=0)
+            {
+                String[] horasMinArray = String.valueOf(horasMin).split("\\.");
+                int horas = Integer.parseInt(horasMinArray[0]);
+                String m = (0+"."+Integer.parseInt(horasMinArray[1]));
+                double minutosDecimales = Integer.parseInt(m) * 60;
+
+                String[] minutosSplit = String.valueOf(minutosDecimales).split("\\.");
+                int minutos = Integer.parseInt(minutosSplit[0]);
+
+                return "Tiempo de llegada: "+horas+" hora "+ minutos+" minutos.";
+            }
+            else
+            {
+                int horas = (int)horasMin;
+                return "Tiempo de llegada: "+horas+" hora/s.";
+            }
+
+        }
+        else
+        {
+            if((tiempo-(int)tiempo)!=0)
+            {
+                int segundosInt;
+
+                //Decimales
+                String[] minSeg = String.valueOf(tiempo).split("\\.");
+                int minutos = Integer.parseInt(minSeg[0]);
+                String s = (0 + "." + Integer.parseInt(minSeg[1]));
+                double segundos = Double.parseDouble(s) * 60;
+                if((segundos-(int)segundos)!=0)
+                {
+                    String[] segDecimals = String.valueOf(segundos).split("\\.");
+                    segundosInt = Integer.parseInt(segDecimals[0]);
+                }
+                else
+                {
+                    segundosInt = (int)segundos;
+                }
+
+                return "Tiempo de LLegada: "+minutos+ " minutos "+segundosInt+" segundos.";
+            }
+            else
+            {
+                //No decimales
+                int minutos = (int)tiempo;
+                return "Tiempo de LLegada: "+minutos+ " minutos.";
+            }
+        }
+    }
+
     public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color) {
 
 
@@ -476,10 +585,12 @@ public class UserMapActivity extends AppCompatActivity
 
         for (Paradero p : paraderos) {
 
-
-            marcadoresParaderos.add(mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
+            Marker paradero = mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero")));
+                    .title("Paradero"));
+
+            paradero.setTag(p.id);
+            marcadoresParaderos.add(paradero);
             //marker.position(new LatLng(p.latitud,p.longitud));
             //marcadorVuelta = mMap.addMarker(marker);
         }
@@ -509,6 +620,32 @@ public class UserMapActivity extends AppCompatActivity
         return smallMarker;
     }
 
+    public Bitmap microsIcon() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.micro_activa);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
+    public Bitmap microsParaderoIcon() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.micro_paradero);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
     //Remuevo la lista de Paraderos
     private void removerParaderos() {
         for (Marker paradero : paraderosRutaIda) {
@@ -521,6 +658,7 @@ public class UserMapActivity extends AppCompatActivity
         }
         paraderosRutaVuelta.clear();
     }
+
 
     private void removerMicros()
     {
@@ -558,6 +696,31 @@ public class UserMapActivity extends AppCompatActivity
                         try
                         {
                             new Micro.ObtenerMicrosPorLinea().execute(idLineaSeleccionada+"");
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
+    }
+
+    public void actualizarMicrosQueSeleccionaronParaderos(final String idParadero)
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new Paradero.MicrosQueSeleccionaronParadero().execute(idParadero);
                         }
                         catch (Exception e)
                         {
