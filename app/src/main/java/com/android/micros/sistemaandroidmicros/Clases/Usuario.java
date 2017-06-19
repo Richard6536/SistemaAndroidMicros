@@ -424,4 +424,77 @@ public class Usuario {
 
     }
 
+
+    public static class SeleccionarParadero extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected String doInBackground(String... params) {
+
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+            String idParadero = params[1];
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/SeleccionarParadero");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(idParadero.getBytes());
+                os.flush();
+
+
+                JSONObject resultadoJSON = new JSONObject("");
+
+                return "";
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String p)
+        {
+
+        }
+
+    }
+
 }

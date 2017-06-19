@@ -288,13 +288,13 @@ public class Micro {
         protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
-            String idMicro =params[0];
+            String idUsuario =params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/ObtenerPosicion");
+                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

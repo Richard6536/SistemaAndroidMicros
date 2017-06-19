@@ -35,8 +35,8 @@ public class AsyncTaskServerPosition
         protected String doInBackground(String... parametros) {
 
             try {
-                String usuarioId = parametros[0];
-                String posicionActual = parametros[1];
+                String usuarioId = parametros[1];
+                String posicionActual = parametros[0];
 
                 Log.d(TAG, "Coordenadas: " + posicionActual);
                 Log.d(TAG, "Usuario: " + usuarioId);

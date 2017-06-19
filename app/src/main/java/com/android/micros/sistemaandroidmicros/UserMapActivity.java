@@ -51,6 +51,7 @@ import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Micro;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
+import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -367,9 +368,12 @@ public class UserMapActivity extends AppCompatActivity
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
                 Toast.makeText(UserMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
 
-                String id = paraderoSeleccionado.getTag().toString();
-                //Ejecuta el Thread
-                actualizarMicrosQueSeleccionaronParaderos(id);
+                String idParaderoSeleccionado = paraderoSeleccionado.getTag().toString();
+
+                //Se envía el id del usuario y paradero para hacer la relación
+                new Usuario.SeleccionarParadero().execute(idUser, idParaderoSeleccionado);
+                actualizarPosicion();
+                actualizarMicrosQueSeleccionaronParaderos(idParaderoSeleccionado);
             }
         });
         /*
@@ -388,7 +392,6 @@ public class UserMapActivity extends AppCompatActivity
     {
         if(choferes.length() != 0)
         {
-
             Bitmap iconMicroActivo = microsIcon();
             for (int i = 0; i < choferes.length(); i++) {
                 JSONObject jsonobject = null;
@@ -431,7 +434,8 @@ public class UserMapActivity extends AppCompatActivity
                         if(marcadorMicro != null)
                         {
                             Marker choferSeleccionado = null;
-                            for (Marker chofer : microsMarker) {
+                            for (Marker chofer : microsMarker)
+                            {
                                 if(chofer.getTag() == marcadorMicro.getTag())
                                 {
 
@@ -721,6 +725,32 @@ public class UserMapActivity extends AppCompatActivity
                         try
                         {
                             new Paradero.MicrosQueSeleccionaronParadero().execute(idParadero);
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
+    }
+
+
+    public void actualizarPosicion()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new AsyncTaskServerPosition.SendPosition().execute(idUser);
                         }
                         catch (Exception e)
                         {

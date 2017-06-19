@@ -3,6 +3,7 @@ package com.android.micros.sistemaandroidmicros.Clases;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.micros.sistemaandroidmicros.ChoferMapActivity;
 import com.android.micros.sistemaandroidmicros.FirstTimeActivity;
 import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
@@ -307,6 +308,163 @@ public class Paradero
 
             UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
             uMap.obtenerMicrosDelParadero(microParadero);
+        }
+
+    }
+
+    public static class ObtenerMiParadero extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            String idMicro =params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/ObtenerMiParadero");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.connect();
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject miParadero = new JSONObject(value);
+
+                return miParadero;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject miParadero)
+        {
+
+            ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+            cMap.recibirMiParadero(miParadero);
+        }
+
+    }
+
+    public static class UsuariosQueSeleccionaronParadero extends AsyncTask<String,String,JSONArray>
+    {
+        @Override
+        protected JSONArray doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            String idParadero =params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Paraderos("+idParadero+")/UsuariosQueSeleccionaron");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.connect();
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject usuarios = new JSONObject(value);
+                JSONArray usuariosArray = usuarios.getJSONArray("value");
+
+                return usuariosArray;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray usuarios)
+        {
+
+            ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+            cMap.recibirUsuariosParadero(usuarios);
         }
 
     }
