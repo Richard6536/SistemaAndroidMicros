@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,7 +7,8 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.android.micros.sistemaandroidmicros.ChoferMapActivity"
     tools:showIn="@layout/app_bar_chofer_map">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/fragment_container"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="516dp"
@@ -57,20 +58,21 @@
                 android:layout_toRightOf="@+id/btnComenzar"
                 android:layout_toEndOf="@+id/btnComenzar" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="169dp">
-                <Button
-                    android:id="@+id/btnIniciarRecorrido"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:text="INICIAR RECORRIDO"
-                    android:layout_marginTop="31dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true" />
-
-            </RelativeLayout>
         </RelativeLayout>
 
-    </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+    </FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="169dp"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/btnIniciarRecorrido"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="INICIAR RECORRIDO"
+            android:layout_marginTop="37dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+</RelativeLayout>

@@ -40,4 +40,12 @@
     <string name="title_activity_first_time">FirstTimeActivity</string>
     <string name="title_perfilusuarioactivity_list">Items</string>
     <string name="title_perfilusuarioactivity_detail">PerfilUsuarioActivity Detail</string>
+    <string name="title_activity_recomendacion_ruta">Map</string>
+    <string name="title_activity_menu_user">MenuUserActivity</string>
+    <string name="title_activity_map_user">Map</string>
+    <string name="title_activity_recomendar_ruta">RecomendarRutaActivity</string>
+    <string name="title_activity_asdf">asdfActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

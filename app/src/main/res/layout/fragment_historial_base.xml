@@ -1,0 +1,114 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.android.micros.sistemaandroidmicros.HistorialBaseFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="210dp"
+        android:background="#a9fcab"
+        android:layout_height="440dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+
+        <TextView
+            android:id="@+id/txtvInicio"
+            android:layout_width="227dp"
+            android:layout_height="84dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="18dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="27dp"
+            android:text="Hora de Inicio"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtInicio"
+            android:layout_width="227dp"
+            android:layout_height="84dp"
+            android:layout_alignBottom="@+id/txtvInicio"
+            android:layout_alignLeft="@+id/txtvInicio"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignStart="@+id/txtvInicio"
+            android:layout_alignTop="@+id/txtvInicio"
+            android:layout_marginTop="29dp"
+            android:text=""
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/txtvTermino"
+            android:layout_width="227dp"
+            android:layout_height="84dp"
+            android:layout_alignLeft="@+id/txtvInicio"
+            android:layout_alignStart="@+id/txtvInicio"
+            android:layout_below="@+id/txtvInicio"
+            android:text="Hora de Término: "
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtvKilometrosR"
+            android:layout_width="227dp"
+            android:layout_height="84dp"
+            android:layout_alignLeft="@+id/txtvInicio"
+            android:layout_alignStart="@+id/txtvInicio"
+            android:layout_below="@+id/txtvTermino"
+            android:text="Kilómetros Recorridos"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtvNumIdaVueltas"
+            android:layout_width="227dp"
+            android:layout_height="84dp"
+            android:layout_alignLeft="@+id/txtvKilometrosR"
+            android:layout_alignStart="@+id/txtvKilometrosR"
+            android:layout_below="@+id/txtvKilometrosR"
+            android:text="N° Ida de vueltas"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/fullscreen_content_controls"
+            style="?metaButtonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="#258928"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <Button
+                android:id="@+id/btnIdaVuelta"
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
+                android:background="@android:color/transparent"
+                android:textColor="#ffff"
+                android:clickable="true"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Historial Ida y vuelta" />
+
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>
+
+</FrameLayout>
+
+
+</RelativeLayout>

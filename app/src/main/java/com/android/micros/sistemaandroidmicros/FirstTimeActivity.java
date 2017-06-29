@@ -1,9 +1,12 @@
 package com.android.micros.sistemaandroidmicros;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Linea;
@@ -48,20 +52,14 @@ public class FirstTimeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//set content view AFTER ABOVE sequence (to avoid crash)
         this.setContentView(R.layout.activity_first_time);
+        ActivityController.activiyAbiertaActual = this;
+
         session = new UserSessionManager(getApplicationContext());
 
         mProgressBar = (ProgressBar)findViewById(R.id.progressBarFT);
 
-        String URLRutas = "http://localhost:8081/odata/Rutas";
-        String URLLineas = "http://localhost:8081/odata/Lineas";
-        String URLParaderos = "http://localhost:8081/odata/Paraderos";
-
-        new Rutas.ObtenerRutas().execute(URLRutas);
-        new Linea.ObtenerLineas().execute(URLLineas);
-        new Paradero.ObtenerParaderos().execute(URLParaderos);
+        new InternetConnection.hasInternetAccess().execute(getApplicationContext());
 
         //Start progressing
         new Thread(new Runnable() {
@@ -81,6 +79,47 @@ public class FirstTimeActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+    public void internetAlert()
+    {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(FirstTimeActivity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Error de conexión");
+        dialog.setMessage("Por favor, verifique su conexión a internet e intente nuevamente." );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                dialog.cancel();
+            }
+        });
+        dialog.setPositiveButton("Config.", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
+    }
+
+    public void resultInternetConnection(boolean isConnected)
+    {
+        if(isConnected == false)
+        {
+            internetAlert();
+        }
+        else
+        {
+            String URLRutas = "http://localhost:8081/odata/Rutas";
+            String URLLineas = "http://localhost:8081/odata/Lineas";
+            String URLParaderos = "http://localhost:8081/odata/Paraderos";
+
+            new Rutas.ObtenerRutas().execute(URLRutas);
+            new Linea.ObtenerLineas().execute(URLLineas);
+            new Paradero.ObtenerParaderos().execute(URLParaderos);
+        }
     }
 
     protected void onResume()

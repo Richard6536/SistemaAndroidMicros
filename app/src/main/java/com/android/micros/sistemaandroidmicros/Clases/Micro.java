@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Richard on 17/05/2017.
@@ -164,8 +165,9 @@ public class Micro {
         @Override
         protected void onPostExecute(JSONObject microJson)
         {
-            Micro micro = new Micro();
             try {
+            Micro micro = new Micro();
+
                 micro.id = microJson.getInt("Id");
                 micro.patente = microJson.getString("Patente");
                 String calificacion = microJson.getString("Calificacion");
@@ -276,8 +278,16 @@ public class Micro {
         @Override
         protected void onPostExecute(JSONArray micros)
         {
-            UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
-            uMap.agregarMicros(micros);
+            try {
+
+
+                    UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
+                    uMap.agregarMicros(micros);
+                }
+                catch (Exception e)
+                {
+
+                }
         }
 
     }
@@ -354,9 +364,15 @@ public class Micro {
         @Override
         protected void onPostExecute(JSONObject posicion)
         {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.recibirPosicion(posicion);
+            }
+            catch (Exception e)
+            {
 
-            ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
-            cMap.recibirPosicion(posicion);
+            }
         }
 
     }
@@ -433,6 +449,15 @@ public class Micro {
         @Override
         protected void onPostExecute(String posicion)
         {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.continuarInicioRecorrido();
+            }
+            catch (Exception e)
+            {
+
+            }
 
         }
 

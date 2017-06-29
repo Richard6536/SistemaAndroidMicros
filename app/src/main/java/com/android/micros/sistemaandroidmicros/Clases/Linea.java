@@ -4,16 +4,20 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.micros.sistemaandroidmicros.FirstTimeActivity;
+import com.android.micros.sistemaandroidmicros.RecomendarRutaActivity;
 import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -138,8 +142,15 @@ public class Linea {
         protected void onPostExecute(ArrayList<Linea> result) {
             super.onPostExecute(result);
 
-            FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
-            reg.RecibirCargaDeLineas();
+            try
+            {
+                FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+                reg.RecibirCargaDeLineas();
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
         @Override
@@ -193,4 +204,97 @@ public class Linea {
         return null;
     }
 
+    public static class RecomendarRuta extends AsyncTask<String,String,JSONArray>
+    {
+        @Override
+        protected JSONArray doInBackground(String... params) {
+
+
+            HttpURLConnection urlConnection = null;
+            String coordenadas =params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL("http://localhost:8081/odata/Lineas/RecomendarRutaDX");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(coordenadas.getBytes());
+                os.flush();
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject resultadoJSON = new JSONObject(value);
+
+                JSONArray ruta = resultadoJSON.getJSONArray("value");
+
+
+                return ruta;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray ruta)
+        {
+            try
+            {
+                RecomendarRutaActivity rMap = (RecomendarRutaActivity)ActivityController.activiyAbiertaActual;
+                rMap.mejorRuta(ruta);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+    }
 }

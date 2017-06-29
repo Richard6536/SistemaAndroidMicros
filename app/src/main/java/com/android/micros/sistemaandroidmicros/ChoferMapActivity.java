@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -113,9 +116,7 @@ public class ChoferMapActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
 
-                iniciarServicio();
-                new Micro.IniciarRecorrido().execute(microActual.id + "");
-                buscarMiParadero();
+            new Micro.IniciarRecorrido().execute(microActual.id+"");
 
             }
         });
@@ -165,6 +166,12 @@ public class ChoferMapActivity extends AppCompatActivity
 
         new Micro.ObtenerMicroDeChofer().execute(idSession);
 
+    }
+
+    public void continuarInicioRecorrido()
+    {
+        buscarMiParadero();
+        iniciarServicio();
     }
 
     public void validarLinea(Micro micro) {
@@ -341,7 +348,14 @@ public class ChoferMapActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
+            Intent intent = new Intent(ChoferMapActivity.this, HistorialActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("idMicro", microActual.id+"");
+            intent.putExtras(bundle);
+            startActivity(intent);
+            finish();
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -377,15 +391,17 @@ public class ChoferMapActivity extends AppCompatActivity
         }
         cMap.setMyLocationEnabled(true);
 
+        /* TODO: Era un método antiguo de asociar el paradero y chofer
+
         cMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
                 Toast.makeText(ChoferMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
 
-                String id = microActual.id+"";
-                new Paradero.AsociarParaderoChofer().execute(id, paraderoSeleccionado.getTag().toString());
+                //String id = microActual.id+"";
+                //new Paradero.AsociarParaderoChofer().execute(id, paraderoSeleccionado.getTag().toString());
             }
-        });
+        });*/
     }
 
     public void detenerServicio()

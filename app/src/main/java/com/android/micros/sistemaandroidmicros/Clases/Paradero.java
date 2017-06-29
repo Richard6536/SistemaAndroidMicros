@@ -63,6 +63,7 @@ public class Paradero
     }
 
 
+
     //Se guardan todos los paraderos en una lista estática (paraderos)
     public static class ObtenerParaderos extends AsyncTask<String,String,ArrayList<Paradero>>
     {
@@ -140,8 +141,15 @@ public class Paradero
         @Override
         protected void onPostExecute(ArrayList<Paradero> result)
         {
-            FirstTimeActivity ft = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
-            ft.RecibirCargaDeParaderos();
+            try
+            {
+                FirstTimeActivity ft = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+                ft.RecibirCargaDeParaderos();
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
 
@@ -305,9 +313,15 @@ public class Paradero
         @Override
         protected void onPostExecute(JSONObject microParadero)
         {
+            try
+            {
+                UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
+                uMap.obtenerMicrosDelParadero(microParadero);
+            }
+            catch (Exception e)
+            {
 
-            UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
-            uMap.obtenerMicrosDelParadero(microParadero);
+            }
         }
 
     }
@@ -383,9 +397,15 @@ public class Paradero
         @Override
         protected void onPostExecute(JSONObject miParadero)
         {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.recibirMiParadero(miParadero);
+            }
+            catch (Exception e)
+            {
 
-            ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
-            cMap.recibirMiParadero(miParadero);
+            }
         }
 
     }
@@ -427,6 +447,7 @@ public class Paradero
                 }
 
                 String value = buffer.toString();
+
                 JSONObject usuarios = new JSONObject(value);
                 JSONArray usuariosArray = usuarios.getJSONArray("value");
 
@@ -463,8 +484,15 @@ public class Paradero
         protected void onPostExecute(JSONArray usuarios)
         {
 
-            ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
-            cMap.recibirUsuariosParadero(usuarios);
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.recibirUsuariosParadero(usuarios);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
     }

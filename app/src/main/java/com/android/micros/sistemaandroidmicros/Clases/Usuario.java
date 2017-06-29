@@ -159,8 +159,15 @@ public class Usuario {
         @Override
         protected void onPostExecute(Boolean resultBool)
         {
-            RegisterStep2Activity reg = (RegisterStep2Activity)ActivityController.activiyAbiertaActual;
-            reg.resultadoValidacion(resultBool);
+            try
+            {
+                RegisterStep2Activity reg = (RegisterStep2Activity)ActivityController.activiyAbiertaActual;
+                reg.resultadoValidacion(resultBool);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
     }
@@ -231,8 +238,15 @@ public class Usuario {
 
         protected void onPostExecute(String result)
         {
-            RegisterStep3Activity reg = (RegisterStep3Activity)ActivityController.activiyAbiertaActual;
-            reg.fin();
+            try
+            {
+                RegisterStep3Activity reg = (RegisterStep3Activity)ActivityController.activiyAbiertaActual;
+                reg.fin();
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
 
@@ -418,13 +432,20 @@ public class Usuario {
         @Override
         protected void onPostExecute(Boolean resultBool)
         {
-            RegisterStep2Activity reg = (RegisterStep2Activity)ActivityController.activiyAbiertaActual;
-            reg.resultadoValidacion(resultBool);
+            try
+            {
+                RegisterStep2Activity reg = (RegisterStep2Activity)ActivityController.activiyAbiertaActual;
+                reg.resultadoValidacion(resultBool);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
     }
 
-
+    static String TAG = "TESTUsuario";
     public static class SeleccionarParadero extends AsyncTask<String,String,String>
     {
         @Override
@@ -437,15 +458,18 @@ public class Usuario {
             String idUsuario =params[0];
             String idParadero = params[1];
 
+            Log.d(TAG, "idUsuario: " + idUsuario);
+
+
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/SeleccionarParadero");
+                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
-
+                Log.d(TAG, "idParadero: " + idParadero);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 urlConnection.setRequestProperty("Accept", "application/json");
@@ -457,10 +481,32 @@ public class Usuario {
                 os.write(idParadero.getBytes());
                 os.flush();
 
+                Log.d(TAG, "url: " + url);
 
-                JSONObject resultadoJSON = new JSONObject("");
+                try
+                {
+                    inputStream = urlConnection.getInputStream();
+                }
+                catch(Exception e)
+                {
 
-                return "";
+                }
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject resultadoJSON = new JSONObject("value");
+
+                return value;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -490,9 +536,18 @@ public class Usuario {
         }
 
         @Override
-        protected void onPostExecute(String p)
+        protected void onPostExecute(String mensaje)
         {
+            try
+            {
+                Log.d(TAG, "mensaje: " + mensaje);
+                UserMapActivity cMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.ContinuacionSeleccionParadero(mensaje);
+            }
+            catch (Exception e)
+            {
 
+            }
         }
 
     }

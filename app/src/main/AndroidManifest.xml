@@ -44,7 +44,13 @@
         <activity
             android:name=".UserMapActivity"
             android:label=""
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".RegisterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -102,7 +108,18 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ServicePosition"/>
+        <service android:name=".ServicePosition" />
+
+        <activity
+            android:name=".RecomendarRutaActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".HistorialActivity"></activity>
     </application>
 
 </manifest>

@@ -130,6 +130,7 @@ public class UserMapActivity extends AppCompatActivity
 
     String GPS_FILTER = "MyGPSLocation";
 
+    private String idParaderoSeleccionado;
     private TextView datosUsuario;
 
     @Override
@@ -149,6 +150,7 @@ public class UserMapActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //TODO: -------------INICIO-----------------------------------------------
+        /*
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStop = (Button)findViewById(R.id.btnStop);
         btnStart.setOnClickListener(new View.OnClickListener() {
@@ -167,8 +169,7 @@ public class UserMapActivity extends AppCompatActivity
                 detenerServicio();
             }
         });
-
-
+        */
         //TODO: ----------------FIN------------------------------------------------
 
 
@@ -324,9 +325,20 @@ public class UserMapActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
          int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_camera)
+        {
+            Intent in = new Intent(UserMapActivity.this, UserMapActivity.class);
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            startActivity(in);
 
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_gallery)
+        {
+
+            Intent in = new Intent(UserMapActivity.this, RecomendarRutaActivity.class);
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            startActivity(in);
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -368,12 +380,18 @@ public class UserMapActivity extends AppCompatActivity
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
                 Toast.makeText(UserMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
 
-                String idParaderoSeleccionado = paraderoSeleccionado.getTag().toString();
+                idParaderoSeleccionado = paraderoSeleccionado.getTag().toString();
 
-                //Se envía el id del usuario y paradero para hacer la relación
-                new Usuario.SeleccionarParadero().execute(idUser, idParaderoSeleccionado);
-                actualizarPosicion();
-                actualizarMicrosQueSeleccionaronParaderos(idParaderoSeleccionado);
+                JSONObject idParadero = new JSONObject();
+                try {
+
+                    idParadero.put("IdParadero",idParaderoSeleccionado);
+                    //Se envía el id del usuario y paradero para hacer la relación
+                    new Usuario.SeleccionarParadero().execute(idUser, idParadero.toString());
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
         /*
@@ -386,7 +404,12 @@ public class UserMapActivity extends AppCompatActivity
         });*/
     }
 
-
+    public void ContinuacionSeleccionParadero(String mensaje)
+    {
+        Toast.makeText(UserMapActivity.this, "mensaje : " + mensaje, Toast.LENGTH_SHORT).show();
+        iniciarServicio();
+        actualizarMicrosQueSeleccionaronParaderos(idParaderoSeleccionado);
+    }
 
     public void agregarMicros(JSONArray choferes)
     {
@@ -482,8 +505,8 @@ public class UserMapActivity extends AppCompatActivity
 
                     if(id != -1)
                     {
-                        //double distancia = microParadero.getDouble("DistanciaEntre");
-                        //String tiempoLlegada = calcularTiempo(distancia);
+                        double distancia = microParadero.getDouble("DistanciaEntre");
+                        String tiempoLlegada = calcularTiempo(distancia);
 
                         int idMicro = microParadero.getInt("MicroId");
                         Toast.makeText(UserMapActivity.this,"Micro "+idMicro, Toast.LENGTH_SHORT).show();
@@ -495,7 +518,7 @@ public class UserMapActivity extends AppCompatActivity
                             String tag = m.getTag().toString();
                             if(tag.equals(idMicro+""))
                             {
-                                m.setTitle("Primero");
+                                m.setTitle(tiempoLlegada);
                                 m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicroParadero));
                             }
                         }
@@ -737,29 +760,12 @@ public class UserMapActivity extends AppCompatActivity
         timer.schedule(task, 0, 500);
     }
 
-
-    public void actualizarPosicion()
+    public void iniciarServicio()
     {
-        final Handler handler = new Handler();
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try
-                        {
-                            new AsyncTaskServerPosition.SendPosition().execute(idUser);
-                        }
-                        catch (Exception e)
-                        {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
-            }
-        };
-        timer.schedule(task, 0, 500);
+        Intent intent = new Intent(getBaseContext(), ServicePosition.class);
+        intent.putExtra("usuarioId", idUser);
+        startService(intent);
     }
+
+
 }

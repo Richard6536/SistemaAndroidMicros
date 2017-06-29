@@ -157,8 +157,15 @@ public class Rutas
             protected void onPostExecute(ArrayList<Rutas> result) {
                super.onPostExecute(result);
 
-                FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
-                reg.RecibirCargaDeRutas();
+                try
+                {
+                    FirstTimeActivity reg = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
+                    reg.RecibirCargaDeRutas();
+                }
+                catch (Exception e)
+                {
+
+                }
             }
 
             @Override
@@ -281,9 +288,16 @@ public class Rutas
         protected void onPostExecute(ArrayList<Coordenada> result)
         {
 
+            try
+            {
                 FirstTimeActivity ft = (FirstTimeActivity)ActivityController.activiyAbiertaActual;
                 ft.RecibirCargaDeCoordenadas();
 
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
 
