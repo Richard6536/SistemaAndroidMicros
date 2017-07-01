@@ -33,7 +33,7 @@ public class Linea {
     public int idRutaIda;
     public int idRutaVuelta;
     public static ArrayList<Linea> listaLineas = new ArrayList<Linea>();
-    String URL = "http://localhost:8081/odata/Lineas";
+    String URL = "http://stapp.ml/odata/Lineas";
 
     public Linea(){}
 
@@ -217,7 +217,7 @@ public class Linea {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Lineas/RecomendarRutaDX");
+                URL url = new URL("http://stapp.ml/odata/Lineas/RecomendarRutaDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

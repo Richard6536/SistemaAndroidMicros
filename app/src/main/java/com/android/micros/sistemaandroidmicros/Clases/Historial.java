@@ -39,7 +39,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/ObtenerHistorialesDiarios");
+                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/ObtenerHistorialesDiarios");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -136,7 +136,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("odata/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
+                URL url = new URL("http://stapp.ml/odata/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

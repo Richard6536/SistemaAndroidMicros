@@ -43,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20dp"
-            android:text="200"
             android:textColor="#ffffff"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -67,6 +66,7 @@
             android:layout_height="wrap_content"
             android:textSize="20dp"
             android:textColor="#ffffff"
+            android:visibility="invisible"
             android:text="Linea Recomendada:"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />

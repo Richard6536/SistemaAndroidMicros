@@ -4,12 +4,13 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Perfil" />
+            android:icon="@drawable/bus_navigator"
+
+            android:title="Ver Micros" />
         <item
             android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:icon="@drawable/route_navigator"
+            android:title="Mejor Ruta" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"

@@ -103,7 +103,6 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
         txtnombreLinea = (TextView)findViewById(R.id.txtNombreLinea);
         txtMsjLinea = (TextView)findViewById(R.id.txtMsjLinea);
-        txtMsjLinea.setEnabled(false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -192,17 +191,19 @@ public class RecomendarRutaActivity extends AppCompatActivity
             @Override
             public void onMapClick(LatLng latLng) {
 
+                Bitmap flag = flagMarker();
+
                 if(marcadorTermino == null)
                 {
                     marcadorTermino = mMap.addMarker(new MarkerOptions().position(latLng).title("Punto de llegada")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                            .icon(BitmapDescriptorFactory.fromBitmap(flag))
                             .draggable(true));
                     marcadorTermino.setTag("llegada");
                     marcadorInicio.showInfoWindow();
                 }
                 else
                 {
-                    Toast.makeText(RecomendarRutaActivity.this, "Ya existe un punto de llegada", Toast.LENGTH_SHORT).show();
+                    marcadorTermino.setPosition(latLng);
                 }
             }
         });
@@ -355,14 +356,17 @@ public class RecomendarRutaActivity extends AppCompatActivity
             polylineVuelta = dibujarMejorLinea(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
 
             dibujarRutaParaderoCercano();
+            txtMsjLinea.setVisibility(View.VISIBLE);
             txtnombreLinea.setText(nombreLinea);
-            txtMsjLinea.setEnabled(true);
+
+
 
             alert.cancel();
         }
         else
         {
             noExisteRutaDialog();
+            alert.cancel();
         }
     }
 
@@ -402,7 +406,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
         for (Coordenada c : coordenadas) {
 
             polyLineaNueva.color(_color);
-            polyLineaNueva.width(36);
+            polyLineaNueva.width(16);
             polyLineaNueva.add(new LatLng(c.latitud, c.longitud));
 
         }
@@ -428,7 +432,20 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
         int largo = 68;
         int ancho = 42;
-        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.stop2);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
+    public Bitmap flagMarker() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.flag_finish);
         Bitmap b = bitmapdraw.getBitmap();
         smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
 
@@ -526,10 +543,13 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_gallery) {
 
-            Intent in = new Intent(RecomendarRutaActivity.this, RecomendarRutaActivity.class);
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            startActivity(in);
+            if(ActivityController.activiyAbiertaActual != this)
+            {
+                Intent in = new Intent(RecomendarRutaActivity.this, RecomendarRutaActivity.class);
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                startActivity(in);
+            }
 
         } else if (id == R.id.nav_slideshow)
         {

@@ -213,7 +213,7 @@ public class Rutas
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Rutas("+idRuta+")/ListaCoordenadas");
+                URL url = new URL("http://stapp.ml/odata/Rutas("+idRuta+")/ListaCoordenadas");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

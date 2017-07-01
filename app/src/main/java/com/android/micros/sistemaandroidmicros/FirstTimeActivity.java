@@ -112,9 +112,9 @@ public class FirstTimeActivity extends AppCompatActivity {
         }
         else
         {
-            String URLRutas = "http://localhost:8081/odata/Rutas";
-            String URLLineas = "http://localhost:8081/odata/Lineas";
-            String URLParaderos = "http://localhost:8081/odata/Paraderos";
+            String URLRutas = "http://stapp.ml/odata/Rutas";
+            String URLLineas = "http://stapp.ml/odata/Lineas";
+            String URLParaderos = "http://stapp.ml/odata/Paraderos";
 
             new Rutas.ObtenerRutas().execute(URLRutas);
             new Linea.ObtenerLineas().execute(URLLineas);

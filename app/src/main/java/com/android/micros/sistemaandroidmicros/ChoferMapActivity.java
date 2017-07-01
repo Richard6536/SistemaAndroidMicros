@@ -238,9 +238,9 @@ public class ChoferMapActivity extends AppCompatActivity
 
         Bitmap smallMarker;
 
-        int largo = 68;
-        int ancho = 42;
-        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        int largo = 72;
+        int ancho = 46;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.stop2);
         Bitmap b = bitmapdraw.getBitmap();
         smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
 
@@ -349,14 +349,21 @@ public class ChoferMapActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
 
+            if(ActivityController.activiyAbiertaActual != this)
+            {
+                Intent intent = new Intent(ChoferMapActivity.this, ChoferMapActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+        } else if (id == R.id.nav_gallery) {
+
             Intent intent = new Intent(ChoferMapActivity.this, HistorialActivity.class);
             Bundle bundle = new Bundle();
             bundle.putString("idMicro", microActual.id+"");
             intent.putExtras(bundle);
             startActivity(intent);
             finish();
-
-        } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 

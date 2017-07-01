@@ -187,7 +187,7 @@ public class Paradero
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/SeleccionarParadero");
+                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/SeleccionarParadero");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -254,7 +254,7 @@ public class Paradero
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Paraderos("+idParadero+")/MicroParaderoMasCercano");
+                URL url = new URL("http://stapp.ml/odata/Paraderos("+idParadero+")/MicroParaderoMasCercano");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -338,7 +338,7 @@ public class Paradero
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/ObtenerMiParadero");
+                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/ObtenerMiParadero");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -422,7 +422,7 @@ public class Paradero
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Paraderos("+idParadero+")/UsuariosQueSeleccionaron");
+                URL url = new URL("http://stapp.ml/odata/Paraderos("+idParadero+")/UsuariosQueSeleccionaron");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

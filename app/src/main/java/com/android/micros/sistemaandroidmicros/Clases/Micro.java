@@ -96,7 +96,7 @@ public class Micro {
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro");
+                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -208,7 +208,7 @@ public class Micro {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Lineas("+idLinea+")/ObtenerChoferes");
+                URL url = new URL("http://stapp.ml/odata/Lineas("+idLinea+")/ObtenerChoferes");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -304,7 +304,7 @@ public class Micro {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
+                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -389,7 +389,7 @@ public class Micro {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Micros("+idMicro+")/IniciarRecorrido");
+                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/IniciarRecorrido");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

@@ -6,11 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.SearchView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Historial;
@@ -42,16 +43,26 @@ public class HistorialActivity extends AppCompatActivity{
     int id3 = 9;
     int id4 = 10;
 
-    String fecha1 = "1. 22-06-17";
-    String fecha2 = "2. 23-06-17";
-    String fecha3 = "3. 24-06-17";
-    String fecha4 = "4. 25-06-17";
+    String fecha1 = "1.   22-06-17";
+    String fecha2 = "2.   23-06-17";
+    String fecha3 = "3.   24-06-17";
+    String fecha4 = "4.   25-06-17";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial);
         listView = (ListView)findViewById(R.id.listFecha);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
+        arrayListFecha.add(fecha1);
+        arrayListFecha.add(fecha2);
+        arrayListFecha.add(fecha3);
+        arrayListFecha.add(fecha4);
+
+        Bundle bundle = getIntent().getExtras();
+        idMicro = bundle.getString("idMicro").toString();
+
         searchViewItems = (SearchView)findViewById(R.id.searchViewItems);
         searchViewItems.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -68,13 +79,6 @@ public class HistorialActivity extends AppCompatActivity{
             }
         });
 
-        arrayListFecha.add(fecha1);
-        arrayListFecha.add(fecha2);
-        arrayListFecha.add(fecha3);
-        arrayListFecha.add(fecha4);
-
-        Bundle bundle = getIntent().getExtras();
-        idMicro = bundle.getString("idMicro").toString();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -135,8 +139,9 @@ public class HistorialActivity extends AppCompatActivity{
                     String fecha = h.getString("Fecha");
                     int id = h.getInt("Id");
 
-                    arrayListFecha.add(fecha);
-                    itemsId.add(id);
+                    String fechaId = id+"    "+fecha;
+                    arrayListFecha.add(fechaId);
+                    //itemsId.add(id);
 
 
                 } catch (JSONException e) {

@@ -90,7 +90,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios/ExisteMail");
+                URL url = new URL("http://stapp.ml/odata/Usuarios/ExisteMail");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -188,7 +188,7 @@ public class Usuario {
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios");
+                URL url = new URL("http://stapp.ml/odata/Usuarios");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -266,7 +266,7 @@ public class Usuario {
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios/EsValido");
+                URL url = new URL("http://stapp.ml/odata/Usuarios/EsValido");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -363,7 +363,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios(5)/EditarDatos");
+                URL url = new URL("http://stapp.ml/odata/Usuarios(5)/EditarDatos");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -466,7 +466,7 @@ public class Usuario {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
+                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 Log.d(TAG, "idParadero: " + idParadero);

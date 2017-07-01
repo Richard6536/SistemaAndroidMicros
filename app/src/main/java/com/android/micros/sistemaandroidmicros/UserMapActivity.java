@@ -327,10 +327,13 @@ public class UserMapActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera)
         {
-            Intent in = new Intent(UserMapActivity.this, UserMapActivity.class);
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
-            startActivity(in);
+            if(ActivityController.activiyAbiertaActual != this)
+            {
+                Intent in = new Intent(UserMapActivity.this, UserMapActivity.class);
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+                startActivity(in);
+            }
 
         } else if (id == R.id.nav_gallery)
         {
@@ -638,9 +641,9 @@ public class UserMapActivity extends AppCompatActivity
 
         Bitmap smallMarker;
 
-        int largo = 68;
-        int ancho = 42;
-        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.map_marker);
+        int largo = 72;
+        int ancho = 46;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.stop2);
         Bitmap b = bitmapdraw.getBitmap();
         smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
 
