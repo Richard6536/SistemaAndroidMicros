@@ -27,18 +27,27 @@ public class HistorialBaseFragment extends Fragment {
 
     String nombreChofer;
     String fecha, horaInicio, horaFinal; //DateTime.
-    Double kilometrosRecorridos;
-    int calificacionesRecibidas, calificacionesDiarias, pasajerosTransportados; //Posiblemente no.
+    Double kilometrosRecorridos,calificacionesDiarias;
+    int calificacionesRecibidas, pasajerosTransportados; //Posiblemente no.
     int numeroVueltas, idMicro;
     int idHistorial;
 
+    TextView txtInicio, txtTermino, txtKilometrosR, txtNumIdaVueltas, txtnCalificaciones, txtCalificacionDiaria, txtPasajerosTrans;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         //((ChoferMapActivity) getActivity()).getSupportActionBar().setTitle("Fragment Inbox");
         View v = inflater.inflate(R.layout.fragment_historial_base, container, false);
-        final TextView txtId = (TextView)v.findViewById(R.id.txtInicio);
+
+        txtInicio = (TextView)v.findViewById(R.id.txtInicio);
+        txtTermino = (TextView)v.findViewById(R.id.txtKilometrosR);
+        txtKilometrosR = (TextView)v.findViewById(R.id.textView21);
+        txtnCalificaciones = (TextView)v.findViewById(R.id.textView23);
+        txtNumIdaVueltas = (TextView)v.findViewById(R.id.textView24);
+        txtCalificacionDiaria = (TextView)v.findViewById(R.id.textView26);
+        txtPasajerosTrans = (TextView)v.findViewById(R.id.textView27);
+
         final Button btnIdaVuelta = (Button)v.findViewById(R.id.btnIdaVuelta);
 
         idHistorial = this.getArguments().getInt("id");
@@ -47,10 +56,10 @@ public class HistorialBaseFragment extends Fragment {
             @Override
             public void onClick(View v) {
                //new Historial.ObtenerHistorialIdaVuelta().execute(idHistorial+"");
-                ((HistorialActivity)getActivity()).redireccionarFragments();
+                ((HistorialActivity)getActivity()).redireccionarFragments(idHistorial);
             }
         });
-    /*
+
         for(int i = 0; i<historialActual.length(); i++)
         {
             try {
@@ -61,14 +70,17 @@ public class HistorialBaseFragment extends Fragment {
 
                 if(id == idHistorial)
                 {
-                    nombreChofer = h.getString("nombreChofer"); //??
+                    nombreChofer = h.getString("NombreChofer"); //??
                     fecha = h.getString("Fecha");           //DATETIME
-                    horaInicio = h.getString("horaInicio"); //DATETIME
-                    horaFinal = h.getString("horaFinal");   //DATETIME
-                    kilometrosRecorridos = h.getDouble("kilometrosRecorridos");
+                    horaInicio = h.getString("HoraInicio"); //DATETIME
+                    horaFinal = h.getString("HoraFinal");   //DATETIME
+                    kilometrosRecorridos = h.getDouble("KilometrosRecorridos");
+                    calificacionesRecibidas = h.getInt("CalificacionesRecibidas");
+                    calificacionesDiarias = h.getDouble("CalificacionDiaria");
+                    numeroVueltas = h.getInt("NumeroIdaVueltas");
+                    pasajerosTransportados = h.getInt("PasajerosTransportados");
 
-                    numeroVueltas = h.getInt("numeroVuelta");
-                    idMicro = h.getInt("idMicro");
+                    idMicro = h.getInt("IdMicro");
                 }
 
 
@@ -76,14 +88,21 @@ public class HistorialBaseFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-    */
-        txtId.setText(idHistorial+"");
+
+        txtInicio.setText(horaInicio);
+        txtTermino.setText(horaFinal);
+        txtKilometrosR.setText(kilometrosRecorridos+"");
+        txtnCalificaciones.setText(calificacionesRecibidas+"");
+        txtNumIdaVueltas.setText(numeroVueltas+"");
+        txtCalificacionDiaria.setText(calificacionesDiarias+"");
+        txtPasajerosTrans.setText(pasajerosTransportados+"");
         return v;
     }
 
     public void onResume() {
         super.onResume();
         FragmentController.FragmentAbierto = this;
+        String a = "";
     }
 
     public void cargarHistorialIdaVuelta()

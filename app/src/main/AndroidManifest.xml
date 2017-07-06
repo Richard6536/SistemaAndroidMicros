@@ -119,7 +119,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".HistorialActivity"></activity>
+        <activity android:name=".HistorialActivity" />
+        <activity android:name=".HistorialIdaVueltaActivity" />
+        <activity android:name=".HistorialParaderoActivity"></activity>
     </application>
 
 </manifest>

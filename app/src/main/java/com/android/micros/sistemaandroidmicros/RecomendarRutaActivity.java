@@ -65,7 +65,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
     //Alertas de dialogo
     AlertDialog alert = null;
     AlertDialog alertNoExisteRuta = null;
-
+    AlertDialog alerta = null;
     //Marcadores
     private Marker marcadorInicio;
     private Marker marcadorTermino;
@@ -343,25 +343,36 @@ public class RecomendarRutaActivity extends AppCompatActivity
                 }
             }
 
-            Linea linea;
+            if(idLineaSeleccionada == -1)
+            {
+                dibujarRutaParaderoCercano();
+                caminarDialog();
+                alert.cancel();
+
+            }
+            else
+            {
+
+                Linea linea;
 
 
-            linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
-            nombreLinea = linea.nombreLinea;
+                linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
+                nombreLinea = linea.nombreLinea;
 
-            rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
-            rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
+                rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
+                rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
 
-            polylineIda = dibujarMejorLinea(rutaIda, paraderosRutaIda, Color.RED);
-            polylineVuelta = dibujarMejorLinea(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+                polylineIda = dibujarMejorLinea(rutaIda, paraderosRutaIda, Color.RED);
+                polylineVuelta = dibujarMejorLinea(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
 
-            dibujarRutaParaderoCercano();
-            txtMsjLinea.setVisibility(View.VISIBLE);
-            txtnombreLinea.setText(nombreLinea);
+                dibujarRutaParaderoCercano();
+                txtMsjLinea.setVisibility(View.VISIBLE);
+                txtnombreLinea.setText(nombreLinea);
 
 
 
-            alert.cancel();
+                alert.cancel();
+            }
         }
         else
         {
@@ -494,6 +505,22 @@ public class RecomendarRutaActivity extends AppCompatActivity
         });
         alertNoExisteRuta = dialog.create();
         alertNoExisteRuta.show();
+    }
+
+    public void caminarDialog()
+    {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(RecomendarRutaActivity.this);
+        dialog.setCancelable(false);
+        dialog.setMessage("Caminar hasta el siguiente punto, es lo más recomendado.");
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                alerta.cancel();
+            }
+        });
+        alerta = dialog.create();
+        alerta.show();
     }
 
     public void creandoRutaDialog()

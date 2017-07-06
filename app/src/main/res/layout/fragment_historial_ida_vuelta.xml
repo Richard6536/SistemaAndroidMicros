@@ -19,65 +19,99 @@
                 android:layout_alignParentEnd="true">
 
                 <TextView
-                    android:id="@+id/txtvInicio"
+                    android:id="@+id/txtPasajerosTransportados"
                     android:layout_width="227dp"
-                    android:layout_height="84dp"
+                    android:layout_height="20dp"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginLeft="18dp"
                     android:layout_marginStart="18dp"
                     android:layout_marginTop="27dp"
-                    android:text="Hora de Inicio"
+                    android:text="Pasajeros Transportados"
                     android:textSize="18dp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtInicio"
+                    android:id="@+id/txtPasajerosTransp"
                     android:layout_width="227dp"
-                    android:layout_height="84dp"
-                    android:layout_alignBottom="@+id/txtvInicio"
-                    android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignStart="@+id/txtvInicio"
-                    android:layout_alignTop="@+id/txtvInicio"
-                    android:layout_marginTop="29dp"
-                    android:text=""
-                    android:textSize="18dp" />
+                    android:layout_height="60dp"
+                    android:text="Text"
+                    android:layout_below="@+id/txtPasajerosTransportados"
+                    android:layout_alignLeft="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_alignStart="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_marginTop="7dp" />
 
                 <TextView
-                    android:id="@+id/txtvTermino"
+                    android:id="@+id/txtvHoraInicioIdaVuelta"
                     android:layout_width="227dp"
                     android:layout_height="84dp"
-                    android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignStart="@+id/txtvInicio"
-                    android:layout_below="@+id/txtvInicio"
-                    android:text="Hora de Término: "
+                    android:text="Hora de Inicio: "
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:layout_below="@+id/txtPasajerosTransp"
+                    android:layout_alignLeft="@+id/textView16"
+                    android:layout_alignStart="@+id/textView16" />
+
+
+                <TextView
+                    android:id="@+id/txtHoraInicioIdaVuelta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="137dp"
+                    android:text="Text"
+                    android:layout_alignLeft="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_alignStart="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_alignRight="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_alignEnd="@+id/txtvHoraInicioIdaVuelta"
+                    android:layout_above="@+id/txtHoraTerminoIdaVuelta" />
+
+                <TextView
+                    android:id="@+id/txtHoraTerminoIdaVuelta"
+                    android:layout_width="227dp"
+                    android:layout_height="20dp"
+                    android:layout_alignLeft="@+id/txtPasajerosTransportados"
+                    android:layout_alignStart="@+id/txtPasajerosTransportados"
+                    android:layout_below="@+id/txtvHoraInicioIdaVuelta"
+                    android:text="Hora de Término"
                     android:textSize="18dp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/txtvKilometrosR"
-                    android:layout_width="227dp"
-                    android:layout_height="84dp"
-                    android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignStart="@+id/txtvInicio"
-                    android:layout_below="@+id/txtvTermino"
-                    android:text="Kilómetros Recorridos"
-                    android:textSize="18dp"
-                    android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtvNumIdaVueltas"
+                    android:id="@+id/textView16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:text="TextView"
+                    android:layout_centerVertical="true"
+                    android:layout_alignLeft="@+id/txtHoraTerminoIdaVuelta"
+                    android:layout_alignStart="@+id/txtHoraTerminoIdaVuelta"
+                    android:layout_alignRight="@+id/txtHoraTerminoIdaVuelta"
+                    android:layout_alignEnd="@+id/txtHoraTerminoIdaVuelta" />
+
+                <TextView
+                    android:id="@+id/txtDuracionRec"
                     android:layout_width="227dp"
                     android:layout_height="84dp"
-                    android:layout_alignLeft="@+id/txtvKilometrosR"
-                    android:layout_alignStart="@+id/txtvKilometrosR"
-                    android:layout_below="@+id/txtvKilometrosR"
-                    android:text="N° Ida de vueltas"
+                    android:text="Duración del Recorrido"
                     android:textSize="18dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_below="@+id/textView16"
+                    android:layout_alignLeft="@+id/textView16"
+                    android:layout_alignStart="@+id/textView16" />
+
+                <TextView
+                    android:id="@+id/textView18"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_alignLeft="@+id/txtDuracionRec"
+                    android:layout_alignStart="@+id/txtDuracionRec"
+                    android:layout_below="@+id/textView16"
+                    android:layout_marginTop="24dp"
+                    android:text="TextView"
+                    android:layout_alignRight="@+id/txtDuracionRec"
+                    android:layout_alignEnd="@+id/txtDuracionRec" />
 
                 <LinearLayout
                     android:id="@+id/fullscreen_content_controls"
@@ -104,11 +138,11 @@
                         android:text="Historial Paradero" />
 
                 </LinearLayout>
+
             </RelativeLayout>
         </RelativeLayout>
 
     </FrameLayout>
-
 
 
 </RelativeLayout>

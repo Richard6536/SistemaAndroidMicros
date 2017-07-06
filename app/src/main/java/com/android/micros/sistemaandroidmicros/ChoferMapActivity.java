@@ -69,6 +69,16 @@ import java.util.logging.LogRecord;
 public class ChoferMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
+    //INFORMACIÓN PERSONAL
+    String nombre;
+    String email;
+    String patente;
+    String lineaNombre;
+
+    boolean modoTest = true;
+    boolean stopRunner;
+    boolean paraderoEncontrado;
+
     private GoogleMap cMap;
     private int idChofer;
     private int idMicro;
@@ -80,9 +90,7 @@ public class ChoferMapActivity extends AppCompatActivity
     private List<Marker> usuariosMarker = new ArrayList<>();
 
     UserSessionManager session;
-    private String name;
-    private String email;
-    private String idSession;
+    public String idSession;
     Polyline polylineIda;
     Polyline polylineVuelta;
     Micro microActual;
@@ -108,7 +116,7 @@ public class ChoferMapActivity extends AppCompatActivity
         HashMap<String, String> chofer = session.obtenerRolyId();
 
         idSession = chofer.get(UserSessionManager.KEY_ID);
-        name = user.get(UserSessionManager.KEY_NAME);
+        nombre = user.get(UserSessionManager.KEY_NAME);
         email = user.get(UserSessionManager.KEY_EMAIL);
 
         btnIniciarRecorrido = (Button) findViewById(R.id.btnIniciarRecorrido);
@@ -127,7 +135,6 @@ public class ChoferMapActivity extends AppCompatActivity
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                obtenerPosicion();
             }
         });
 
@@ -185,6 +192,7 @@ public class ChoferMapActivity extends AppCompatActivity
         } else {
 
             microActual = micro;
+            patente = micro.patente;
 
             Rutas rutaIda = new Rutas();
             Rutas rutaVuelta = new Rutas();
@@ -192,6 +200,7 @@ public class ChoferMapActivity extends AppCompatActivity
             Linea linea = new Linea();
             linea = Linea.BuscarLineaPorId(micro.lineaId);
             idLineaActual = linea.idLinea;
+            lineaNombre = linea.nombreLinea;
 
             rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
             rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
@@ -247,6 +256,19 @@ public class ChoferMapActivity extends AppCompatActivity
         return smallMarker;
     }
 
+    public Bitmap markerParaderoSig() {
+
+        Bitmap smallMarker;
+
+        int largo = 72;
+        int ancho = 46;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.stop_sig);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -280,7 +302,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
                     } else {
                         detenerServicio();
-                        obtenerPosicion();
+                        //obtenerPosicion();
                         if (ActivityCompat.checkSelfPermission(ChoferMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChoferMapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             // TODO: Consider calling
                             //    ActivityCompat#requestPermissions
@@ -347,14 +369,13 @@ public class ChoferMapActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+
         if (id == R.id.nav_camera) {
 
-            if(ActivityController.activiyAbiertaActual != this)
-            {
-                Intent intent = new Intent(ChoferMapActivity.this, ChoferMapActivity.class);
-                startActivity(intent);
-                finish();
-            }
+            Intent intent = new Intent(ChoferMapActivity.this, ChoferMapActivity.class);
+            startActivity(intent);
+            finish();
+
 
         } else if (id == R.id.nav_gallery) {
 
@@ -365,11 +386,45 @@ public class ChoferMapActivity extends AppCompatActivity
             startActivity(intent);
             finish();
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_slideshow)
+        {
+            FragmentManager FM = getSupportFragmentManager();
+            FragmentTransaction FT = FM.beginTransaction();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("nombre", nombre);
+            bundle.putString("email", email);
+            bundle.putString("patente", patente);
+            bundle.putString("linea", lineaNombre);
+
+            Fragment fragment = new PerfilChoferFragment();
+            fragment.setArguments(bundle);
+
+            FT.replace(R.id.frame_content_chofer_info, fragment);
+            FT.addToBackStack(null);
+            FT.commit();
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_share)
+        {
+
+
+            if(modoTest == true)
+            {
+
+                modoTest = false;
+                stopRunner = false;
+                item.setTitle("Desactivar Modo Tester");
+                obtenerPosicion();
+            }
+            else
+            {
+                modoTest = true;
+                stopRunner = true;
+                item.setTitle("Activar Modo Tester");
+                obtenerPosicion();
+            }
 
         } else if (id == R.id.nav_send) {
         }
@@ -446,6 +501,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
             double lat = posicion.getDouble("Latitud");
             double lng = posicion.getDouble("Longitud");
+            Toast.makeText(ChoferMapActivity.this, lat+"-"+lng, Toast.LENGTH_SHORT).show();
 
             if(miMicroMarker != null)
             {
@@ -469,8 +525,32 @@ public class ChoferMapActivity extends AppCompatActivity
         }
     }
 
+    public void obtenerPosicion2()
+    {
+
+        final Handler handler = new Handler();
+
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+
+                final Runnable runnable = new Runnable() {
+                    public void run() {
+
+
+                    }
+                };
+            }
+
+        };
+        timer.schedule(task, 0, 500);
+    }
+
     public void obtenerPosicion()
     {
+
         final Handler handler = new Handler();
         Timer timer = new Timer();
         TimerTask task = new TimerTask()
@@ -481,10 +561,19 @@ public class ChoferMapActivity extends AppCompatActivity
                     public void run() {
                         try
                         {
-                            new Micro.CambiarPosicion().execute(idSession);
+
+                            if(stopRunner == false)
+                            {
+                                new Micro.CambiarPosicion().execute(idSession);
+                            }
+                            else
+                            {
+                                handler.removeCallbacks(this);
+                            }
                         }
                         catch (Exception e)
                         {
+                            String a = "error: "+e;
                             // TODO Auto-generated catch block
                         }
                     }
@@ -496,17 +585,28 @@ public class ChoferMapActivity extends AppCompatActivity
 
     public void buscarMiParadero()
     {
+
         final Handler handler = new Handler();
         Timer timer = new Timer();
         TimerTask task = new TimerTask()
         {
             @Override
             public void run() {
+
                 handler.post(new Runnable() {
                     public void run() {
                         try
                         {
-                            new Paradero.ObtenerMiParadero().execute(microActual.id+"");
+                            boolean stop = false;
+                            if(stop == false)
+                            {
+                                stop = true;
+                                new Paradero.ObtenerMiParadero().execute(microActual.id+"");
+                            }
+                            else
+                            {
+                                handler.postDelayed(this,1);
+                            }
                         }
                         catch (Exception e)
                         {
@@ -543,6 +643,32 @@ public class ChoferMapActivity extends AppCompatActivity
         };
         timer.schedule(task, 0, 500);
     }
+
+    public void actualizarMiMicro()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new Micro.ObtenerMiMicroConstanteMente().execute(idSession.toString());
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
+    }
+
 
     public Bitmap microsIcon() {
 
@@ -582,37 +708,50 @@ public class ChoferMapActivity extends AppCompatActivity
         {
             try {
 
+                paraderoEncontrado = false;
+
+                Bitmap MiparaderoIcon = markerParaderoSig();
+                Bitmap paraderoIcon = markerIcon();
+
                 //Marker paraderoEncontrado = null;
                 String tagId;
                 int id = miParadero.getInt("Id");
-                Toast.makeText(ChoferMapActivity.this, "Paradero: " + id, Toast.LENGTH_SHORT).show();
 
-                for(Marker pIda : paraderosRutaIda)
+                if(id != -1)
                 {
-                    pIda.setTitle("Paradero");
-                    tagId = pIda.getTag().toString();
-                    if(tagId.equals(id+""))
+                    for(Marker pIda : paraderosRutaIda)
                     {
-                        Toast.makeText(ChoferMapActivity.this, "Mi paradero: " + tagId, Toast.LENGTH_SHORT).show();
-                        pIda.setTitle("Mi paradero");
-                        //paraderoEncontrado = pIda;
-                    }
-                    for(Marker pVuelta : paraderosRutaVuelta)
-                    {
-                        pVuelta.setTitle("Paradero");
+                        pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                        pIda.setTitle("Paradero");
                         tagId = pIda.getTag().toString();
                         if(tagId.equals(id+""))
                         {
-                            Toast.makeText(ChoferMapActivity.this, "Mi paradero: " + tagId, Toast.LENGTH_SHORT).show();
-                            pVuelta.setTitle("Mi paradero");
-                            //paraderoEncontrado = pVuelta;
+                            paraderoEncontrado = true;
+                            pIda.setTitle("Mi paradero");
+                            pIda.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
+                            //paraderoEncontrado = pIda;
+                        }
+
+                    }
+
+                    if(paraderoEncontrado == false)
+                    {
+                        for(Marker pVuelta : paraderosRutaVuelta)
+                        {
+                            pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                            pVuelta.setTitle("Paradero");
+                            tagId = pVuelta.getTag().toString();
+                            if(tagId.equals(id+""))
+                            {
+                                pVuelta.setTitle("Mi paradero");
+                                pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
+                                //paraderoEncontrado = pVuelta;
+                            }
                         }
                     }
+                    //Envío el id de mi paradero para buscar los pasajeros que seleccionaron ese paradero.
+                    buscarMisPasajeros(id);
                 }
-
-                //Envío el id de mi paradero para buscar los pasajeros que seleccionaron ese paradero.
-                buscarMisPasajeros(id);
-
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -654,10 +793,14 @@ public class ChoferMapActivity extends AppCompatActivity
                     }
                 }
 
+
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+
+        actualizarMiMicro();
     }
 
     private Marker obtenerMarcadorUsuario(int idUsuario)
@@ -698,6 +841,25 @@ public class ChoferMapActivity extends AppCompatActivity
                 usuariosMarker.remove(usuarioEncontrado);
             }
         }
+
+
+    }
+
+    public void validarSigCoord(boolean esNull)
+    {
+        if(esNull == true)
+        {
+            btnIniciarRecorrido.setEnabled(false);
+        }
+        else
+        {
+            btnIniciarRecorrido.setEnabled(true);
+        }
+    }
+
+    public void mensajeLatLng(String latLng)
+    {
+        Toast.makeText(ChoferMapActivity.this, latLng, Toast.LENGTH_SHORT).show();
     }
 }
 

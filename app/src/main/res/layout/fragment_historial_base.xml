@@ -38,49 +38,166 @@
                 <TextView
                     android:id="@+id/txtInicio"
                     android:layout_width="227dp"
-                    android:layout_height="84dp"
-                    android:layout_alignBottom="@+id/txtvInicio"
-                    android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignParentEnd="true"
+                    android:layout_height="64dp"
+                    android:textSize="18dp"
+                    android:layout_above="@+id/txtvTermino"
                     android:layout_alignParentRight="true"
-                    android:layout_alignStart="@+id/txtvInicio"
-                    android:layout_alignTop="@+id/txtvInicio"
-                    android:layout_marginTop="29dp"
-                    android:text=""
-                    android:textSize="18dp" />
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignLeft="@+id/txtvInicio"
+                    android:layout_alignStart="@+id/txtvInicio" />
 
                 <TextView
                     android:id="@+id/txtvTermino"
                     android:layout_width="227dp"
-                    android:layout_height="84dp"
-                    android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignStart="@+id/txtvInicio"
+                    android:layout_height="20dp"
+                    android:text="Hora de Término "
+                    android:textSize="18dp"
+                    android:textStyle="bold"
                     android:layout_below="@+id/txtvInicio"
-                    android:text="Hora de Término: "
-                    android:textSize="18dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txtvKilometrosR"
-                    android:layout_width="227dp"
-                    android:layout_height="84dp"
                     android:layout_alignLeft="@+id/txtvInicio"
-                    android:layout_alignStart="@+id/txtvInicio"
-                    android:layout_below="@+id/txtvTermino"
-                    android:text="Kilómetros Recorridos"
+                    android:layout_alignStart="@+id/txtvInicio" />
+                <TextView
+                    android:id="@+id/txtTermino"
+                    android:layout_width="227dp"
+                    android:layout_height="20dp"
+                    android:text="Kilómetros:"
                     android:textSize="18dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_below="@+id/txtKilometrosR"
+                    android:layout_alignLeft="@+id/txtKilometrosR"
+                    android:layout_alignStart="@+id/txtKilometrosR" />
+                <TextView
+                    android:id="@+id/txtKilometrosR"
+                    android:layout_width="227dp"
+                    android:layout_height="64dp"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:layout_alignLeft="@+id/txtvTermino"
+                    android:layout_alignStart="@+id/txtvTermino"
+                    android:layout_below="@+id/txtvTermino" />
+
 
                 <TextView
                     android:id="@+id/txtvNumIdaVueltas"
                     android:layout_width="227dp"
-                    android:layout_height="84dp"
-                    android:layout_alignLeft="@+id/txtvKilometrosR"
-                    android:layout_alignStart="@+id/txtvKilometrosR"
-                    android:layout_below="@+id/txtvKilometrosR"
-                    android:text="N° Ida de vueltas"
+                    android:layout_height="20dp"
+                    android:text="N° Ida de vueltas:"
                     android:textSize="18dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_marginTop="9dp"
+                    android:layout_below="@+id/textView11"
+                    android:layout_alignLeft="@+id/textView11"
+                    android:layout_alignStart="@+id/textView11" />
+
+
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N° Calificaciones:"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="28dp"
+                    android:layout_below="@+id/txtKilometrosR"
+                    android:layout_alignLeft="@+id/txtTermino"
+                    android:layout_alignStart="@+id/txtTermino"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
+
+
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:text="Calificación Diaria:"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txtvNumIdaVueltas"
+                    android:layout_alignLeft="@+id/textView11"
+                    android:layout_alignStart="@+id/textView11" />
+
+
+                <TextView
+                    android:id="@+id/textView19"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:text="Pasajeros:"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/textView17"
+                    android:layout_alignLeft="@+id/textView17"
+                    android:layout_alignStart="@+id/textView17"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
+
+
+                <TextView
+                    android:id="@+id/textView21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Text"
+                    android:gravity="center"
+                    android:layout_below="@+id/txtKilometrosR"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignBottom="@+id/txtTermino"
+                    android:layout_toRightOf="@+id/textView17"
+                    android:layout_toEndOf="@+id/textView17" />
+
+                <TextView
+                    android:id="@+id/textView23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/textView11"
+                    android:gravity="center"
+                    android:text="Text"
+                    android:layout_alignLeft="@+id/textView21"
+                    android:layout_alignStart="@+id/textView21"
+                    android:layout_alignBottom="@+id/textView11" />
+
+                <TextView
+                    android:id="@+id/textView24"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/txtvNumIdaVueltas"
+                    android:text="Text"
+                    android:gravity="center"
+                    android:layout_alignLeft="@+id/textView23"
+                    android:layout_alignStart="@+id/textView23"
+                    android:layout_alignBottom="@+id/txtvNumIdaVueltas" />
+
+                <TextView
+                    android:id="@+id/textView26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textView17"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:gravity="center"
+                    android:text="Text"
+                    android:layout_toRightOf="@+id/textView17"
+                    android:layout_toEndOf="@+id/textView17"
+                    android:layout_alignTop="@+id/textView17" />
+
+                <TextView
+                    android:id="@+id/textView27"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textView19"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:gravity="center"
+                    android:text="Text"
+                    android:layout_toRightOf="@+id/textView17"
+                    android:layout_toEndOf="@+id/textView17"
+                    android:layout_alignTop="@+id/textView19" />
 
                 <LinearLayout
                     android:id="@+id/fullscreen_content_controls"
@@ -107,10 +224,12 @@
                         android:textColor="#ffff" />
 
                 </LinearLayout>
+
             </RelativeLayout>
         </RelativeLayout>
 
     </FrameLayout>
+
 
 
 </RelativeLayout>

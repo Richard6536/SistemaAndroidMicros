@@ -6,6 +6,7 @@ import android.util.Log;
 import com.android.micros.sistemaandroidmicros.ChoferMapActivity;
 import com.android.micros.sistemaandroidmicros.HistorialActivity;
 import com.android.micros.sistemaandroidmicros.HistorialBaseFragment;
+import com.android.micros.sistemaandroidmicros.HistorialIdaVueltaActivity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
 
 import org.json.JSONArray;
@@ -208,8 +209,8 @@ public class Historial {
         {
             try {
 
-                HistorialBaseFragment hbf = (HistorialBaseFragment)FragmentController.FragmentAbierto;
-                hbf.cargarHistorialIdaVuelta();
+                HistorialIdaVueltaActivity ha = (HistorialIdaVueltaActivity)ActivityController.activiyAbiertaActual;
+                ha.listarHistorial(historialIdaVuelta);
 
             }
             catch (Exception e)

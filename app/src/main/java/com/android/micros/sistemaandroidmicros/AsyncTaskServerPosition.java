@@ -2,6 +2,9 @@ package com.android.micros.sistemaandroidmicros;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 
 import org.json.JSONObject;
 
@@ -25,6 +28,7 @@ public class AsyncTaskServerPosition
 
     public static class SendPosition extends AsyncTask<String, String, String>
     {
+        String latLng;
         @Override
         protected void onPreExecute() {
             Log.d(TAG, "Asynctask iniciado");
@@ -38,6 +42,8 @@ public class AsyncTaskServerPosition
                 String usuarioId = parametros[1];
                 String posicionActual = parametros[0];
 
+                latLng = posicionActual;
+
                 Log.d(TAG, "Coordenadas: " + posicionActual);
                 Log.d(TAG, "Usuario: " + usuarioId);
 
@@ -46,7 +52,7 @@ public class AsyncTaskServerPosition
                 OutputStream os = null;
                 InputStream inputStream = null;
 
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+usuarioId+")/ActualizarPosicion");
+                URL url = new URL("http://stapp.ml/odata/Usuarios("+usuarioId+")/ActualizarPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -73,11 +79,21 @@ public class AsyncTaskServerPosition
                 Log.i("error", e.toString());
             }
 
-            return "call";
+            return latLng;
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(String latLng)
+        {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
+                cMap.mensajeLatLng(latLng);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
     }
@@ -128,7 +144,9 @@ public class AsyncTaskServerPosition
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(String result)
+        {
+
         }
 
     }

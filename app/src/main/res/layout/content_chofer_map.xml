@@ -75,4 +75,10 @@
             android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
+    <FrameLayout
+        android:id="@+id/frame_content_chofer_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -23,7 +24,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -130,8 +135,12 @@ public class UserMapActivity extends AppCompatActivity
 
     String GPS_FILTER = "MyGPSLocation";
 
+    boolean enMicro = false;
+
     private String idParaderoSeleccionado;
     private TextView datosUsuario;
+
+    AlertDialog alert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,8 +195,9 @@ public class UserMapActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                double global = 4.5;
+                calificarDialog(global);
             }
         });
 
@@ -379,21 +389,30 @@ public class UserMapActivity extends AppCompatActivity
         }
         mMap.setMyLocationEnabled(true);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+
             @Override
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
-                Toast.makeText(UserMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
+                if(enMicro == false)
+                {
+                    Toast.makeText(UserMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
 
-                idParaderoSeleccionado = paraderoSeleccionado.getTag().toString();
+                    idParaderoSeleccionado = paraderoSeleccionado.getTag().toString();
 
-                JSONObject idParadero = new JSONObject();
-                try {
+                    JSONObject idParadero = new JSONObject();
+                    try {
 
-                    idParadero.put("IdParadero",idParaderoSeleccionado);
-                    //Se envía el id del usuario y paradero para hacer la relación
-                    new Usuario.SeleccionarParadero().execute(idUser, idParadero.toString());
+                        idParadero.put("IdParadero",idParaderoSeleccionado);
+                        //Se envía el id del usuario y paradero para hacer la relación
+                        new Usuario.SeleccionarParadero().execute(idUser, idParadero.toString());
+                        actualizarMiMicroAbordada();
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    Toast.makeText(UserMapActivity.this, "No puede selecconar un paradero, si está abordo de una micro.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -509,7 +528,7 @@ public class UserMapActivity extends AppCompatActivity
                     if(id != -1)
                     {
                         double distancia = microParadero.getDouble("DistanciaEntre");
-                        String tiempoLlegada = calcularTiempo(distancia);
+                        //String tiempoLlegada = calcularTiempo(distancia);
 
                         int idMicro = microParadero.getInt("MicroId");
                         Toast.makeText(UserMapActivity.this,"Micro "+idMicro, Toast.LENGTH_SHORT).show();
@@ -521,7 +540,7 @@ public class UserMapActivity extends AppCompatActivity
                             String tag = m.getTag().toString();
                             if(tag.equals(idMicro+""))
                             {
-                                m.setTitle(tiempoLlegada);
+                                //m.setTitle(tiempoLlegada);
                                 m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicroParadero));
                             }
                         }
@@ -770,5 +789,114 @@ public class UserMapActivity extends AppCompatActivity
         startService(intent);
     }
 
+    public void calificarDialog(final double calificacionGlobal)
+    {
 
+        AlertDialog.Builder dialog = new AlertDialog.Builder(UserMapActivity.this);
+        dialog.setCancelable(false);
+        dialog.setMessage("¿Desea calificar esta micro?" );
+        dialog.setNegativeButton("Más tarde", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                alert.cancel();
+            }
+        });
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                FragmentManager FM = getSupportFragmentManager();
+                FragmentTransaction FT = FM.beginTransaction();
+
+                Bundle bundle = new Bundle();
+                bundle.putDouble("cGlobal", calificacionGlobal);
+
+                Fragment fragment = new CalificacionFragment();
+                fragment.setArguments(bundle);
+                FT.replace(R.id.fragment_container_User, fragment);
+                FT.addToBackStack(null);
+                FT.commit();
+            }
+        });
+        alert = dialog.create();
+        alert.show();
+    }
+
+    public void RemoverFragmentCalificacion()
+    {
+        FragmentManager FM = getSupportFragmentManager();
+        FragmentTransaction FT = FM.beginTransaction();
+
+        FT.remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container_User));
+        FT.commit();
+    }
+
+    public void actualizarMiMicroAbordada()
+    {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try
+                        {
+                            new Usuario.MiMicroAbordada().execute(idUser);
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(task, 0, 500);
+    }
+
+    public void verificarMiMicroAbordada(JSONObject miMicroObject)
+    {
+        try {
+
+            int idMiMicro = miMicroObject.getInt("Id");
+
+            if(idMiMicro != -1)
+            {
+                enMicro = true;
+
+                String patente = miMicroObject.getString("Patente");
+                double calificacionGlobal = miMicroObject.getDouble("Calificacion");
+                int lineaId = miMicroObject.getInt("LineaId");
+                Linea linea = Linea.BuscarLineaPorId(lineaId);
+                String nombreLinea = linea.nombreLinea;
+
+                FragmentManager FM = getSupportFragmentManager();
+                FragmentTransaction FT = FM.beginTransaction();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("patente", patente);
+                bundle.putDouble("cGlobal", calificacionGlobal);
+                bundle.putString("nombreLinea", nombreLinea);
+
+                Fragment fragment = new CalificacionFragment();
+                fragment.setArguments(bundle);
+                FT.replace(R.id.fragment_container_User, fragment);
+                FT.addToBackStack(null);
+                FT.commit();
+
+                //calificarDialog(calificacionGlobal);
+            }
+            else
+            {
+                enMicro = false;
+                //RemoverFragmentCalificacion();
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

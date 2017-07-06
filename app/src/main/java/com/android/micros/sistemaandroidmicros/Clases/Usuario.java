@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
+import com.android.micros.sistemaandroidmicros.ChoferMapActivity;
 import com.android.micros.sistemaandroidmicros.LoginActivity;
 import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
 import com.android.micros.sistemaandroidmicros.RegisterStep3Activity;
@@ -543,6 +544,91 @@ public class Usuario {
                 Log.d(TAG, "mensaje: " + mensaje);
                 UserMapActivity cMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
                 cMap.ContinuacionSeleccionParadero(mensaje);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+    }
+
+    public static class MiMicroAbordada extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            String idUsuario = params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+
+                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerMiMicroAbordada");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.connect();
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject miMicro = new JSONObject(value);
+
+                return miMicro;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject miMicro)
+        {
+            try
+            {
+                UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
+                uMap.verificarMiMicroAbordada(miMicro);
             }
             catch (Exception e)
             {

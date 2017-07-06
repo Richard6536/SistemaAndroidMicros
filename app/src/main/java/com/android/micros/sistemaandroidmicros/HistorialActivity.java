@@ -1,5 +1,7 @@
 package com.android.micros.sistemaandroidmicros;
 
+import android.content.ClipData;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.widget.SearchView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Historial;
+import com.android.micros.sistemaandroidmicros.Clases.HistorialIdaVuelta;
 import com.android.micros.sistemaandroidmicros.Clases.ItemsAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -38,27 +41,12 @@ public class HistorialActivity extends AppCompatActivity{
 
     private String idMicro;
 
-    int id1 = 7;
-    int id2 = 8;
-    int id3 = 9;
-    int id4 = 10;
-
-    String fecha1 = "1.   22-06-17";
-    String fecha2 = "2.   23-06-17";
-    String fecha3 = "3.   24-06-17";
-    String fecha4 = "4.   25-06-17";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial);
         listView = (ListView)findViewById(R.id.listFecha);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-
-        arrayListFecha.add(fecha1);
-        arrayListFecha.add(fecha2);
-        arrayListFecha.add(fecha3);
-        arrayListFecha.add(fecha4);
 
         Bundle bundle = getIntent().getExtras();
         idMicro = bundle.getString("idMicro").toString();
@@ -84,18 +72,11 @@ public class HistorialActivity extends AppCompatActivity{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                int posicion = position;
-                int posicionActual = 0;
+                String item = parent.getAdapter().getItem(position).toString();
+                String[] split = item.split("\\.");
+                String a = split[0];
 
-                for(Integer idr: itemsId)
-                {
-                    if(posicion == posicionActual)
-                    {
-                        idHistorial = idr;
-                        break;
-                    }
-                    posicionActual++;
-                }
+                idHistorial = Integer.parseInt(a);
 
                 FragmentManager FM = getSupportFragmentManager();
                 FragmentTransaction FT = FM.beginTransaction();
@@ -128,31 +109,33 @@ public class HistorialActivity extends AppCompatActivity{
 
         if(historial.length() != 0)
         {
-            /*
-            for(int i = 0; i<historial.length(); i++)
-            {
+            for(int i = 0; i<historial.length(); i++) {
                 try {
 
                     JSONObject h = null;
                     h = historial.getJSONObject(i);
 
                     String fecha = h.getString("Fecha");
-                    int id = h.getInt("Id");
+                    String horaInicio = h.getString("HoraInicio"); //DATETIME
+                    String horaFinal = h.getString("HoraFinal");   //DATETIME
 
-                    String fechaId = id+"    "+fecha;
-                    arrayListFecha.add(fechaId);
-                    //itemsId.add(id);
+                    if(!horaInicio.equals(horaFinal))
+                    {
+
+                        int id = h.getInt("Id");
+
+                        String[] fechaSplit = fecha.split("T");
+                        String fechaId = id + "."+"     " + fechaSplit[0];
+                        arrayListFecha.add(fechaId);
+                        //itemsId.add(id);
+                    }
 
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }*/
 
-            itemsId.add(id1);
-            itemsId.add(id2);
-            itemsId.add(id3);
-            itemsId.add(id4);
+            }
 
             adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, arrayListFecha);
             listView.setAdapter(adapter);
@@ -162,37 +145,14 @@ public class HistorialActivity extends AppCompatActivity{
 
             listView.performItemClick(listView.getSelectedView(), 0, 0);
         }
-        else
-        {
-
-            itemsId.add(id1);
-            itemsId.add(id2);
-            itemsId.add(id3);
-            itemsId.add(id4);
-
-            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, arrayListFecha);
-            listView.setAdapter(adapter);
-
-            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            listView.setItemChecked(0, true);
-
-            listView.performItemClick(listView.getSelectedView(), 0, 0);
-
-
-
-        }
-
-
     }
 
-    public void redireccionarFragments()
+    public void redireccionarFragments(final int idHistorial)
     {
-        FragmentManager FM = getSupportFragmentManager();
-        FragmentTransaction FT = FM.beginTransaction();
-
-        Fragment fragment = new HistorialIdaVueltaFragment();
-        FT.replace(R.id.fragment_container, fragment);
-        FT.addToBackStack(null);
-        FT.commit();
+        Intent intent = new Intent(HistorialActivity.this, HistorialIdaVueltaActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("idHistorial", idHistorial);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 }
