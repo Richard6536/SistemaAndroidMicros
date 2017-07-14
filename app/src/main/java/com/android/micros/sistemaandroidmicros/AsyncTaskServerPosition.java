@@ -16,6 +16,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
+
 /**
  * Created by Richard on 31/05/2017.
  */
@@ -52,7 +54,7 @@ public class AsyncTaskServerPosition
                 OutputStream os = null;
                 InputStream inputStream = null;
 
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+usuarioId+")/ActualizarPosicion");
+                URL url = new URL(ip+"/odata/Usuarios("+usuarioId+")/ActualizarPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -87,8 +89,7 @@ public class AsyncTaskServerPosition
         {
             try
             {
-                ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
-                cMap.mensajeLatLng(latLng);
+                String coor = latLng;
             }
             catch (Exception e)
             {
@@ -119,7 +120,7 @@ public class AsyncTaskServerPosition
                 OutputStream os = null;
                 InputStream inputStream = null;
 
-                URL url = new URL("http://localhost:8081/odata/Usuarios("+usuarioId+")/DetenerPosicionUpdate");
+                URL url = new URL(ip+"/odata/Usuarios("+usuarioId+")/DetenerPosicionUpdate");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

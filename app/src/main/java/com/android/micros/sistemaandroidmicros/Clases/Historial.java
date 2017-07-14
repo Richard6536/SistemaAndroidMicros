@@ -7,6 +7,7 @@ import com.android.micros.sistemaandroidmicros.ChoferMapActivity;
 import com.android.micros.sistemaandroidmicros.HistorialActivity;
 import com.android.micros.sistemaandroidmicros.HistorialBaseFragment;
 import com.android.micros.sistemaandroidmicros.HistorialIdaVueltaActivity;
+import com.android.micros.sistemaandroidmicros.HistorialParaderoActivity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
 
 import org.json.JSONArray;
@@ -20,6 +21,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
 
 /**
  * Created by Richard on 25/06/2017.
@@ -40,7 +43,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/ObtenerHistorialesDiarios");
+                URL url = new URL(ip+"/odata/Micros("+idMicro+")/ObtenerHistorialesDiarios");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -137,7 +140,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
+                URL url = new URL(ip+"/odata/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -221,4 +224,100 @@ public class Historial {
 
     }
 
+    public static class ObtenerHistorialParaderos extends AsyncTask<String,String,JSONArray>
+    {
+        @Override
+        protected JSONArray doInBackground(String... params) {
+
+
+            HttpURLConnection urlConnection = null;
+            String idIdaVuelta =params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+                URL url = new URL(ip+"/odata/HistorialesIdaVuelta("+idIdaVuelta+")/ObtenerHistorialesParaderos");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+
+                urlConnection.connect();
+
+                /*
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(JsonData.getBytes());
+                os.flush();
+                */
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject resultadoJSON = new JSONObject(value);
+
+                JSONArray historialParaderos = resultadoJSON.getJSONArray("value");
+
+
+                return historialParaderos;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray historialParaderos)
+        {
+            try {
+
+                HistorialParaderoActivity ha = (HistorialParaderoActivity)ActivityController.activiyAbiertaActual;
+                ha.listarHistorial(historialParaderos);
+
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+    }
 }

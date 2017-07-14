@@ -76,7 +76,16 @@ public class HistorialBaseFragment extends Fragment {
                     horaFinal = h.getString("HoraFinal");   //DATETIME
                     kilometrosRecorridos = h.getDouble("KilometrosRecorridos");
                     calificacionesRecibidas = h.getInt("CalificacionesRecibidas");
-                    calificacionesDiarias = h.getDouble("CalificacionDiaria");
+
+                    try
+                    {
+                        calificacionesDiarias = h.getDouble("CalificacionDiaria");
+                    }
+                    catch(Exception e)
+                    {
+                        calificacionesDiarias = 0.0;
+                    }
+
                     numeroVueltas = h.getInt("NumeroIdaVueltas");
                     pasajerosTransportados = h.getInt("PasajerosTransportados");
 

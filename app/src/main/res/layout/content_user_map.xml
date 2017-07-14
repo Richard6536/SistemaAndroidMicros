@@ -35,6 +35,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
+                android:id="@+id/relativeLayoutSpinner"
                 android:layout_height="match_parent">
 
                 <TextView
@@ -47,12 +48,12 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginBottom="135dp"
                     android:text="Selecciona una linea" />
+
                 <RelativeLayout
                     android:layout_width="282dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background"
                     android:orientation="horizontal"
-                    android:id="@+id/relativeLayout"
                     android:layout_alignTop="@+id/datosUsuario"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="47dp">
@@ -73,7 +74,8 @@
                         android:layout_alignParentRight="true"
                         android:layout_gravity="center"
                         android:src="@drawable/drop"
-                        android:id="@+id/imageView3" />
+                        android:id="@+id/imageView3"
+                        android:layout_alignParentTop="true" />
 
 
                 </RelativeLayout>
@@ -84,7 +86,8 @@
     </LinearLayout>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/relativeLayout">
         <FrameLayout
             android:id="@+id/frame_content_info"
             android:layout_width="match_parent"
@@ -95,5 +98,17 @@
             android:layout_marginTop="480dp">
 
         </FrameLayout>
+               <Button
+                android:id="@+id/btnDeseleccionarParadero"
+                style="?android:textAppearanceSmall"
+                android:textColor="#ffffff"
+                android:background="#f46e00"
+                android:layout_width="282dp"
+                android:layout_height="50dp"
+                android:text="Deseleccionar Paradero"
+                   android:layout_alignParentBottom="true"
+                   android:layout_centerHorizontal="true"
+                   android:layout_marginBottom="9dp" />
     </RelativeLayout>
+
 </RelativeLayout>

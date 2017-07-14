@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
+
 /**
  * Created by Richard on 03/05/2017.
  */
@@ -213,7 +215,7 @@ public class Rutas
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Rutas("+idRuta+")/ListaCoordenadas");
+                URL url = new URL(ip+"/odata/Rutas("+idRuta+")/ListaCoordenadas");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

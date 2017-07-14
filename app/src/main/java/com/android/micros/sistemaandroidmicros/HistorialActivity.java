@@ -42,9 +42,12 @@ public class HistorialActivity extends AppCompatActivity{
     private String idMicro;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial);
+        ActivityController.activiyAbiertaActual = this;
+
         listView = (ListView)findViewById(R.id.listFecha);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
@@ -74,7 +77,7 @@ public class HistorialActivity extends AppCompatActivity{
 
                 String item = parent.getAdapter().getItem(position).toString();
                 String[] split = item.split("\\.");
-                String a = split[0];
+                String a = split[1];
 
                 idHistorial = Integer.parseInt(a);
 
@@ -87,7 +90,6 @@ public class HistorialActivity extends AppCompatActivity{
                 Fragment fragment = new HistorialBaseFragment();
                 fragment.setArguments(bundle);
                 FT.replace(R.id.fragment_container, fragment);
-                FT.addToBackStack(null);
                 FT.commit();
             }
         });
@@ -97,8 +99,6 @@ public class HistorialActivity extends AppCompatActivity{
 
     protected void onResume() {
         super.onResume();
-        ActivityController.activiyAbiertaActual = this;
-
     }
 
     public void listarHistorial(JSONArray historial){
@@ -125,7 +125,7 @@ public class HistorialActivity extends AppCompatActivity{
                         int id = h.getInt("Id");
 
                         String[] fechaSplit = fecha.split("T");
-                        String fechaId = id + "."+"     " + fechaSplit[0];
+                        String fechaId = fechaSplit[0]+"                           ."+id;
                         arrayListFecha.add(fechaId);
                         //itemsId.add(id);
                     }

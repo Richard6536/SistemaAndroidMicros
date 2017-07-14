@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.micros.sistemaandroidmicros.ChoferMapActivity;
+import com.android.micros.sistemaandroidmicros.FirstTimeActivity;
 import com.android.micros.sistemaandroidmicros.LoginActivity;
 import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
@@ -22,6 +23,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
 
 /**
  * Created by Richard on 17/05/2017.
@@ -106,7 +109,7 @@ public class Micro {
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerMicro");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -221,7 +224,7 @@ public class Micro {
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerMicro");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -317,7 +320,6 @@ public class Micro {
                 cma.validarSigCoord(esNull);
 
             } catch (JSONException e) {
-                e.printStackTrace();
             }
 
         }
@@ -336,8 +338,10 @@ public class Micro {
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("LINEID", idLinea);
+
             try {
-                URL url = new URL("http://stapp.ml/odata/Lineas("+idLinea+")/ObtenerChoferes");
+                URL url = new URL(ip+"/odata/Lineas("+idLinea+")/ObtenerChoferes");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -432,9 +436,10 @@ public class Micro {
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("CAMBIARPOSICIONXD", idUsuario);
             try {
 
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -496,21 +501,31 @@ public class Micro {
         {
             try
             {
-                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
-                cMap.recibirPosicion(posicion);
+                String activityActual = ActivityController.activiyAbiertaActual.getClass().getSimpleName();
+
+                if(activityActual.equals("UserMapActivity"))
+                {
+                    UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
+                    uMap.recibirPosicion(posicion);
+                }
+                else if(activityActual.equals("ChoferMapActivity"))
+                {
+                    ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
+                    cMap.recibirPosicion(posicion);
+                }
             }
             catch (Exception e)
             {
-                String error = e+"";
+
             }
         }
 
     }
 
-    public static class IniciarRecorrido extends AsyncTask<String,String,String>
+    public static class IniciarRecorrido extends AsyncTask<String,String,JSONObject>
     {
         @Override
-        protected String doInBackground(String... params) {
+        protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
             String idMicro =params[0];
@@ -518,8 +533,10 @@ public class Micro {
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("190854531", idMicro);
+
             try {
-                URL url = new URL("http://stapp.ml/odata/Micros("+idMicro+")/IniciarRecorrido");
+                URL url = new URL(ip+"/odata/Micros("+idMicro+")/IniciarRecorrido");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -547,7 +564,7 @@ public class Micro {
                 JSONObject posicion = new JSONObject(value);
 
 
-                return "";
+                return posicion;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -577,17 +594,8 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(String posicion)
+        protected void onPostExecute(JSONObject posicion)
         {
-            try
-            {
-                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
-                cMap.continuarInicioRecorrido();
-            }
-            catch (Exception e)
-            {
-
-            }
 
         }
 
@@ -605,8 +613,10 @@ public class Micro {
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("OBTENERMIPOSICIONASDF", idUsuario);
+
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

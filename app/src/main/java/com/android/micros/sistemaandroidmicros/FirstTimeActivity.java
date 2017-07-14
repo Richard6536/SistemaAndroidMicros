@@ -25,6 +25,8 @@ import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -112,9 +114,9 @@ public class FirstTimeActivity extends AppCompatActivity {
         }
         else
         {
-            String URLRutas = "http://stapp.ml/odata/Rutas";
-            String URLLineas = "http://stapp.ml/odata/Lineas";
-            String URLParaderos = "http://stapp.ml/odata/Paraderos";
+            String URLRutas = ip+"/odata/Rutas";
+            String URLLineas = ip+"/odata/Lineas";
+            String URLParaderos = ip+"/odata/Paraderos";
 
             new Rutas.ObtenerRutas().execute(URLRutas);
             new Linea.ObtenerLineas().execute(URLLineas);

@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
+
 /**
  * Created by Richard on 02/07/2017.
  */
@@ -35,7 +37,7 @@ public class Calificacion
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Micros("+microId+")/NuevaCalificacion");
+                URL url = new URL(ip+"/odata/Micros("+microId+")/NuevaCalificacion");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);

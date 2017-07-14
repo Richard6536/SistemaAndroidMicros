@@ -1,5 +1,6 @@
 package com.android.micros.sistemaandroidmicros;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
@@ -25,9 +27,9 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
     int idHistorial, idIdaVuelta;
     public static JSONArray historialIdaVeultaActual;
 
+
     static ArrayList<Integer> arrayListId = new ArrayList<>();
     private ArrayAdapter<Integer> adapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,7 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
         listView = (ListView)findViewById(R.id.listIdaVuelta);
         Bundle bundle = getIntent().getExtras();
         idHistorial = bundle.getInt("idHistorial");
+
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -50,7 +53,6 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
                 Fragment fragment = new HistorialIdaVueltaFragment();
                 fragment.setArguments(bundle);
                 FT.replace(R.id.fragment_container_idavuelta, fragment);
-                FT.addToBackStack(null);
                 FT.commit();
             }
         });
@@ -93,5 +95,14 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
 
             listView.performItemClick(listView.getSelectedView(), 0, 0);
         }
+    }
+
+    public void redireccionarFragments(int idIdaVuelta)
+    {
+        Intent intent = new Intent(HistorialIdaVueltaActivity.this, HistorialParaderoActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("idIdaVuelta", idIdaVuelta);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 }

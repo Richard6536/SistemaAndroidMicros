@@ -144,6 +144,7 @@ public class ServicePosition extends Service
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "El proveedor de gps no existe, " + ex.getMessage());
         }
+
         try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
                     mLocationListeners[0]);

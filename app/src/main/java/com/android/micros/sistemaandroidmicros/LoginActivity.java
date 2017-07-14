@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.nfc.Tag;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,10 +88,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserLoginTask mAuthTask = null;
 
     private CallbackManager callBackManager;
-    private LoginButton loginFacebookButton;
     private Button btnRegister;
     private TextView info;
-
+    Button mEmailSignInButton;
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -104,17 +105,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     UserSessionManager session;
 
     boolean cancel = false;
+    ProgressBar progressBarLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //Obsoleto: FacebookSdk.sdkInitialize(getApplicationContext());
+
         session = new UserSessionManager(getApplicationContext());
-        initializeControls();
-        //obtenerDatos();
-        mensaje = (TextView)findViewById(R.id.w);
+
+        //mensaje = (TextView)findViewById(R.id.w);
         btnRegister = (Button)findViewById(R.id.btnRegister);
+        progressBarLogin = (ProgressBar)findViewById(R.id.progressBarLogin);
+        progressBarLogin.setVisibility(View.GONE);
 
         Toast.makeText(getApplicationContext(),
                         		       "User Login Status: " + session.isUserLoggedIn(),
@@ -127,9 +130,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        // Set up the login form.
+
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
+
         mPasswordView = (EditText) findViewById(R.id.password);
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -143,16 +147,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 attemptLogin();
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     protected void onResume()
@@ -177,58 +181,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    private void initializeControls()
-    {
-        //Inicialización de Componentes Facebook
-        callBackManager = CallbackManager.Factory.create();
-        info = (TextView) findViewById(R.id.info);
-        loginFacebookButton = (LoginButton) findViewById(R.id.login_button);
-        loginFacebookButton.setReadPermissions(Arrays.asList("public_profile, email, user_birthday"));
-    }
-
-    private void loginFacebook()
-    {
-
-        LoginManager.getInstance().registerCallback(callBackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                GraphRequest request = GraphRequest.newMeRequest(
-                        loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject object, GraphResponse response) {
-                                Log.v("Main", response.toString());
-                                try
-                                {
-                                    info.setText(object.getString("email")+" "+object.getString("gender")+" "+object.getString("name"));
-                                }
-                                catch(JSONException json)
-                                {
-                                    json.printStackTrace();
-                                }
-                            }
-                        });
-
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender, birthday");
-                request.setParameters(parameters);
-                request.executeAsync();
-                //info.setText("Login Success\n"+loginResult.getAccessToken());
-
-            }
-
-            @Override
-            public void onCancel() {
-                info.setText("Inicio de Sesión cancelado");
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                info.setText("Error al iniciar sesión: "+error.getMessage());
-            }
-        });
     }
 
     @Override
@@ -368,6 +320,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 Log.e(LOG_TAG, "Está conectado a internet");
 
+                progressBarLogin.setVisibility(View.VISIBLE);
+                mEmailSignInButton.setBackgroundColor(Color.GRAY);
+                mEmailSignInButton.setEnabled(false);
+
                 Usuario us = new Usuario();
                 us.new ValidarUsuario().execute(parametros.toString());
 
@@ -381,10 +337,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
             if(usuario.id == -1)
             {
-                mensaje.setText("El email/contraseña no son válidos");
+                emailPassIncorrectos();
             }
             else
             {
+                progressBarLogin.setVisibility(View.GONE);
+                //mEmailSignInButton.setBackgroundColor(3713740);
+                mEmailSignInButton.setEnabled(true);
 
                 session.crearSesionUsuario(usuario);
 
@@ -574,6 +533,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         Intent in = new Intent(LoginActivity.this, RegisterStep1Activity.class);
         startActivity(in);
+    }
+
+
+    public void emailPassIncorrectos()
+    {
+        progressBarLogin.setVisibility(View.GONE);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+        dialog.setCancelable(false);
+        dialog.setTitle("Error de conexión");
+        dialog.setMessage("El email o contraseña son incorrectos" );
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                dialog.cancel();
+            }
+        });
+        final AlertDialog alert = dialog.create();
+        alert.show();
     }
 }
 

@@ -4,9 +4,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -15,7 +18,7 @@ public class InformacionMicroFragment extends Fragment {
 
     String patente, nombreLinea;
     Double calificacionGlobal;
-
+    Button btnCalificarMicro;
     TextView patenteView, nombreLineaView;
     RatingBar ratingBarView;
 
@@ -38,6 +41,15 @@ public class InformacionMicroFragment extends Fragment {
         patente = this.getArguments().getString("patente");
         calificacionGlobal = this.getArguments().getDouble("cGlobal");
         nombreLinea = this.getArguments().getString("nombreLinea");
+
+        btnCalificarMicro = (Button)view.findViewById(R.id.btnCalificarMicro);
+
+        btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((UserMapActivity)getActivity()).redireccionarFragments();
+            }
+        });
 
         patenteView.setText(patente);
         nombreLineaView.setText(nombreLinea);

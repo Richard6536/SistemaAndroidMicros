@@ -22,6 +22,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.android.micros.sistemaandroidmicros.Clases.Usuario.ip;
+
 /**
  * Created by Richard on 04/05/2017.
  */
@@ -217,7 +219,7 @@ public class Linea {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Lineas/RecomendarRutaDX");
+                URL url = new URL(ip+"/odata/Lineas/RecomendarRutaDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

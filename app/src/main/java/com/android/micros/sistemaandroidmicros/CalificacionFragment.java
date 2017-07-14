@@ -24,7 +24,7 @@ public class CalificacionFragment extends Fragment {
     TextView txtMiCalificacion;
     Button btnCalificar;
     float miCalififcacion;
-    int idMicro = 1;
+    int idMicro;
     float calificacionGlobal;
 
     @Override
@@ -43,6 +43,7 @@ public class CalificacionFragment extends Fragment {
         txtMiCalificacion = (TextView)view.findViewById(R.id.txtMiCalificacion);
         btnCalificar = (Button)view.findViewById(R.id.btnCalificar);
 
+        idMicro = this.getArguments().getInt("idMicro");
         Double calificacion = this.getArguments().getDouble("cGlobal");
         calificacionGlobal = calificacion.floatValue();
         ratingBarGlobal.setRating(calificacionGlobal);

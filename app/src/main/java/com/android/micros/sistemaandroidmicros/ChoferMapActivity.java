@@ -31,6 +31,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +43,7 @@ import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Micro;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
+import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -75,6 +78,8 @@ public class ChoferMapActivity extends AppCompatActivity
     String patente;
     String lineaNombre;
 
+    int idParaderoSeleccionado = -1;
+
     boolean modoTest = true;
     boolean stopRunner;
     boolean paraderoEncontrado;
@@ -96,10 +101,12 @@ public class ChoferMapActivity extends AppCompatActivity
     Micro microActual;
     Marker miMicroMarker;
 
-    private Button btnStart, btnStop, btnIniciarRecorrido;
+    Button btnIniciarRecorrido;
 
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
+
+    LinearLayout recorridoLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,44 +126,24 @@ public class ChoferMapActivity extends AppCompatActivity
         nombre = user.get(UserSessionManager.KEY_NAME);
         email = user.get(UserSessionManager.KEY_EMAIL);
 
-        btnIniciarRecorrido = (Button) findViewById(R.id.btnIniciarRecorrido);
+        btnIniciarRecorrido = (Button) findViewById(R.id.btnComenzarRecorrido);
         btnIniciarRecorrido.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+            btnIniciarRecorrido.setText("Recorrido Iniciado");
+            btnIniciarRecorrido.setEnabled(false);
+            btnIniciarRecorrido.setBackgroundColor(Color.GRAY);
+
 
             new Micro.IniciarRecorrido().execute(microActual.id+"");
 
             }
         });
 
-
-        btnStart = (Button) findViewById(R.id.btnComenzar);
-        btnStop = (Button) findViewById(R.id.btnParar);
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopService(new Intent(getBaseContext(), ServicePosition.class));
-            }
-        });
-
         lblMensaje = (TextView) findViewById(R.id.lblMensaje);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -171,14 +158,14 @@ public class ChoferMapActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
         new Micro.ObtenerMicroDeChofer().execute(idSession);
 
-    }
+        //Métodos que se ejecutan constantemente --------------
 
-    public void continuarInicioRecorrido()
-    {
-        buscarMiParadero();
-        iniciarServicio();
+        //actualizarMiMicro();             //Usuarios(5)/ObtenerMicro
+        actualizarRecorrido();
+        iniciarServicio();               //Usuarios(5)/ActualizarPosicion
     }
 
     public void validarLinea(Micro micro) {
@@ -186,10 +173,9 @@ public class ChoferMapActivity extends AppCompatActivity
         if (micro.id == -1) {
             lblMensaje.setText("No está asociado a una micro");
             //No está asociado a una micro
-        } else if (micro.lineaId == null) {
-            lblMensaje.setText("La micro no está asociada a una linea.");
-            //La micro no está asociada a una linea
-        } else {
+        }
+        else
+        {
 
             microActual = micro;
             patente = micro.patente;
@@ -284,47 +270,6 @@ public class ChoferMapActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.chofer_map, menu);
 
-        switchTest = (Switch) findViewById(R.id.switchTest);
-        switchTest.setChecked(false);
-
-        switchTest.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    //Si es true, apaga el gps y comienza a obtenerPosicion
-                    Toast.makeText(ChoferMapActivity.this, "Encendido", Toast.LENGTH_SHORT).show();
-
-                    final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-                    if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        buildAlertMessageNoGps();
-                        switchTest.setChecked(false);
-
-                    } else {
-                        detenerServicio();
-                        //obtenerPosicion();
-                        if (ActivityCompat.checkSelfPermission(ChoferMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChoferMapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
-                            return;
-                        }
-                        cMap.setMyLocationEnabled(false);
-                    }
-
-                }
-                else
-                {
-
-                    Toast.makeText(ChoferMapActivity.this, "Apagado", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
         return true;
     }
 
@@ -337,6 +282,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            new Usuario.DetenerPosicion().execute(idSession);
             detenerServicio();
             session.logoutUser();
             return true;
@@ -368,7 +314,6 @@ public class ChoferMapActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
 
         if (id == R.id.nav_camera) {
 
@@ -404,9 +349,8 @@ public class ChoferMapActivity extends AppCompatActivity
             FT.addToBackStack(null);
             FT.commit();
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share)
+        }
+        else if (id == R.id.nav_share)
         {
 
 
@@ -426,7 +370,6 @@ public class ChoferMapActivity extends AppCompatActivity
                 obtenerPosicion();
             }
 
-        } else if (id == R.id.nav_send) {
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -453,17 +396,6 @@ public class ChoferMapActivity extends AppCompatActivity
         }
         cMap.setMyLocationEnabled(true);
 
-        /* TODO: Era un método antiguo de asociar el paradero y chofer
-
-        cMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker paraderoSeleccionado) {
-                Toast.makeText(ChoferMapActivity.this, "click en paradero Id : " + paraderoSeleccionado.getTag(), Toast.LENGTH_SHORT).show();
-
-                //String id = microActual.id+"";
-                //new Paradero.AsociarParaderoChofer().execute(id, paraderoSeleccionado.getTag().toString());
-            }
-        });*/
     }
 
     public void detenerServicio()
@@ -481,8 +413,9 @@ public class ChoferMapActivity extends AppCompatActivity
     @Override
     protected void onStop()
     {
-        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
         super.onStop();
+        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
+        new Usuario.DetenerPosicion().execute(idSession);
         detenerServicio();
     }
 
@@ -525,123 +458,50 @@ public class ChoferMapActivity extends AppCompatActivity
         }
     }
 
-    public void obtenerPosicion2()
+    private void obtenerPosicion()
     {
-
-        final Handler handler = new Handler();
-
         Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
 
-                final Runnable runnable = new Runnable() {
-                    public void run() {
-
-
-                    }
-                };
+                Log.e("IDSESSION", idSession+"");
+                new Micro.CambiarPosicion().execute(idSession);
             }
-
-        };
-        timer.schedule(task, 0, 500);
+        }, 0, 1000);
     }
 
-    public void obtenerPosicion()
+    private void buscarMiParadero()
     {
-
-        final Handler handler = new Handler();
         Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try
-                        {
 
-                            if(stopRunner == false)
-                            {
-                                new Micro.CambiarPosicion().execute(idSession);
-                            }
-                            else
-                            {
-                                handler.removeCallbacks(this);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            String a = "error: "+e;
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
+                Log.e("MICROID", microActual+"");
+                new Paradero.ObtenerMiParadero().execute(microActual.id+"");
             }
-        };
-        timer.schedule(task, 0, 500);
+        }, 0, 1000);
     }
 
-    public void buscarMiParadero()
+    private void buscarMisPasajeros()
     {
-
-        final Handler handler = new Handler();
         Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
 
-                handler.post(new Runnable() {
-                    public void run() {
-                        try
-                        {
-                            boolean stop = false;
-                            if(stop == false)
-                            {
-                                stop = true;
-                                new Paradero.ObtenerMiParadero().execute(microActual.id+"");
-                            }
-                            else
-                            {
-                                handler.postDelayed(this,1);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
+                Log.e("buscarMisPasajeros", idParaderoSeleccionado+"");
+                new Paradero.UsuariosQueSeleccionaronParadero().execute(idParaderoSeleccionado+"");
             }
-        };
-        timer.schedule(task, 0, 500);
+        }, 0, 1000);
     }
 
-    public void buscarMisPasajeros(final int idMiParadero)
+    private void actualizarRecorrido()
     {
-        final Handler handler = new Handler();
         Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try
-                        {
-                            new Paradero.UsuariosQueSeleccionaronParadero().execute(idMiParadero+"");
-                        }
-                        catch (Exception e)
-                        {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
+                new Usuario.ObtenerDatosRecorridoFusion().execute(idSession);
             }
-        };
-        timer.schedule(task, 0, 500);
+        }, 0, 1000);
     }
 
     public void actualizarMiMicro()
@@ -683,50 +543,39 @@ public class ChoferMapActivity extends AppCompatActivity
         return smallMarker;
     }
 
-    private void buildAlertMessageNoGps()
-    {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Debe desactivar el GPS para habilitar esta opción, desea ir a conf.?")
-                .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                        dialog.cancel();
-                    }
-                });
-        final AlertDialog alert = builder.create();
-        alert.show();
+    public Bitmap pasajeroIcon() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.pasajeros_marker);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
     }
 
-    public void recibirMiParadero(JSONObject miParadero)
+
+    public void recibirMiParadero(int miParadero)
     {
-        if(miParadero != null)
-        {
-            try {
 
                 paraderoEncontrado = false;
 
                 Bitmap MiparaderoIcon = markerParaderoSig();
                 Bitmap paraderoIcon = markerIcon();
 
-                //Marker paraderoEncontrado = null;
                 String tagId;
-                int id = miParadero.getInt("Id");
-
-                if(id != -1)
+                if (miParadero != -1)
                 {
-                    for(Marker pIda : paraderosRutaIda)
-                    {
+                    for (Marker pIda : paraderosRutaIda) {
                         pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
                         pIda.setTitle("Paradero");
                         tagId = pIda.getTag().toString();
-                        if(tagId.equals(id+""))
-                        {
+
+                        if (tagId.equals(miParadero + "")) {
                             paraderoEncontrado = true;
+                            idParaderoSeleccionado = miParadero;
                             pIda.setTitle("Mi paradero");
                             pIda.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
                             //paraderoEncontrado = pIda;
@@ -734,35 +583,42 @@ public class ChoferMapActivity extends AppCompatActivity
 
                     }
 
-                    if(paraderoEncontrado == false)
-                    {
-                        for(Marker pVuelta : paraderosRutaVuelta)
-                        {
+                    if (paraderoEncontrado == false) {
+                        for (Marker pVuelta : paraderosRutaVuelta) {
                             pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
                             pVuelta.setTitle("Paradero");
                             tagId = pVuelta.getTag().toString();
-                            if(tagId.equals(id+""))
-                            {
+                            if (tagId.equals(miParadero + "")) {
+                                idParaderoSeleccionado = miParadero;
                                 pVuelta.setTitle("Mi paradero");
                                 pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
                                 //paraderoEncontrado = pVuelta;
                             }
                         }
                     }
-                    //Envío el id de mi paradero para buscar los pasajeros que seleccionaron ese paradero.
-                    buscarMisPasajeros(id);
                 }
+                else
+                {
+                    for(Marker pIda : paraderosRutaIda)
+                    {
+                        pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                    }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+                    for(Marker pVuelta : paraderosRutaVuelta)
+                    {
+                        pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                    }
+                }
+            //buscarMisPasajeros();     //Paraderos(5)/UsuariosQueSeleccionaron
     }
 
     public void recibirUsuariosParadero(JSONArray usuarios)
     {
+
         if(usuarios.length() != 0)
         {
+
+            Bitmap iconPasajero = pasajeroIcon();
 
             try {
 
@@ -771,36 +627,35 @@ public class ChoferMapActivity extends AppCompatActivity
                 for(int i=0; i<usuarios.length(); i++)
                 {
                     JSONObject usuario = null;
-
                     usuario = usuarios.getJSONObject(i);
-
                     int id = usuario.getInt("UsuarioId");
-                    double lat = usuario.getDouble("Latitud");
-                    double lng = usuario.getDouble("Longitud");
-                    double distancia = usuario.getDouble("Distancia");
 
-                    Marker usuarioMarker = obtenerMarcadorUsuario(id);
+                    if(id == -1)
+                    {
+                        double lat = usuario.getDouble("Latitud");
+                        double lng = usuario.getDouble("Longitud");
+                        double distancia = usuario.getDouble("Distancia");
 
-                    if(usuarioMarker != null)
-                    {
-                        usuarioMarker.setPosition(new LatLng(lat,lng));
-                    }
-                    else
-                    {
-                        Marker m = cMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title("Soy una pasajero"));
-                        m.setTag(id);
-                        usuariosMarker.add(m);
+                        Marker usuarioMarker = obtenerMarcadorUsuario(id);
+
+                        if(usuarioMarker != null)
+                        {
+                            usuarioMarker.setPosition(new LatLng(lat,lng));
+                        }
+                        else
+                        {
+                            Marker m = cMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title("Soy una pasajero")
+                            .icon(BitmapDescriptorFactory.fromBitmap(iconPasajero)));
+                            m.setTag(id);
+                            usuariosMarker.add(m);
+                        }
                     }
                 }
-
-
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-
-        actualizarMiMicro();
     }
 
     private Marker obtenerMarcadorUsuario(int idUsuario)
@@ -841,25 +696,47 @@ public class ChoferMapActivity extends AppCompatActivity
                 usuariosMarker.remove(usuarioEncontrado);
             }
         }
-
-
     }
 
     public void validarSigCoord(boolean esNull)
     {
         if(esNull == true)
         {
-            btnIniciarRecorrido.setEnabled(false);
+            //btnIniciarRecorrido.setEnabled(false);
         }
         else
         {
-            btnIniciarRecorrido.setEnabled(true);
+            //btnIniciarRecorrido.setEnabled(true);
         }
     }
 
-    public void mensajeLatLng(String latLng)
+    public void obtenerParametrosFusionadosChofer(JSONObject parametros)
     {
-        Toast.makeText(ChoferMapActivity.this, latLng, Toast.LENGTH_SHORT).show();
+        try {
+
+            int idSiguienteParadero = parametros.getInt("IdSiguienteParadero");
+
+            if(idSiguienteParadero != -1)
+            {
+                JSONObject miMicro = parametros.getJSONObject("MiMicro");
+                JSONArray usuarioParaderos = parametros.getJSONArray("UsuarioParaderos");
+
+                Micro micro = new Micro();
+                micro.id = miMicro.getInt("Id");
+                micro.patente = miMicro.getString("Patente");
+                String calificacion = miMicro.getString("Calificacion");
+                micro.calificacion = Float.valueOf(calificacion);
+
+                recibirUsuariosParadero(usuarioParaderos);
+                recibirMiParadero(idSiguienteParadero);
+                validarLinea(micro);
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 }
 

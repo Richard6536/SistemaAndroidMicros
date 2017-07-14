@@ -76,6 +76,9 @@ public class Usuario {
         this.rol = rol;
     }
 
+
+    public static String ip = "http://192.168.8.103:8080";
+
     //Verificar si existe el emai al crear un usuario
     public static class ValidarEmail extends AsyncTask<String,Void,Boolean>
     {
@@ -91,7 +94,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios/ExisteMail");
+                URL url = new URL(ip+"/odata/Usuarios/ExisteMail");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -189,7 +192,7 @@ public class Usuario {
             BufferedReader reader = null;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios");
+                URL url = new URL(ip+"/odata/Usuarios");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -266,8 +269,10 @@ public class Usuario {
 
             BufferedReader reader = null;
 
+            Log.e("usuarioU", JsonUsuario);
+
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios/EsValido");
+                URL url = new URL(ip+"/odata/Usuarios/EsValido");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -364,7 +369,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios(5)/EditarDatos");
+                URL url = new URL(ip+"/odata/Usuarios(5)/EditarDatos");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -446,53 +451,46 @@ public class Usuario {
 
     }
 
-    static String TAG = "TESTUsuario";
-    public static class SeleccionarParadero extends AsyncTask<String,String,String>
+    public static class ObtenerDatosLineaFusion extends AsyncTask<String,String,JSONObject>
     {
         @Override
-        protected String doInBackground(String... params) {
-
+        protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
-
             //Parámetros
             String idUsuario =params[0];
-            String idParadero = params[1];
-
-            Log.d(TAG, "idUsuario: " + idUsuario);
-
-
+            String idLinea = params[1];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("LINEAFUSION ",idUsuario + " "+ idLinea);
+
             try {
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
+
+                JSONObject idLineaJSON = new JSONObject();
+                try {
+
+                    idLineaJSON.put("IdLinea",idLinea);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerDatosLineaFusion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
-                Log.d(TAG, "idParadero: " + idParadero);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 urlConnection.setRequestProperty("Accept", "application/json");
 
-
                 urlConnection.connect();
 
                 os = new BufferedOutputStream(urlConnection.getOutputStream());
-                os.write(idParadero.getBytes());
+                os.write(idLineaJSON.toString().getBytes());
                 os.flush();
 
-                Log.d(TAG, "url: " + url);
-
-                try
-                {
-                    inputStream = urlConnection.getInputStream();
-                }
-                catch(Exception e)
-                {
-
-                }
-
+                inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
 
                 reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -505,9 +503,14 @@ public class Usuario {
 
                 String value = buffer.toString();
 
-                JSONObject resultadoJSON = new JSONObject("value");
+                JSONObject parametros = new JSONObject(value);
 
-                return value;
+                // MicroParaderoCercano
+                //MicroAboradada
+                //Choferes : Lista
+                //IdLineaChoferes
+
+                return parametros;
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -537,15 +540,108 @@ public class Usuario {
         }
 
         @Override
-        protected void onPostExecute(String mensaje)
+        protected void onPostExecute(JSONObject parametros)
         {
             try
             {
-                Log.d(TAG, "mensaje: " + mensaje);
-                UserMapActivity cMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
-                cMap.ContinuacionSeleccionParadero(mensaje);
+                UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
+                uMap.obtenerParametrosFusionados(parametros);
             }
-            catch (Exception e)
+            catch(Exception e)
+            {
+
+            }
+        }
+
+    }
+
+    public static class ObtenerDatosRecorridoFusion extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+            //String idLinea = params[1];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            Log.e("RECORRIDOFUSIONXD ",idUsuario);
+
+            try {
+
+
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerDatosRecorridoFusion");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                /*
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(idLineaJSON.toString().getBytes());
+                os.flush();
+                */
+
+                inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject parametros = new JSONObject(value);
+
+                return parametros;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject parametros)
+        {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.obtenerParametrosFusionadosChofer(parametros);
+            }
+            catch(Exception e)
             {
 
             }
@@ -564,9 +660,10 @@ public class Usuario {
             OutputStream os = null;
             InputStream inputStream = null;
 
+            Log.e("IDUSUARIO", idUsuario);
             try {
 
-                URL url = new URL("http://stapp.ml/odata/Usuarios("+idUsuario+")/ObtenerMiMicroAbordada");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMiMicroAbordada");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -628,7 +725,7 @@ public class Usuario {
             try
             {
                 UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
-                uMap.verificarMiMicroAbordada(miMicro);
+                //uMap.verificarMiMicroAbordada(miMicro);
             }
             catch (Exception e)
             {
@@ -638,4 +735,80 @@ public class Usuario {
 
     }
 
+    public static class DetenerPosicion extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected String doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            String idUsuario = params[0];
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            try {
+
+                URL url = new URL(ip+"/odata/odata/Usuarios("+idUsuario+")/DetenerPosicionUpdate");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.connect();
+
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject miMicro = new JSONObject(value);
+
+                return "";
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String miMicro)
+        {
+
+        }
+
+    }
 }
