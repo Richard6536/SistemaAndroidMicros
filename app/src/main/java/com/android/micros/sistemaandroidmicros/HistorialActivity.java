@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Historial;
@@ -38,7 +39,7 @@ public class HistorialActivity extends AppCompatActivity{
     SearchView searchViewItems;
 
     int idHistorial;
-
+    TextView txtNoExisteHistorial;
     private String idMicro;
 
     @Override
@@ -48,8 +49,11 @@ public class HistorialActivity extends AppCompatActivity{
         setContentView(R.layout.activity_historial);
         ActivityController.activiyAbiertaActual = this;
 
+        txtNoExisteHistorial = (TextView)findViewById(R.id.txtNoExisteHistorial);
         listView = (ListView)findViewById(R.id.listFecha);
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
         idMicro = bundle.getString("idMicro").toString();
@@ -145,6 +149,10 @@ public class HistorialActivity extends AppCompatActivity{
 
             listView.performItemClick(listView.getSelectedView(), 0, 0);
         }
+        else
+        {
+            txtNoExisteHistorial.setText("No tiene historiales");
+        }
     }
 
     public void redireccionarFragments(final int idHistorial)
@@ -154,5 +162,18 @@ public class HistorialActivity extends AppCompatActivity{
         bundle.putInt("idHistorial", idHistorial);
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        Intent intent = new Intent(this, ChoferMapActivity.class);
+        startActivity(intent);
+        return true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        arrayListFecha.clear();
     }
 }

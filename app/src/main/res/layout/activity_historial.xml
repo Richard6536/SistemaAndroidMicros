@@ -29,5 +29,17 @@
             android:layout_width="match_parent"
             android:layout_height="460dp" />
     </FrameLayout>
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="23dp"
+        android:gravity="center"
+        android:id="@+id/txtNoExisteHistorial"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
 </RelativeLayout>

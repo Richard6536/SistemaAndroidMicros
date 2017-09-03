@@ -34,6 +34,7 @@ public class Linea {
     public String nombreLinea;
     public int idRutaIda;
     public int idRutaVuelta;
+    public int tarifa;
     public static ArrayList<Linea> listaLineas = new ArrayList<Linea>();
     String URL = "http://stapp.ml/odata/Lineas";
 
@@ -71,6 +72,13 @@ public class Linea {
         this.idRutaVuelta = idRutaVuelta;
     }
 
+    public int getTarifa() {
+        return tarifa;
+    }
+
+    public void setTarifa(int tarifa) {
+        this.tarifa = tarifa;
+    }
 
     public static class ObtenerLineas extends AsyncTask<String, String, ArrayList<Linea>>
     {
@@ -115,6 +123,7 @@ public class Linea {
                     line.nombreLinea = jsonobject.getString("Nombre");
                     line.idRutaIda = jsonobject.getInt("RutaIdaId");
                     line.idRutaVuelta = jsonobject.getInt("RutaVueltaId");
+                    line.tarifa = jsonobject.getInt("Tarifa");
 
                     listaLineas.add(line);
                 }

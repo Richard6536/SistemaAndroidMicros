@@ -39,6 +39,7 @@ public class Micro {
     public int numeroCalificaciones;
     public Integer lineaId;
     public Integer sigCoordenadaId;
+    public double kilometrosDia;
 
     public Integer getSigCoordenadaId() {
         return sigCoordenadaId;
@@ -50,8 +51,7 @@ public class Micro {
 //public Integer microChoferId;
     //public Integer microParaderoId;
 
-    public Micro()
-    {
+    public Micro() {
 
     }
 
@@ -95,21 +95,20 @@ public class Micro {
         this.lineaId = lineaId;
     }
 
-    public static class ObtenerMicroDeChofer extends AsyncTask<String,String,JSONObject>
-    {
+    public static class ObtenerMicroDeChofer extends AsyncTask<String, String, JSONObject> {
         @Override
         protected JSONObject doInBackground(String... params) {
 
 
             HttpURLConnection urlConnection = null;
-            String idUsuario =params[0];
+            String idUsuario = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMicro");
+                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -136,14 +135,12 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
                 String value = buffer.toString();
                 JSONObject resultadoJSON = new JSONObject(value);
-
 
 
                 return resultadoJSON;
@@ -152,7 +149,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -163,8 +160,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -176,10 +172,9 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONObject microJson)
-        {
+        protected void onPostExecute(JSONObject microJson) {
             try {
-            Micro micro = new Micro();
+                Micro micro = new Micro();
 
                 micro.id = microJson.getInt("Id");
                 micro.patente = microJson.getString("Patente");
@@ -190,16 +185,14 @@ public class Micro {
 
                 try {
                     micro.lineaId = microJson.getInt("LineaId");
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     micro.lineaId = null;
                 }
 
                 //micro.microParaderoId = microJson.getInt("MicroParaderoId");
                 //micro.microChoferId = microJson.getInt("MicroChoferId");
 
-                ChoferMapActivity cma = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                ChoferMapActivity cma = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
                 cma.validarLinea(micro);
 
             } catch (JSONException e) {
@@ -210,21 +203,20 @@ public class Micro {
 
     }
 
-    public static class ObtenerMiMicroConstanteMente extends AsyncTask<String,String,JSONObject>
-    {
+    public static class ObtenerMiMicroConstanteMente extends AsyncTask<String, String, JSONObject> {
         @Override
         protected JSONObject doInBackground(String... params) {
 
 
             HttpURLConnection urlConnection = null;
-            String idUsuario =params[0];
+            String idUsuario = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMicro");
+                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -251,14 +243,12 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
                 String value = buffer.toString();
                 JSONObject resultadoJSON = new JSONObject(value);
-
 
 
                 return resultadoJSON;
@@ -267,7 +257,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -278,8 +268,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -291,8 +280,7 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONObject microJson)
-        {
+        protected void onPostExecute(JSONObject microJson) {
             try {
 
                 boolean esNull = false;
@@ -309,14 +297,12 @@ public class Micro {
                 try {
                     micro.sigCoordenadaId = microJson.getInt("SiguienteVerticeId");
                     esNull = false;
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     //Esconder boton de iniciar Recorrido
                     esNull = true;
                 }
 
-                ChoferMapActivity cma = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                ChoferMapActivity cma = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
                 cma.validarSigCoord(esNull);
 
             } catch (JSONException e) {
@@ -326,14 +312,13 @@ public class Micro {
 
     }
 
-    public static class ObtenerMicrosPorLinea extends AsyncTask<String,String,JSONArray>
-    {
+    public static class ObtenerMicrosPorLinea extends AsyncTask<String, String, JSONArray> {
         @Override
         protected JSONArray doInBackground(String... params) {
 
 
             HttpURLConnection urlConnection = null;
-            String idLinea =params[0];
+            String idLinea = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
@@ -341,7 +326,7 @@ public class Micro {
             Log.e("LINEID", idLinea);
 
             try {
-                URL url = new URL(ip+"/odata/Lineas("+idLinea+")/ObtenerChoferes");
+                URL url = new URL(ip + "/odata/Lineas(" + idLinea + ")/ObtenerChoferes");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -368,8 +353,7 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
@@ -385,7 +369,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -396,8 +380,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -409,29 +392,25 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONArray micros)
-        {
+        protected void onPostExecute(JSONArray micros) {
             try {
 
 
-                    UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
-                    uMap.agregarMicros(micros);
-                }
-                catch (Exception e)
-                {
+                UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
+                uMap.agregarMicros(micros);
+            } catch (Exception e) {
 
-                }
+            }
         }
 
     }
 
-    public static class CambiarPosicion extends AsyncTask<String,String,JSONObject>
-    {
+    public static class CambiarPosicion extends AsyncTask<String, String, JSONObject> {
         @Override
         protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
-            String idUsuario =params[0];
+            String idUsuario = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
@@ -439,7 +418,7 @@ public class Micro {
             Log.e("CAMBIARPOSICIONXD", idUsuario);
             try {
 
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
+                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -458,8 +437,7 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
@@ -473,7 +451,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -484,8 +462,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -497,38 +474,30 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONObject posicion)
-        {
-            try
-            {
+        protected void onPostExecute(JSONObject posicion) {
+            try {
                 String activityActual = ActivityController.activiyAbiertaActual.getClass().getSimpleName();
 
-                if(activityActual.equals("UserMapActivity"))
-                {
+                if (activityActual.equals("UserMapActivity")) {
                     UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
                     uMap.recibirPosicion(posicion);
-                }
-                else if(activityActual.equals("ChoferMapActivity"))
-                {
+                } else if (activityActual.equals("ChoferMapActivity")) {
                     ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
                     cMap.recibirPosicion(posicion);
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
 
             }
         }
 
     }
 
-    public static class IniciarRecorrido extends AsyncTask<String,String,JSONObject>
-    {
+    public static class IniciarRecorrido extends AsyncTask<String, String, JSONObject> {
         @Override
         protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
-            String idMicro =params[0];
+            String idMicro = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
@@ -536,7 +505,7 @@ public class Micro {
             Log.e("190854531", idMicro);
 
             try {
-                URL url = new URL(ip+"/odata/Micros("+idMicro+")/IniciarRecorrido");
+                URL url = new URL(ip + "/odata/Micros(" + idMicro + ")/IniciarRecorrido");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -555,8 +524,7 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
@@ -570,7 +538,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -581,8 +549,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -594,21 +561,24 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONObject posicion)
-        {
+        protected void onPostExecute(JSONObject posicion) {
+            try {
+                ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
+                cMap.iniciarServicioRecorridoFusion();
+            } catch (Exception e) {
 
+            }
         }
 
     }
 
-    public static class CambiarMiPosicion extends AsyncTask<String,String,JSONObject>
-    {
+    public static class CambiarMiPosicion extends AsyncTask<String, String, JSONObject> {
 
         @Override
         protected JSONObject doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
-            String idUsuario =params[0];
+            String idUsuario = params[0];
             BufferedReader reader = null;
             OutputStream os = null;
             InputStream inputStream = null;
@@ -616,7 +586,7 @@ public class Micro {
             Log.e("OBTENERMIPOSICIONASDF", idUsuario);
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerPosicion");
+                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -635,8 +605,7 @@ public class Micro {
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine = "";
-                while ((inputLine = reader.readLine()) != null)
-                {
+                while ((inputLine = reader.readLine()) != null) {
                     buffer.append(inputLine);
                 }
 
@@ -650,7 +619,7 @@ public class Micro {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -661,8 +630,7 @@ public class Micro {
                         Log.e("Mensaje2", "Error closing stream", e);
                     }
                 }
-                if(os != null)
-                {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
@@ -674,20 +642,19 @@ public class Micro {
         }
 
         @Override
-        protected void onPostExecute(JSONObject posicion)
-        {
-            try
-            {
-                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+        protected void onPostExecute(JSONObject posicion) {
+            try {
+                ChoferMapActivity cMap = (ChoferMapActivity) ActivityController.activiyAbiertaActual;
                 cMap.recibirPosicion(posicion);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
 
             }
 
         }
 
     }
-
 }
+
+
+
+

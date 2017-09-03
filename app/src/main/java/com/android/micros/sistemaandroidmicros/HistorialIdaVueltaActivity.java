@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,6 +15,7 @@ import android.widget.ListView;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Historial;
+import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,14 +28,16 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
     ListView listView;
     int idHistorial, idIdaVuelta;
     public static JSONArray historialIdaVeultaActual;
+    int cont = 0;
 
-
-    static ArrayList<Integer> arrayListId = new ArrayList<>();
-    private ArrayAdapter<Integer> adapter;
+    static ArrayList<String> arrayListId = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial_ida_vuelta);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         listView = (ListView)findViewById(R.id.listIdaVuelta);
         Bundle bundle = getIntent().getExtras();
@@ -43,6 +47,10 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String item = parent.getAdapter().getItem(position).toString();
+                String[] split = item.split("\\.");
+                idIdaVuelta = Integer.parseInt(split[1]);
 
                 FragmentManager FM = getSupportFragmentManager();
                 FragmentTransaction FT = FM.beginTransaction();
@@ -72,14 +80,16 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
 
         if(historialIdaVuelta.length() != 0)
         {
-            for(int i = 0; i<historialIdaVuelta.length(); i++) {
+            for(int i = 0; i<historialIdaVuelta.length(); i++)
+            {
                 try {
 
+                    cont++;
                     JSONObject h = null;
                     h = historialIdaVuelta.getJSONObject(i);
                     idIdaVuelta = h.getInt("Id");
 
-                    arrayListId.add(idIdaVuelta);
+                    arrayListId.add("  "+cont+"                  ."+idIdaVuelta);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -104,5 +114,18 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
         bundle.putInt("idIdaVuelta", idIdaVuelta);
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        arrayListId.clear();
+        cont = 0;
     }
 }

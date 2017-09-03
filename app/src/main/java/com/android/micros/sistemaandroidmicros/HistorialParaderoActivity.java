@@ -23,11 +23,12 @@ import java.util.ArrayList;
 public class HistorialParaderoActivity extends AppCompatActivity {
 
     public static JSONArray historialParaderosActual;
-    static ArrayList<Integer> arrayListIdParaderos = new ArrayList<>();
-    private ArrayAdapter<Integer> adapter;
+    static ArrayList<String> arrayListIdParaderos = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
     ListView listView;
     int idParaderos, idIdaVuelta;
     String idParadero;
+    int cont = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +37,17 @@ public class HistorialParaderoActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         idIdaVuelta = bundle.getInt("idIdaVuelta");
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         listView = (ListView)findViewById(R.id.listParaderos);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                idParadero = parent.getAdapter().getItem(position).toString();
+                String item = parent.getAdapter().getItem(position).toString();
+                String[] split = item.split("\\.");
+                idParadero = split[1];
 
                 FragmentManager FM = getSupportFragmentManager();
                 FragmentTransaction FT = FM.beginTransaction();
@@ -74,11 +79,12 @@ public class HistorialParaderoActivity extends AppCompatActivity {
             for(int i = 0; i<historialParaderos.length(); i++) {
                 try {
 
+                    cont++;
                     JSONObject h = null;
                     h = historialParaderos.getJSONObject(i);
                     idParaderos = h.getInt("Id");
 
-                    arrayListIdParaderos.add(idParaderos);
+                    arrayListIdParaderos.add("  "+cont+"                 ."+idParaderos);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -96,4 +102,15 @@ public class HistorialParaderoActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        arrayListIdParaderos.clear();
+        cont = 0;
+    }
 }

@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/com_facebook_button_login_silver_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -38,7 +39,6 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginTop="54dp"
                 android:gravity="center"/>
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -57,13 +57,105 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true" />
             </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:background="@drawable/com_facebook_button_login_silver_background"
+                    android:layout_height="55dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true">
+
+                </RelativeLayout>
+            </RelativeLayout>
         </RelativeLayout>
 
     </FrameLayout>
     <FrameLayout
         android:id="@+id/frame_content_chofer_info"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/txtLineaChof"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="16dp"
+                android:layout_marginLeft="23dp"
+                android:layout_marginStart="23dp"
+                android:layout_above="@+id/textView28"
+                android:layout_toRightOf="@+id/textView25"
+                android:layout_toEndOf="@+id/textView25" />
+
+            <TextView
+                android:id="@+id/textView28"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Patente:"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_alignParentBottom="true"
+                android:layout_alignLeft="@+id/textView25"
+                android:layout_alignStart="@+id/textView25"
+                android:layout_marginBottom="9dp" />
+
+            <TextView
+                android:id="@+id/textView25"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="14dp"
+                android:layout_marginStart="14dp"
+                android:text="Linea:"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_above="@+id/textView28"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:id="@+id/txtPatenteChof"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:text="TextView"
+                android:layout_alignTop="@+id/textView28"
+                android:layout_alignLeft="@+id/txtLineaChof"
+                android:layout_alignStart="@+id/txtLineaChof" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:text="Kmts recorridos"
+                android:textStyle="bold"
+                android:layout_marginRight="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_alignBaseline="@+id/txtLineaChof"
+                android:layout_alignBottom="@+id/txtLineaChof"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <TextView
+                android:id="@+id/txtKilometrosDia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:text="0"
+                android:layout_below="@+id/textView3"
+                android:layout_alignLeft="@+id/textView3"
+                android:layout_alignStart="@+id/textView3"
+                android:layout_marginLeft="43dp"
+                android:layout_marginStart="43dp" />
+        </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>

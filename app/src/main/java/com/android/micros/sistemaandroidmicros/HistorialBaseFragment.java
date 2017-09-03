@@ -26,9 +26,9 @@ import static com.android.micros.sistemaandroidmicros.HistorialActivity.historia
 public class HistorialBaseFragment extends Fragment {
 
     String nombreChofer;
-    String fecha, horaInicio, horaFinal; //DateTime.
+    String fecha, fechaInicio, horaInicio, fechaFinal, horaFinal; //DateTime.
     Double kilometrosRecorridos,calificacionesDiarias;
-    int calificacionesRecibidas, pasajerosTransportados; //Posiblemente no.
+    int calificacionesRecibidas, pasajerosTransportados;
     int numeroVueltas, idMicro;
     int idHistorial;
 
@@ -72,8 +72,20 @@ public class HistorialBaseFragment extends Fragment {
                 {
                     nombreChofer = h.getString("NombreChofer"); //??
                     fecha = h.getString("Fecha");           //DATETIME
-                    horaInicio = h.getString("HoraInicio"); //DATETIME
-                    horaFinal = h.getString("HoraFinal");   //DATETIME
+
+                    String hi = h.getString("HoraInicio"); //DATETIME
+                    String hf = h.getString("HoraFinal");   //DATETIME
+
+                    String[] fechaHoraInicioSplit = hi.split("T");
+                    String[] fechaHoraTerminoSplit = hf.split("T");
+                    String[] horaCompleta = fechaHoraInicioSplit[1].split("\\.");
+                    String[] horaFCompleta = fechaHoraTerminoSplit[1].split("\\.");
+
+                    fechaInicio = fechaHoraInicioSplit[0];
+                    horaInicio = horaCompleta[0];
+                    fechaFinal = fechaHoraTerminoSplit[0];
+                    horaFinal = horaFCompleta[0];
+
                     kilometrosRecorridos = h.getDouble("KilometrosRecorridos");
                     calificacionesRecibidas = h.getInt("CalificacionesRecibidas");
 
@@ -98,8 +110,8 @@ public class HistorialBaseFragment extends Fragment {
             }
         }
 
-        txtInicio.setText(horaInicio);
-        txtTermino.setText(horaFinal);
+        txtInicio.setText(fechaInicio + System.getProperty("line.separator") + horaInicio);
+        txtTermino.setText(fechaFinal + System.getProperty("line.separator")+ horaFinal);
         txtKilometrosR.setText(kilometrosRecorridos+"");
         txtnCalificaciones.setText(calificacionesRecibidas+"");
         txtNumIdaVueltas.setText(numeroVueltas+"");

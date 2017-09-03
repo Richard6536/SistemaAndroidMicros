@@ -77,14 +77,14 @@ public class Usuario {
     }
 
 
-    public static String ip = "http://192.168.8.103:8080";
+
+    public static String ip = "";
 
     //Verificar si existe el emai al crear un usuario
     public static class ValidarEmail extends AsyncTask<String,Void,Boolean>
     {
         @Override
         protected Boolean doInBackground(String... params) {
-
 
             HttpURLConnection urlConnection = null;
             String JsonData =params[0];
@@ -502,6 +502,7 @@ public class Usuario {
                 }
 
                 String value = buffer.toString();
+                Log.e("parametros543215 ", value);
 
                 JSONObject parametros = new JSONObject(value);
 
@@ -544,12 +545,13 @@ public class Usuario {
         {
             try
             {
+                Log.e("parametros12345 ", parametros.toString());
                 UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
                 uMap.obtenerParametrosFusionados(parametros);
             }
             catch(Exception e)
             {
-
+                Log.e("ERRORPARAMETROS ", e.getMessage());
             }
         }
 
@@ -583,13 +585,9 @@ public class Usuario {
 
                 urlConnection.connect();
 
-                /*
-                os = new BufferedOutputStream(urlConnection.getOutputStream());
-                os.write(idLineaJSON.toString().getBytes());
-                os.flush();
-                */
-
                 inputStream = urlConnection.getInputStream();
+
+
                 StringBuffer buffer = new StringBuffer();
 
                 reader = new BufferedReader(new InputStreamReader(inputStream));

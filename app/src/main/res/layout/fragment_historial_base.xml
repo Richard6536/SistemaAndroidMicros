@@ -71,7 +71,6 @@
                     android:layout_width="227dp"
                     android:layout_height="64dp"
                     android:textSize="18dp"
-                    android:textStyle="bold"
                     android:layout_alignLeft="@+id/txtvTermino"
                     android:layout_alignStart="@+id/txtvTermino"
                     android:layout_below="@+id/txtvTermino" />

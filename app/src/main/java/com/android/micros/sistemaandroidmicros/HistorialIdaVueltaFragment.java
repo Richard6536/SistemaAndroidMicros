@@ -22,7 +22,7 @@ public class HistorialIdaVueltaFragment extends Fragment {
 
     int idIdaVuelta;
     int pasajerosTransportados;
-    String horaInicio, horaTermino, duracionRecorridoComp;
+    String fechaInicio, horaInicio, fechaTermino, horaTermino, minRecorrido, segRecorridos;
     Button btnHistorialParadero;
 
     TextView txtPasajerosTrans, txtHoraInicio, txtHoraTermino, txtDuracionRecorrido;
@@ -61,9 +61,34 @@ public class HistorialIdaVueltaFragment extends Fragment {
                 if(id == idIdaVuelta)
                 {
                     pasajerosTransportados = h.getInt("PasajerosTransportados");
-                    horaInicio = h.getString("HoraInicio");
-                    horaTermino = h.getString("HoraTermino");
-                    duracionRecorridoComp = h.getString("DuracionRecorrido");
+                    String hi = h.getString("HoraInicio");
+                    String hf = h.getString("HoraTermino");
+
+                    if(!hi.equals(hf))
+                    {
+                        String[] fechaHoraInicioSplit = hi.split("T");
+                        String[] fechaHoraTerminoSplit = hf.split("T");
+                        String[] horaCompleta = fechaHoraInicioSplit[1].split("\\.");
+                        String[] horaFCompleta = fechaHoraTerminoSplit[1].split("\\.");
+
+                        fechaInicio = fechaHoraInicioSplit[0];
+                        horaInicio = horaCompleta[0];
+                        fechaTermino = fechaHoraTerminoSplit[0];
+                        horaTermino = horaFCompleta[0];
+
+                        String duracionRecorridoComp = h.getString("DuracionRecorrido");
+                        String[] splitDuracion = duracionRecorridoComp.split("\\.");
+                        String[] minutoSegundos = splitDuracion[0].split("M");
+                        String[] minutosSplit = minutoSegundos[0].split("T");
+
+                        segRecorridos = minutoSegundos[1];
+                        minRecorrido = minutosSplit[1];
+
+                        txtPasajerosTrans.setText(pasajerosTransportados+"");
+                        txtHoraInicio.setText(fechaInicio + System.getProperty("line.separator") + horaInicio);
+                        txtHoraTermino.setText(fechaTermino + System.getProperty("line.separator") + horaTermino);
+                        txtDuracionRecorrido.setText(minRecorrido +" minutos "+segRecorridos+" segundos");
+                    }
 
                 }
 
@@ -72,12 +97,6 @@ public class HistorialIdaVueltaFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-
-        txtPasajerosTrans.setText(pasajerosTransportados+"");
-        txtHoraInicio.setText(horaInicio);
-        txtHoraTermino.setText(horaTermino);
-        txtDuracionRecorrido.setText(duracionRecorridoComp);
-
         return v;
     }
 }

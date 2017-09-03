@@ -5,10 +5,13 @@ import android.os.AsyncTask;
 import com.android.micros.sistemaandroidmicros.RegisterStep3Activity;
 import com.android.micros.sistemaandroidmicros.UserMapActivity;
 
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -53,19 +56,28 @@ public class Calificacion
                 os.write(calificacion.getBytes());
                 os.flush();
 
+                inputStream = urlConnection.getInputStream();
+
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
                 os.close();
                 urlConnection.disconnect();
 
                 return "";
-                /*
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
 
-                    return "Error 1";
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                */
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -79,7 +91,7 @@ public class Calificacion
             try
             {
                 UserMapActivity cMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
-                cMap.RemoverFragmentCalificacion();
+                cMap.removerFragment();
 
             }
             catch (Exception e)

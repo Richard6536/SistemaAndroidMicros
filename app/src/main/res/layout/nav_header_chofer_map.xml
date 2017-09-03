@@ -15,39 +15,34 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginRight="94dp"
+        android:layout_marginEnd="94dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+
         <TextView
+            android:id="@+id/txtCorreoNavHeaderChofer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/nav_header_vertical_spacing"
-            android:text="Android Studio"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:id="@+id/textView3"
-            android:layout_marginLeft="47dp"
-            android:layout_marginStart="47dp"
-            android:layout_alignParentTop="true"
+            android:text="android.studio@android.com"
+            android:layout_marginLeft="14dp"
+            android:layout_marginStart="14dp"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
 
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:id="@+id/txtNombreNavHeaderChofer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="android.studio@android.com"
-            android:layout_marginLeft="48dp"
-            android:layout_marginStart="48dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="48dp" />
+            android:layout_above="@+id/txtCorreoNavHeaderChofer"
+            android:layout_alignLeft="@+id/txtCorreoNavHeaderChofer"
+            android:layout_alignStart="@+id/txtCorreoNavHeaderChofer"
+            android:layout_marginBottom="10dp"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:text="Android Studio"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
     </RelativeLayout>
 
 

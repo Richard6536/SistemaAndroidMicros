@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
+import com.android.micros.sistemaandroidmicros.Clases.FragmentController;
+import com.android.micros.sistemaandroidmicros.Registro.RegisterDXActivity;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -74,6 +76,11 @@ public class InternetConnection
             {
                 RegisterStep3Activity fta = (RegisterStep3Activity) ActivityController.activiyAbiertaActual;
                 fta.finalizarRegistro(result);
+            }
+            else if(activityActual.equals("RegisterDXActivity"))
+            {
+                RegisterDXActivity rdxa = (RegisterDXActivity) ActivityController.activiyAbiertaActual;
+
             }
         }
 

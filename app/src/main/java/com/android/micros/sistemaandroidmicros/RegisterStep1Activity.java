@@ -22,7 +22,6 @@ public class RegisterStep1Activity extends AppCompatActivity {
 
     private Button btnPaso2;
     private EditText nombre;
-    private String name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

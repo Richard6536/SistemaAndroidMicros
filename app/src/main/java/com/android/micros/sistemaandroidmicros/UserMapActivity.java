@@ -23,11 +23,12 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ActivityCompat;
+
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -47,6 +48,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -92,6 +94,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.content.ContentValues.TAG;
+import static com.android.micros.sistemaandroidmicros.CalificacionFragment.progressCalificacion;
 
 public class UserMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -102,23 +105,30 @@ public class UserMapActivity extends AppCompatActivity
     private Marker selectedMarker;
     //private Animator animator = new Animator();
 
+    //InformacionMicro
+    String patente, nombreLinea;
+    public static Button btnCalificarMicro;
+    TextView patenteView, nombreLineaView;
+    RatingBar ratingBarView;
+    RelativeLayout relativeLayoutInfoMicro, rLayoutTiempo;
+    boolean menos80mts = false;
+    boolean layoutCerrado = false;
     Dialog alertParadero, alertLineas;
-
-    int idMicroabordo;
 
     int contVuelta = 0;
     Timer timerMicroParaderoMasCercano;
     boolean paraderoEncontrado;
 
-    double calificacionGlobal;
+
+    private int idMicroGlobal = -1;
+
+    Double calificacionGlobal;
     boolean estaAbierto = false;
     boolean paraderoSeleccionado;
-
-    private Button btnBuscar, btnCalificarMicro, btnStop, btnReset;
-    private EditText etOrigin, etDestination;
+    boolean swt = false;
 
     //NavHeader
-    private TextView nombreNavHeader, correoNavHeader;
+    private TextView txtTiempoMicro, txtTarifa;
 
     Polyline polylineIda;
     Polyline polylineVuelta;
@@ -150,8 +160,8 @@ public class UserMapActivity extends AppCompatActivity
 
     String GPS_FILTER = "MyGPSLocation";
 
-    boolean enMicro = false;
-    boolean cambioDeLinea = false;
+    boolean estabaEnMicro = false;
+    public static boolean aCalificado = false;
 
     int idParaderoSeleccionado;
 
@@ -173,6 +183,14 @@ public class UserMapActivity extends AppCompatActivity
 
         spinner = (Spinner) findViewById(R.id.spLineas);
         spinnerLayout = (RelativeLayout) findViewById(R.id.relativeLayoutSpinner);
+        txtTarifa = (TextView)findViewById(R.id.txtTarifa);
+
+        rLayoutTiempo = (RelativeLayout)findViewById(R.id.rLayoutTiempo);
+        rLayoutTiempo.setVisibility(View.GONE);
+        txtTiempoMicro = (TextView)findViewById(R.id.txtTiempoMicro);
+
+        relativeLayoutInfoMicro = (RelativeLayout) findViewById(R.id.relativeLayoutInfoMicro);
+        relativeLayoutInfoMicro.setVisibility(View.GONE);
 
         btnDeseleccionarParadero = (Button) findViewById(R.id.btnDeseleccionarParadero);
         btnDeseleccionarParadero.setVisibility(View.GONE);
@@ -182,14 +200,39 @@ public class UserMapActivity extends AppCompatActivity
 
                 spinnerLayout.setVisibility(View.VISIBLE);
                 btnDeseleccionarParadero.setVisibility(View.GONE);
-
-                idParaderoSeleccionado = -1;
-                new Paradero.DeseleccionarParadero().execute(idUser);
+                txtTiempoMicro.setText("");
+                rLayoutTiempo.setVisibility(View.GONE);
+                deseleccionarParaderoAsync();
             }
         });
 
         cargarSpinner();
-        datosUsuario = (TextView) findViewById(R.id.datosUsuario);
+
+        btnCalificarMicro = (Button)findViewById(R.id.btnCalificarMicro);
+        btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                FragmentManager FM = getSupportFragmentManager();
+                FragmentTransaction FT = FM.beginTransaction();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("idMicro", idMicroGlobal);
+                bundle.putDouble("cGlobal", calificacionGlobal);
+
+                Fragment fragment = new CalificacionFragment();
+                fragment.setArguments(bundle);
+                FT.replace(R.id.frame_content_info, fragment);
+                FT.addToBackStack(null);
+                FT.commit();
+            }
+        });
+
+        patenteView = (TextView)findViewById(R.id.txtPatente);
+        nombreLineaView = (TextView)findViewById(R.id.txtLinea);
+        ratingBarView = (RatingBar)findViewById(R.id.ratingBarGlobalInfo);
+
+        //datosUsuario = (TextView) findViewById(R.id.datosUsuario);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -236,10 +279,13 @@ public class UserMapActivity extends AppCompatActivity
 
                 //Retorna el Id de la linea que se selecciona en el spinner
                 idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
-                Log.e("idLineaUSERPMAP", idLineaSeleccionada+"");
+                Log.e("idLineaUSERPMAP", idLineaSeleccionada + "");
 
                 //Envío el Id de la linea y recibo la linea completa
                 linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
+
+                //Mostrar tarifa
+                txtTarifa.setText(linea.tarifa+"");
 
                 rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
                 rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
@@ -261,17 +307,23 @@ public class UserMapActivity extends AppCompatActivity
 
         //actualizarPosicionMicros();                                            //Lineas(5)/ObtenerChoferes
         //actualizarMiMicroAbordada();                                           //Usuarios(5)/ObtenerMiMicroAbordada
+
         iniciarServicio();                                                     //Usuarios(5)/ActualizarPosicion
         iniciarServicioLineaFusion();
     }
 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Permission " + permissions[0] + " granted");
         }
     }
 
+    public void deseleccionarParaderoAsync()
+    {
+        idParaderoSeleccionado = -1;
+        new Paradero.DeseleccionarParadero().execute(idUser);
+    }
 
     protected void onResume() {
         super.onResume();
@@ -380,7 +432,7 @@ public class UserMapActivity extends AppCompatActivity
         mMap = googleMap;
 
         LatLng hcmus = new LatLng(-40.5769389, -73.1260218);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 13));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 14));
 
         //TODO: Dar permisos para utilizar la ubicación de GPS
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -399,7 +451,7 @@ public class UserMapActivity extends AppCompatActivity
 
             @Override
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
-                if (enMicro == false) {
+                if (estabaEnMicro == false) {
 
                     detenerServicioLineaFusion();
                     spinnerLayout.setVisibility(View.GONE);
@@ -409,7 +461,14 @@ public class UserMapActivity extends AppCompatActivity
                     idParaderoSeleccionado = Integer.parseInt(paraderoSeleccionado.getTag().toString());
 
                     Paradero paradero = new Paradero();
-                    paradero.new SeleccionarParadero().execute(idUser, idParaderoSeleccionado + "");
+
+                    //JSONObject result = paradero.seleccParadero(idUser, idParaderoSeleccionado+"");
+                    //Log.e("PARADEROPRUEBA", result.toString());
+                    //recibirParaderoSeleccionado();
+
+                    new Paradero.SeleccionarParadero().execute(idUser, idParaderoSeleccionado+"");
+
+                    //paradero.new SeleccionarParadero().execute(idUser, idParaderoSeleccionado + "");
 
                 } else {
                     Toast.makeText(UserMapActivity.this, "No puede selecconar un paradero, si está abordo de una micro.", Toast.LENGTH_SHORT).show();
@@ -431,8 +490,7 @@ public class UserMapActivity extends AppCompatActivity
                     double lat = jsonobject.getDouble("Latitud");
                     double lng = jsonobject.getDouble("Longitud");
                     int idMicro = jsonobject.getInt("Id");
-                    //boolean estaActivo = jsonobject.getBoolean("TransmitiendoPosicion");
-                    boolean estaActivo = true;
+                    boolean estaActivo = jsonobject.getBoolean("TransmitiendoPosicion");
 
                     if (estaActivo) {
 
@@ -467,16 +525,20 @@ public class UserMapActivity extends AppCompatActivity
                         //chofer esta inactivo
                         //revisar si chofer esta en la lista de marcadores usando el tag
                         Marker marcadorMicro = obtenerChoferMarcador(idMicro);
-                        if (marcadorMicro != null) {
+                        if (marcadorMicro != null)
+                        {
                             Marker choferSeleccionado = null;
-                            for (Marker chofer : microsMarker) {
-                                if (chofer.getTag() == marcadorMicro.getTag()) {
 
+                            for (Marker chofer : microsMarker)
+                            {
+                                if (chofer.getTag() == marcadorMicro.getTag())
+                                {
                                     choferSeleccionado = chofer;
                                     chofer.remove();
                                 }
                             }
-                            if (choferSeleccionado != null) {
+                            if (choferSeleccionado != null)
+                            {
                                 microsMarker.remove(choferSeleccionado);
                             }
 
@@ -501,6 +563,7 @@ public class UserMapActivity extends AppCompatActivity
         return mChofer;
     }
 
+
     public void obtenerMicrosDelParadero(JSONObject microParadero, int idLinea) {
         Bitmap iconMicroParadero = microsParaderoIcon();
         Bitmap iconMicro = microsIcon();
@@ -510,21 +573,45 @@ public class UserMapActivity extends AppCompatActivity
             {
 
                 int id = microParadero.getInt("Id");
-                if (id != -1)
+
+                if ( id != -1)
                 {
+                    swt = true;
+
                     double distancia = microParadero.getDouble("DistanciaEntre");
-                    //String tiempoLlegada = calcularTiempo(distancia);
+                    Log.e("DISTANCIAMICRO", distancia+"");
+                    String[] metros = String.valueOf(distancia).split("\\.");
+                    int metrosInt = Integer.parseInt(metros[0]);
+
+                    String tiempoLlegada = calcularTiempo(distancia);
+
+                    if(layoutCerrado == false)
+                    {
+
+                        rLayoutTiempo.setVisibility(View.VISIBLE);
+                        txtTiempoMicro.setText(tiempoLlegada);
+
+                        if(metrosInt < 150)
+                        {
+                            menos80mts = true;
+                        }
+
+                        if(menos80mts == true && layoutCerrado == false)
+                        {
+                            layoutCerrado = true;
+                            rLayoutTiempo.setVisibility(View.GONE);
+                        }
+
+                    }
 
                     int idMicro = microParadero.getInt("MicroId");
-                    Toast.makeText(UserMapActivity.this, "Micro " + idMicro, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(UserMapActivity.this, "Micro " + idMicro, Toast.LENGTH_SHORT).show();
                     for (Marker m : microsMarker)
                     {
-                        m.setTitle("Soy una micro");
                         m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicro));
 
                         String tag = m.getTag().toString();
                         if (tag.equals(idMicro + "")) {
-                            //m.setTitle(tiempoLlegada);
                             m.setIcon(BitmapDescriptorFactory.fromBitmap(iconMicroParadero));
                         }
                     }
@@ -532,6 +619,11 @@ public class UserMapActivity extends AppCompatActivity
                 else
                 {
                     resetMicros();
+                    if(swt == true)
+                    {
+                        swt = false;
+                        rLayoutTiempo.setVisibility(View.GONE);
+                    }
                 }
             }
 
@@ -550,53 +642,60 @@ public class UserMapActivity extends AppCompatActivity
         }
     }
     private String calcularTiempo(double distancia) {
-        String[] metros = String.valueOf(distancia).split("\\.");
-        double k = Integer.parseInt(metros[0]);
-        double kilometros = k / 1000;
+            String[] metros = String.valueOf(distancia).split("\\.");
+            double k = Integer.parseInt(metros[0]);
+            double kilometros = k / 1000;
 
-        int kmh = 40;
-        double tiempo = (kilometros / kmh) * 60; //40 km/h
+            int kmh = 40;
+            double tiempo = (kilometros / kmh) * 60; //40 km/h
 
-        if (tiempo > 60) {
-            double horasMin = tiempo / 60;
-            if ((horasMin - (int) horasMin) != 0) {
-                String[] horasMinArray = String.valueOf(horasMin).split("\\.");
-                int horas = Integer.parseInt(horasMinArray[0]);
-                String m = (0 + "." + Integer.parseInt(horasMinArray[1]));
-                double minutosDecimales = Integer.parseInt(m) * 60;
+            if (tiempo > 60) {
+                double horasMin = tiempo / 60;
+                if ((horasMin - (int) horasMin) != 0) {
+                    String[] horasMinArray = String.valueOf(horasMin).split("\\.");
+                    int horas = Integer.parseInt(horasMinArray[0]);
+                    String m = (0 + "." + Integer.parseInt(horasMinArray[1]));
+                    double minutosDecimales = Integer.parseInt(m) * 60;
 
-                String[] minutosSplit = String.valueOf(minutosDecimales).split("\\.");
-                int minutos = Integer.parseInt(minutosSplit[0]);
+                    String[] minutosSplit = String.valueOf(minutosDecimales).split("\\.");
+                    int minutos = Integer.parseInt(minutosSplit[0]);
 
-                return "Tiempo de llegada: " + horas + " hora " + minutos + " minutos.";
-            } else {
-                int horas = (int) horasMin;
-                return "Tiempo de llegada: " + horas + " hora/s.";
-            }
-
-        } else {
-            if ((tiempo - (int) tiempo) != 0) {
-                int segundosInt;
-
-                //Decimales
-                String[] minSeg = String.valueOf(tiempo).split("\\.");
-                int minutos = Integer.parseInt(minSeg[0]);
-                String s = (0 + "." + Integer.parseInt(minSeg[1]));
-                double segundos = Double.parseDouble(s) * 60;
-                if ((segundos - (int) segundos) != 0) {
-                    String[] segDecimals = String.valueOf(segundos).split("\\.");
-                    segundosInt = Integer.parseInt(segDecimals[0]);
+                    return horas + " hora " + minutos + " minutos.";
                 } else {
-                    segundosInt = (int) segundos;
+                    int horas = (int) horasMin;
+                    return horas + " hora/s.";
                 }
 
-                return "Tiempo de LLegada: " + minutos + " minutos " + segundosInt + " segundos.";
-            } else {
-                //No decimales
-                int minutos = (int) tiempo;
-                return "Tiempo de LLegada: " + minutos + " minutos.";
             }
-        }
+            else
+            {
+                if ((tiempo - (int) tiempo) != 0)
+                {
+                    int segundosInt;
+
+                    //Decimales
+                    String[] minSeg = String.valueOf(tiempo).split("\\.");
+                    int minutos = Integer.parseInt(minSeg[0]);
+                    String s = (0 + "." + Integer.parseInt(minSeg[1]));
+                    double segundos = Double.parseDouble(s) * 60;
+                    if ((segundos - (int) segundos) != 0) {
+                        String[] segDecimals = String.valueOf(segundos).split("\\.");
+                        segundosInt = Integer.parseInt(segDecimals[0]);
+                    }
+                    else
+                    {
+                        segundosInt = (int) segundos;
+                    }
+                     return minutos + " minutos " + segundosInt + " segundos.";
+
+                }
+                else
+                {
+                    //No decimales
+                    int minutos = (int) tiempo;
+                    return minutos + " minutos.";
+                }
+            }
     }
 
     public Polyline crearRuta(Rutas ruta, List<Marker> marcadoresParaderos, int _color) {
@@ -620,7 +719,8 @@ public class UserMapActivity extends AppCompatActivity
 
             Marker paradero = mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
                     .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero"));
+                    .title("Paradero")
+                    .snippet("Seleccione aquí"));
 
             paradero.setTag(p.id);
             marcadoresParaderos.add(paradero);
@@ -679,6 +779,19 @@ public class UserMapActivity extends AppCompatActivity
         return smallMarker;
     }
 
+    public Bitmap pasajeroIcon() {
+
+        Bitmap smallMarker;
+
+        int largo = 68;
+        int ancho = 42;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.pasajeros_marker);
+        Bitmap b = bitmapdraw.getBitmap();
+        smallMarker = Bitmap.createScaledBitmap(b, ancho, largo, false);
+
+        return smallMarker;
+    }
+
     //Remuevo la lista de Paraderos
     private void removerParaderos() {
         for (Marker paradero : paraderosRutaIda) {
@@ -701,6 +814,19 @@ public class UserMapActivity extends AppCompatActivity
         microsMarker.clear();
     }
 
+    private void reiniciarParaderos()
+    {
+        Bitmap stopIcon = markerIcon();
+        for(Marker paraderoIda : paraderosRutaIda)
+        {
+            paraderoIda.setIcon(BitmapDescriptorFactory.fromBitmap(stopIcon));
+            for(Marker paraderoVuelta : paraderosRutaVuelta)
+            {
+                paraderoVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(stopIcon));
+            }
+        }
+    }
+
     public void detenerServicio() {
         stopService(new Intent(getBaseContext(), ServicePosition.class));
         new AsyncTaskServerPosition.StopPosition().execute(idUser);
@@ -712,8 +838,9 @@ public class UserMapActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
         super.onStop();
+
         new Usuario.DetenerPosicion().execute(idUser);
         detenerServicio();
         detenerServicioLineaFusion();
@@ -733,6 +860,15 @@ public class UserMapActivity extends AppCompatActivity
         startService(intent);
     }
 
+    public void removerFragment()
+    {
+        progressCalificacion.setVisibility(View.GONE);
+        FragmentManager fm = getSupportFragmentManager();
+        if(fm.getBackStackEntryCount()>0)
+        {
+            fm.popBackStack();
+        }
+    }
 
     public void calificarDialog(final double calificacionGlobal)
     {
@@ -754,27 +890,18 @@ public class UserMapActivity extends AppCompatActivity
                 FragmentTransaction FT = FM.beginTransaction();
 
                 Bundle bundle = new Bundle();
-                bundle.putInt("idMicro", idMicroabordo);
+                bundle.putInt("idMicro", idMicroGlobal);
                 bundle.putDouble("cGlobal", calificacionGlobal);
 
                 Fragment fragment = new CalificacionFragment();
                 fragment.setArguments(bundle);
-                FT.replace(R.id.fragment_container_User, fragment);
+                FT.replace(R.id.frame_content_info, fragment);
                 FT.addToBackStack(null);
                 FT.commit();
             }
         });
         alert = dialog.create();
         alert.show();
-    }
-
-    public void RemoverFragmentCalificacion()
-    {
-        FragmentManager FM = getSupportFragmentManager();
-        FragmentTransaction FT = FM.beginTransaction();
-
-        FT.remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container_User));
-        FT.commit();
     }
 
     public void verificarMiMicroAbordada(JSONObject miMicroObject, int idLinea)
@@ -785,38 +912,45 @@ public class UserMapActivity extends AppCompatActivity
 
             if(idMiMicro != -1)
             {
-                enMicro = true;
-
-                idMicroabordo = idMiMicro;
-                String patente = miMicroObject.getString("Patente");
-                calificacionGlobal = miMicroObject.getDouble("Calificacion");
-                //int lineaId = miMicroObject.getInt("LineaId");
-                Linea linea = Linea.BuscarLineaPorId(idLinea);
-                String nombreLinea = linea.nombreLinea;
-
-                FragmentManager FM = getSupportFragmentManager();
-                FragmentTransaction FT = FM.beginTransaction();
-
-                Bundle bundle = new Bundle();
-                bundle.putString("patente", patente);
-                bundle.putDouble("cGlobal", calificacionGlobal);
-                bundle.putString("nombreLinea", nombreLinea);
-
-                Fragment fragment = new InformacionMicroFragment();
-                fragment.setArguments(bundle);
-                FT.replace(R.id.fragment_container_User, fragment);
-                FT.addToBackStack(null);
-                FT.commit();
-
+                estabaEnMicro = true;
                 estaAbierto = true;
-                calificarDialog(calificacionGlobal);
+                calificacionGlobal = miMicroObject.getDouble("Calificacion");
+
+                if(idMicroGlobal == -1) //Entra una sola vez
+                {
+                    btnDeseleccionarParadero.setVisibility(View.GONE); //Desaparece el boton de eleccionar paradero.
+                    idMicroGlobal = idMiMicro;
+                    String patente = miMicroObject.getString("Patente");
+                    Linea linea = Linea.BuscarLineaPorId(idLinea);
+                    String nombreLinea = linea.nombreLinea;
+
+                    relativeLayoutInfoMicro.setVisibility(View.VISIBLE);
+
+                    patenteView.setText(patente);
+                    nombreLineaView.setText(nombreLinea);
+
+                    reiniciarParaderos();
+                    calificarDialog(calificacionGlobal);
+                }
+
+                ratingBarView.setRating(calificacionGlobal.floatValue());
+
             }
             else
             {
-                enMicro = false;
-                if(estaAbierto == true)
+                if( idMicroGlobal != -1)
                 {
-                    RemoverFragmentCalificacion();
+                    if(estabaEnMicro == true)
+                    {
+                        estabaEnMicro = false;
+                        if(aCalificado == true)
+                        {
+                            btnCalificarMicro.setEnabled(true);
+                        }
+
+                        relativeLayoutInfoMicro.setVisibility(View.GONE);
+                        spinnerLayout.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -825,30 +959,14 @@ public class UserMapActivity extends AppCompatActivity
         }
     }
 
-    public void redireccionarFragments()
-    {
-
-        FragmentManager FM = getSupportFragmentManager();
-        FragmentTransaction FT = FM.beginTransaction();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt("idMicro", idMicroabordo);
-        bundle.putDouble("cGlobal", calificacionGlobal);
-
-        Fragment fragment = new CalificacionFragment();
-        fragment.setArguments(bundle);
-        FT.replace(R.id.fragment_container_User, fragment);
-        FT.addToBackStack(null);
-        FT.commit();
-    }
-
     public void recibirPosicion(JSONObject posicion)
     {
         try {
 
+            Bitmap iconPasajero = pasajeroIcon();
+
             double lat = posicion.getDouble("Latitud");
             double lng = posicion.getDouble("Longitud");
-            //Toast.makeText(UserMapActivity.this, lat+"-"+lng, Toast.LENGTH_SHORT).show();
 
             if(marcador != null)
             {
@@ -857,6 +975,7 @@ public class UserMapActivity extends AppCompatActivity
             else
             {
                 marcador = mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng))
+                        .icon(BitmapDescriptorFactory.fromBitmap(iconPasajero))
                         .title("Mi posición"));
             }
 
@@ -934,20 +1053,14 @@ public class UserMapActivity extends AppCompatActivity
         for(Marker ida : paraderosRutaIda)
         {
             ida.setTitle("Paradero");
+            ida.setSnippet("Seleccione aquí");
             ida.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
             for(Marker vuelta : paraderosRutaVuelta)
             {
                 vuelta.setTitle("Paradero");
+                vuelta.setSnippet("Seleccione aquí");
                 vuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
             }
-        }
-    }
-
-    public void restaurarEstado(Bundle saveInstanceState)
-    {
-        if(saveInstanceState != null)
-        {
-
         }
     }
 
@@ -955,8 +1068,9 @@ public class UserMapActivity extends AppCompatActivity
     {
         try {
             Log.e("PARAMETROSUSERMAP", parametros.toString());
+
             int idLinea  = parametros.getInt("IdLineaChoferes");
-            JSONObject microPraderoCercano = parametros.getJSONObject("MicroParaderoCercano");
+            JSONObject microPraderoCercano = parametros.getJSONObject("MicroParaderoCercano"); //TODO: Si es un -1 debe desaparecer el mensaje del tiempo
             JSONObject microAbordada = parametros.getJSONObject("MicroAboradada");
             JSONArray choferes = parametros.getJSONArray("Choferes");
 

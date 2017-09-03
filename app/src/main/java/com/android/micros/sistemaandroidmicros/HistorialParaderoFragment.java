@@ -17,7 +17,7 @@ import static com.android.micros.sistemaandroidmicros.HistorialParaderoActivity.
 
 public class HistorialParaderoFragment extends Fragment {
 
-    String horaLlegada, tiempoDetenido;
+    String horaLlegada, fechaLlegada, segundosDetenidos, minutosDetenidos;
     int pasajerosRecibidos;
     int idParadero;
 
@@ -51,8 +51,31 @@ public class HistorialParaderoFragment extends Fragment {
 
                 if(id == idParadero)
                 {
-                    horaLlegada = h.getString("HoraLlegada");
-                    tiempoDetenido = h.getString("TiempoDetenido");
+                    String hLlegada = h.getString("HoraLlegada");
+                    String[] fechaHoraInicioSplit = hLlegada.split("T");
+                    String[] horaCompleta = fechaHoraInicioSplit[1].split("\\."); //0
+
+                    fechaLlegada = fechaHoraInicioSplit[0];
+                    horaLlegada = horaCompleta[0];
+
+                    String tiempoDetenidoCompleto = h.getString("TiempoDetenido");
+                    String[] sinDecimals = tiempoDetenidoCompleto.split("\\.");
+
+                    boolean existenMinutos = ordenarDuracionRecorrido(sinDecimals[0]);
+                    String[] sinPT = sinDecimals[0].split("T");
+
+                    if(existenMinutos == true)
+                    {
+                        String[] minutosSplit = sinPT[1].split("M");
+                        minutosDetenidos = minutosSplit[0];
+                        segundosDetenidos = minutosSplit[1];
+                    }
+                    else
+                    {
+                        minutosDetenidos = "0";
+                        segundosDetenidos = sinPT[1];
+                    }
+
                     pasajerosRecibidos = h.getInt("PasajerosRecibidos");
                 }
 
@@ -62,11 +85,27 @@ public class HistorialParaderoFragment extends Fragment {
             }
         }
 
-        txtHoraLlegada.setText(horaLlegada);
-        txtTiempoDetenido.setText(tiempoDetenido);
+        txtHoraLlegada.setText(fechaLlegada + System.getProperty("line.separator")+ horaLlegada);
+        txtTiempoDetenido.setText(minutosDetenidos + " minutos "+ segundosDetenidos+" segundos");
         txtPasajerosRecibidos.setText(pasajerosRecibidos+"");
 
         return view;
+    }
+
+    public boolean ordenarDuracionRecorrido(String tiempoDetenido)
+    {
+        boolean existenMinutos = false;
+        for(int caracter = 0; caracter < tiempoDetenido.length(); caracter++)
+        {
+            char caracterObtenido = tiempoDetenido.charAt(caracter);
+
+            if(caracterObtenido == 'M')
+            {
+                existenMinutos = true;
+            }
+        }
+
+        return existenMinutos;
     }
 
 }

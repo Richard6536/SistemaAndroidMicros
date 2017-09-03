@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -18,6 +19,9 @@ import com.google.android.gms.plus.PlusOneButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.android.micros.sistemaandroidmicros.UserMapActivity.aCalificado;
+import static com.android.micros.sistemaandroidmicros.UserMapActivity.btnCalificarMicro;
+
 public class CalificacionFragment extends Fragment {
 
     RatingBar ratingBar, ratingBarGlobal;
@@ -26,6 +30,7 @@ public class CalificacionFragment extends Fragment {
     float miCalififcacion;
     int idMicro;
     float calificacionGlobal;
+    public static ProgressBar progressCalificacion;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,9 @@ public class CalificacionFragment extends Fragment {
         txtMiCalificacion = (TextView)view.findViewById(R.id.txtMiCalificacion);
         btnCalificar = (Button)view.findViewById(R.id.btnCalificar);
 
+        progressCalificacion = (ProgressBar)view.findViewById(R.id.progressCalificacion);
+        progressCalificacion.setVisibility(View.GONE);
+
         idMicro = this.getArguments().getInt("idMicro");
         Double calificacion = this.getArguments().getDouble("cGlobal");
         calificacionGlobal = calificacion.floatValue();
@@ -54,6 +62,10 @@ public class CalificacionFragment extends Fragment {
 
                 try
                 {
+                    progressCalificacion.setVisibility(View.VISIBLE);
+                    btnCalificar.setEnabled(false);
+                    btnCalificarMicro.setEnabled(false);
+                    aCalificado = true;
                     JSONObject params = new JSONObject();
                     params.put("Calificacion", miCalififcacion);
 

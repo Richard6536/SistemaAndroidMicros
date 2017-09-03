@@ -1,32 +1,34 @@
-package com.android.micros.sistemaandroidmicros;
+package com.android.micros.sistemaandroidmicros.Registro;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
+import com.android.micros.sistemaandroidmicros.InternetConnection;
+import com.android.micros.sistemaandroidmicros.R;
+import com.android.micros.sistemaandroidmicros.RegisterStep2Activity;
+import com.android.micros.sistemaandroidmicros.RegisterStep3Activity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-public class RegisterStep2Activity extends AppCompatActivity {
+public class RegisterDXFragment02 extends Fragment {
 
-    private Button btnPaso3;
+    private Button btnSiguienteRegister02;
     private EditText txtCorreo;
     String nombre;
     private TextView lblNombre, mensaje;
@@ -35,22 +37,25 @@ public class RegisterStep2Activity extends AppCompatActivity {
     private ProgressDialog espera;
     private ProgressBar bar;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register_step2);
 
-        Bundle bundle = getIntent().getExtras();
-        nombre=bundle.getString("name").toString();
+    }
 
-        mensaje = (TextView)findViewById(R.id.mensaje8);
-        bar = (ProgressBar)findViewById(R.id.progressBar2);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_register_dxfragment02, container, false);
+
+        mensaje = (TextView)view.findViewById(R.id.mensaje8);
+        bar = (ProgressBar)view.findViewById(R.id.progressBar2);
         bar.setVisibility(View.GONE);
-        txtCorreo = (EditText)findViewById(R.id.txtCorreo);
-        btnPaso3 = (Button)findViewById(R.id.btnPaso3);
+        txtCorreo = (EditText)view.findViewById(R.id.txtCorreo);
 
-
-        btnPaso3.setOnClickListener(new View.OnClickListener() {
+        btnSiguienteRegister02 = (Button)view.findViewById(R.id.btnPaso3);
+        btnSiguienteRegister02.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
@@ -60,17 +65,13 @@ public class RegisterStep2Activity extends AppCompatActivity {
                 }
             }
         });
+
+        return view;
     }
-    protected void onResume()
-    {
-        super.onResume();
-        ActivityController.activiyAbiertaActual = this;
-        bar.setVisibility(View.GONE);
-        btnPaso3.setEnabled(true);
-    }
+
     private void ClickPasoTres() throws JSONException {
 
-        new InternetConnection.hasInternetAccess().execute(getApplicationContext());
+        new InternetConnection.hasInternetAccess().execute(this.getContext());
     }
 
     public void resultInternetConnection(boolean internetConectado)
@@ -80,7 +81,7 @@ public class RegisterStep2Activity extends AppCompatActivity {
             if(txtCorreo.getText().toString().length() >= 3 && txtCorreo.getText().toString().length() <= 50)
             {
                 bar.setVisibility(View.VISIBLE);
-                btnPaso3.setEnabled(false);
+                btnSiguienteRegister02.setEnabled(false);
                 try
                 {
                     JSONObject params = new JSONObject();
@@ -96,23 +97,17 @@ public class RegisterStep2Activity extends AppCompatActivity {
         }
         else
         {
-            internetAlert();
+           // internetAlert();
         }
     }
 
-    public void resultadoValidacion(boolean value)
+    public void resultadoValidcion(boolean value)
     {
-        boolean resultBool = value;
-
-        if(resultBool != true)
+        boolean result = value;
+        if(result != true)
         {
             //bar.setVisibility(View.GONE);
-            Intent intent = new Intent(RegisterStep2Activity.this, RegisterStep3Activity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("correo", txtCorreo.getText().toString());
-            bundle.putString("name", nombre);
-            intent.putExtras(bundle);
-            startActivity(intent);
+            ((RegisterDXActivity)getActivity()).registerFragment02(txtCorreo.getText().toString());
 
         }
         else
@@ -120,11 +115,11 @@ public class RegisterStep2Activity extends AppCompatActivity {
             mensaje.setText(messaje);
         }
     }
-
+/*
     public void internetAlert()
     {
         bar.setVisibility(View.GONE);
-        AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterStep2Activity.this);
+        AlertDialog.Builder dialog = new AlertDialog.Builder();
         dialog.setCancelable(false);
         dialog.setTitle("Error de conexión");
         dialog.setMessage("Por favor, verifique su conexión a internet e intente nuevamente." );
@@ -144,6 +139,5 @@ public class RegisterStep2Activity extends AppCompatActivity {
         });
         final AlertDialog alert = dialog.create();
         alert.show();
-    }
-
+    }*/
 }

@@ -20,6 +20,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -35,6 +37,7 @@ public class Paradero
     public double longitud;
     public int rutaId;
     public double latitud;
+    public int orden;
 
     public static ArrayList<Paradero> paraderos = new ArrayList<>();
 
@@ -520,7 +523,7 @@ public class Paradero
 
 
     static String TAG = "TESTUsuario";
-    public class SeleccionarParadero extends AsyncTask<String,String,JSONObject>
+    public static class SeleccionarParadero extends AsyncTask<String,String,JSONObject>
     {
         @Override
         protected JSONObject doInBackground(String... params) {
@@ -621,6 +624,66 @@ public class Paradero
             }
         }
 
+    }
+
+    public JSONObject seleccParadero(String idUsuario, String idParadero) {
+        HttpURLConnection urlConnection = null;
+        //Parámetros
+        BufferedReader reader = null;
+        OutputStream os = null;
+        InputStream inputStream = null;
+
+        Log.e("asdf ", idUsuario + " " + idParadero);
+
+        try {
+
+            JSONObject paradero = new JSONObject();
+            try {
+
+                paradero.put("IdParadero", idParadero);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/SeleccionarParaderoDX");
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("Accept", "application/json");
+
+            urlConnection.connect();
+
+            os = new BufferedOutputStream(urlConnection.getOutputStream());
+            os.write(paradero.toString().getBytes());
+            os.flush();
+
+            inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String inputLine = "";
+            while ((inputLine = reader.readLine()) != null) {
+                buffer.append(inputLine);
+            }
+
+            String value = buffer.toString();
+
+            JSONObject resultadoJSON = new JSONObject(value);
+            Log.e("resultadoJSON ", resultadoJSON.toString());
+
+
+            return resultadoJSON;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
 //ASDF

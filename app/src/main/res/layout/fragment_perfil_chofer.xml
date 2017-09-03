@@ -28,14 +28,15 @@
 
             <TextView
                 android:id="@+id/txtMiNombre"
+                android:text="Nombre:"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="22dp"
-                android:layout_marginStart="22dp"
+                android:layout_marginLeft="93dp"
+                android:layout_marginStart="93dp"
                 android:layout_alignBaseline="@+id/textView9"
                 android:layout_alignBottom="@+id/textView9"
-                android:layout_toRightOf="@+id/textView13"
-                android:layout_toEndOf="@+id/textView13" />
+                android:layout_toRightOf="@+id/textView9"
+                android:layout_toEndOf="@+id/textView9" />
 
             <TextView
                 android:id="@+id/textView10"
@@ -50,39 +51,33 @@
             <TextView
                 android:id="@+id/txtMiEmail"
                 android:layout_width="wrap_content"
+                android:text="Nombre:"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/textView13"
-                android:layout_toRightOf="@+id/txtMiNombre"
-                android:layout_toEndOf="@+id/txtMiNombre" />
+                android:layout_alignBaseline="@+id/textView10"
+                android:layout_alignBottom="@+id/textView10"
+                android:layout_alignLeft="@+id/txtMiNombre"
+                android:layout_alignStart="@+id/txtMiNombre" />
 
-            <TextView
-                android:id="@+id/textView13"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:text="Contraseña:"
-                android:layout_below="@+id/textView10"
-                android:layout_alignLeft="@+id/textView10"
-                android:layout_alignStart="@+id/textView10" />
 
             <TextView
                 android:id="@+id/textView14"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="127dp"
+                android:layout_marginTop="174dp"
                 android:text="Patente:"
-                android:layout_below="@+id/textView13"
-                android:layout_alignLeft="@+id/textView13"
-                android:layout_alignStart="@+id/textView13" />
+                android:layout_below="@+id/textView10"
+                android:layout_alignLeft="@+id/textView10"
+                android:layout_alignStart="@+id/textView10" />
 
             <TextView
                 android:id="@+id/txtMiPatente"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Nombre:"
                 android:layout_alignBaseline="@+id/textView14"
                 android:layout_alignBottom="@+id/textView14"
-                android:layout_toRightOf="@+id/txtMiEmail"
-                android:layout_toEndOf="@+id/txtMiEmail" />
+                android:layout_alignLeft="@+id/txtMiEmail"
+                android:layout_alignStart="@+id/txtMiEmail" />
 
             <TextView
                 android:id="@+id/textView15"
@@ -97,6 +92,7 @@
             <TextView
                 android:id="@+id/txtMiLinea"
                 android:layout_width="wrap_content"
+                android:text="Nombre:"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@+id/textView15"
                 android:layout_alignBottom="@+id/textView15"

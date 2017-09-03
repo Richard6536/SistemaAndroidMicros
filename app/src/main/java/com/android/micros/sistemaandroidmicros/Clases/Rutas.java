@@ -129,7 +129,6 @@ public class Rutas
                         ruta.idRuta = jsonobject.getInt("Id");
                         ruta.nombreRuta = jsonobject.getString("Nombre");
                         ruta.tipoRuta = jsonobject.getInt("TipoDeRuta");
-                        ruta.idInicio = jsonobject.getInt("InicioId");
                         ruta.idLinea = jsonobject.getInt("LineaId");
 
                         listaRutas.add(ruta);

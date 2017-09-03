@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    tools:context="com.android.micros.sistemaandroidmicros.RegisterActivity">
+    tools:context="com.android.micros.sistemaandroidmicros.Registro.RegisterDXFragment02">
+
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -22,9 +22,6 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,25 +29,28 @@
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
             android:background="#258928"
+            android:layout_gravity="bottom|center_horizontal"
             android:orientation="horizontal"
             tools:ignore="UselessParent">
 
             <Button
-                android:id="@+id/btnPaso3"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:textColor="#ffff"
-                android:clickable="true"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/button_ult_paso" />
+                android:id="@+id/btnSiguienteRegister02"
+                style="?android:textAppearanceSmall"
+                android:textColor="#ffffff"
+                android:background="#258928"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Siguiente y último paso"
+                android:textStyle="bold"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="327dp"
             android:layout_height="wrap_content"
@@ -99,6 +99,5 @@
         </RelativeLayout>
 
     </FrameLayout>
-
 
 </FrameLayout>

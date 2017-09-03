@@ -337,6 +337,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
             if(usuario.id == -1)
             {
+                mEmailSignInButton.setEnabled(true);
+                mEmailSignInButton.setBackgroundColor(Color.GREEN);
                 emailPassIncorrectos();
             }
             else

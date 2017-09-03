@@ -73,6 +73,16 @@
                     android:layout_below="@+id/ratingBar"
                     android:layout_toRightOf="@+id/textView4"
                     android:layout_toEndOf="@+id/textView4" />
+
+                <ProgressBar
+                    android:id="@+id/progressCalificacion"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@+id/ratingBarGlobal"
+                    android:layout_alignRight="@+id/ratingBarGlobal"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginTop="57dp" />
             </RelativeLayout>
         </FrameLayout>
     </RelativeLayout>
