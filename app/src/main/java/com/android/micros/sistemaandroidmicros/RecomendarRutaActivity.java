@@ -27,6 +27,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +38,10 @@ import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -71,6 +77,8 @@ public class RecomendarRutaActivity extends AppCompatActivity
     private Marker marcadorTermino;
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
+
+    String estadoPunto;
 
     //Polylineas
     Polyline polyRuta;
@@ -171,6 +179,23 @@ public class RecomendarRutaActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+
+                direccionAlert(place);
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("MENSAJEPLACE", "An error occurred: " + status);
+            }
+        });
+
         initializeLocationManager();
         permisos();
 
@@ -180,6 +205,84 @@ public class RecomendarRutaActivity extends AppCompatActivity
     {
         super.onResume();
         ActivityController.activiyAbiertaActual = this;
+    }
+
+    public void direccionAlert(final Place place)
+    {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(RecomendarRutaActivity.this);
+        // Set the dialog title
+        builder.setTitle("¿Cómo desea agregar esta dirección?").setMessage(place.getName()+",\n"+
+                place.getAddress() +"\n"
+                + place.getPhoneNumber())
+                .setPositiveButton("inicio", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        estadoPunto = "inicio";
+                        agregarDireccion(estadoPunto, place);
+
+                    }
+                })
+                .setNegativeButton("término", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        estadoPunto = "termino";
+                        agregarDireccion(estadoPunto, place);
+                    }
+                });
+
+        builder.create();
+        builder.show();
+    }
+
+    public void agregarDireccion(String punto, Place place)
+    {
+        Bitmap flag = flagMarker();
+
+        String nombre = place.getName().toString();
+        String direccion = place.getAddress().toString();
+
+        if(punto.equals("termino"))
+        {
+            if(marcadorTermino == null)
+            {
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
+                marcadorTermino = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Punto de término")
+                        .snippet(nombre+"\n"+direccion)
+                        .icon(BitmapDescriptorFactory.fromBitmap(flag))
+                        .draggable(true));
+                marcadorTermino.setTag("llegada");
+                marcadorTermino.showInfoWindow();
+            }
+            else
+            {
+                marcadorTermino.setPosition(place.getLatLng());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
+            }
+
+        }
+        else if(punto.equals("inicio"))
+        {
+
+            if(marcadorInicio == null)
+            {
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
+                marcadorInicio = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Punto de llegada")
+                        .snippet(nombre+"\n"+direccion)
+                        .icon(BitmapDescriptorFactory.fromBitmap(flag))
+                        .draggable(true));
+                marcadorInicio.setTag("llegada");
+                marcadorInicio.showInfoWindow();
+            }
+            else
+            {
+                marcadorInicio.setPosition(place.getLatLng());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
+            }
+        }
+
     }
 
     @Override
@@ -555,6 +658,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -589,6 +693,8 @@ public class RecomendarRutaActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
 }
 
 

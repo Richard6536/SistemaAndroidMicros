@@ -476,6 +476,7 @@ public class Micro {
         @Override
         protected void onPostExecute(JSONObject posicion) {
             try {
+                Log.e("POSICION1232134", posicion+"");
                 String activityActual = ActivityController.activiyAbiertaActual.getClass().getSimpleName();
 
                 if (activityActual.equals("UserMapActivity")) {

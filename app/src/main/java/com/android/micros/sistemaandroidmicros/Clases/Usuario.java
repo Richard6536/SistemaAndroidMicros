@@ -809,4 +809,101 @@ public class Usuario {
         }
 
     }
+
+    public class validacionEmailUsuario extends AsyncTask <String,String,Boolean>
+    {
+
+        @Override
+        protected Boolean doInBackground(String... user) {
+
+            String JsonResponse = "";
+            HttpURLConnection urlConnection = null;
+            String JsonUsuario = user[0];
+            OutputStream outputstream = null;
+            InputStream inputStream = null;
+
+            BufferedReader reader = null;
+
+            Log.e("usuarioU", JsonUsuario);
+
+            try {
+                URL url = new URL(ip+"/odata/Usuarios/ExisteMail");
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+
+                urlConnection.setFixedLengthStreamingMode(JsonUsuario.getBytes().length);
+
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8"));
+                //writer.write(JsonUsuario);
+                //writer.close();
+
+                outputstream = new BufferedOutputStream(urlConnection.getOutputStream());
+                outputstream.write(JsonUsuario.getBytes());
+                outputstream.flush();
+
+                try
+                {
+                    inputStream = urlConnection.getInputStream();
+                }
+                catch(Exception e)
+                {
+                    String err = e.getMessage();
+                }
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+                JSONObject usuarioJson = new JSONObject(value);
+                boolean existe = Boolean.parseBoolean(usuarioJson.getString("value"));
+
+                return existe;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                //clean up
+                try {
+                    outputstream.close();
+                    inputStream.close();
+                    urlConnection.disconnect();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        protected void onPostExecute(Boolean existe)
+        {
+            try
+            {
+                UserMapActivity uMap = (UserMapActivity)ActivityController.activiyAbiertaActual;
+                uMap.verificacionUsuario(existe);
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+    }
+
 }

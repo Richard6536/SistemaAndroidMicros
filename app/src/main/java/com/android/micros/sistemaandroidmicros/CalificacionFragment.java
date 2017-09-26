@@ -13,8 +13,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.android.micros.sistemaandroidmicros.Clases.Calificacion;
-import com.android.micros.sistemaandroidmicros.Clases.Usuario;
-import com.google.android.gms.plus.PlusOneButton;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -16,7 +16,68 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:weightSum="1">
+            <RelativeLayout
+                android:layout_width="160dp"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:text="Linea: "
+                    android:gravity="center"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:id="@+id/textView29" />
+                <TextView
+                    android:id="@+id/lineaNombreAppbar"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:text="200"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="20dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/textView29"
+                    android:layout_toEndOf="@+id/textView29" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.53">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="|"
+                    android:textColor="#57c15a"
+                    android:gravity="center"
+                    android:textSize="30dp"/>
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="match_parent"
+                    android:text="Tarifa:"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:id="@+id/textView30" />
+                <TextView
+                    android:id="@+id/tarifaAppbar"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:text="$400"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/textView30"
+                    android:layout_toEndOf="@+id/textView30" />
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 

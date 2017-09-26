@@ -123,6 +123,7 @@ public class HistorialActivity extends AppCompatActivity{
                     String horaInicio = h.getString("HoraInicio"); //DATETIME
                     String horaFinal = h.getString("HoraFinal");   //DATETIME
 
+
                     if(!horaInicio.equals(horaFinal))
                     {
 

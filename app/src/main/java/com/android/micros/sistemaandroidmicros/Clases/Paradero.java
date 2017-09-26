@@ -37,7 +37,6 @@ public class Paradero
     public double longitud;
     public int rutaId;
     public double latitud;
-    public int orden;
 
     public static ArrayList<Paradero> paraderos = new ArrayList<>();
 

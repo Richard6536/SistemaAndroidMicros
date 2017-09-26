@@ -51,4 +51,5 @@
     <string name="title_activity_ip">IpActivity</string>
 
     <string name="title_activity_register_dx">RegisterDXActivity</string>
+    <string name="title_activity_ejemplo_place_api">EjemploPlaceAPIActivity</string>
 </resources>

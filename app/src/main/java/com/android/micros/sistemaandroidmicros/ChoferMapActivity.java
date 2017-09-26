@@ -55,6 +55,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +79,7 @@ public class ChoferMapActivity extends AppCompatActivity
     String email;
     String patente;
     String lineaNombre;
-
+    String kilometrosDia;
 
     boolean estaEnRecorrido = false;
     int idParaderoSeleccionado = -1;
@@ -192,7 +194,7 @@ public class ChoferMapActivity extends AppCompatActivity
         }
         else
         {
-
+            lblMensaje.setText("");
             microActual = micro;
             patente = micro.patente;
 
@@ -203,10 +205,10 @@ public class ChoferMapActivity extends AppCompatActivity
             linea = Linea.BuscarLineaPorId(micro.lineaId);
             idLineaActual = linea.idLinea;
             lineaNombre = linea.nombreLinea;
+            //String kilometros = micro.kilometrosDia+"";
 
             txtLineaChof.setText(lineaNombre);
             txtPatenteChof.setText(patente);
-            txtKilometrosDia.setText(micro.kilometrosDia+"");
 
             rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
             rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
@@ -442,8 +444,8 @@ public class ChoferMapActivity extends AppCompatActivity
         super.onStop();
         //Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
         new Usuario.DetenerPosicion().execute(idSession);
-        detenerServicioRecorridoFusion();
-        detenerServicio();
+        //detenerServicioRecorridoFusion();
+        //detenerServicio();
     }
 
     @Override
@@ -848,9 +850,16 @@ public class ChoferMapActivity extends AppCompatActivity
                 micro.patente = miMicro.getString("Patente");
                 String calificacion = miMicro.getString("Calificacion");
                 micro.calificacion = Float.valueOf(calificacion);
-                micro.kilometrosDia = miMicro.getDouble("KilometrosDia");
+                double kmt = miMicro.getDouble("KilometrosDia");
+
+                DecimalFormat df = new DecimalFormat("#.###");
+                df.setRoundingMode(RoundingMode.CEILING);
+                String km = df.format(kmt).toString();
 
                 recibirUsuariosParadero(usuarioParaderos);
+                txtKilometrosDia.setText(km);
+                Log.e("KILOMETROSXDIA", km);
+
                 validarLinea(micro);
 
             }

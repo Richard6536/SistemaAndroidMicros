@@ -60,6 +60,7 @@ import com.android.micros.sistemaandroidmicros.Clases.Linea;
 import com.android.micros.sistemaandroidmicros.Clases.Micro;
 import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
+import com.android.micros.sistemaandroidmicros.Clases.SesionPasajero;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -100,25 +101,23 @@ public class UserMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private List<Marker> markers = new ArrayList<Marker>();
-    private final Handler mHandler = new Handler();
-    private Marker selectedMarker;
-    //private Animator animator = new Animator();
 
-    //InformacionMicro
-    String patente, nombreLinea;
+    ArrayList<String> items;
+
     public static Button btnCalificarMicro;
     TextView patenteView, nombreLineaView;
+    TextView nombreLineaAppbar, tarifaAppbar;
     RatingBar ratingBarView;
     RelativeLayout relativeLayoutInfoMicro, rLayoutTiempo;
     boolean menos80mts = false;
     boolean layoutCerrado = false;
     Dialog alertParadero, alertLineas;
-
-    int contVuelta = 0;
     Timer timerMicroParaderoMasCercano;
     boolean paraderoEncontrado;
+    boolean onCreateBool = false;
 
+    Rutas rutaDeIdaActual;
+    Rutas rutaDeVueltaActual;
 
     private int idMicroGlobal = -1;
 
@@ -128,7 +127,7 @@ public class UserMapActivity extends AppCompatActivity
     boolean swt = false;
 
     //NavHeader
-    private TextView txtTiempoMicro, txtTarifa;
+    private TextView txtTiempoMicro;
 
     Polyline polylineIda;
     Polyline polylineVuelta;
@@ -138,17 +137,11 @@ public class UserMapActivity extends AppCompatActivity
 
     private List<Marker> microsMarker = new ArrayList<>();
 
-    private List<Marker> Paraderos = new ArrayList<>();
-
     Marker marcador;
-    private ProgressDialog progressDialog;
     private Spinner spinner;
     ArrayAdapter<String> adapter;
 
-    //Datos de Facebook
-    private String nombreFacebook, correoFacebook;
-
-    private TextView nameHeader, emailHeader, mensaje;
+    private TextView nameHeader, emailHeader;
 
     UserSessionManager session;
     private String name;
@@ -156,160 +149,195 @@ public class UserMapActivity extends AppCompatActivity
     private String idUser;
 
     static int idLineaSeleccionada;
-    int cambioLinea;
 
     String GPS_FILTER = "MyGPSLocation";
 
     boolean estabaEnMicro = false;
     public static boolean aCalificado = false;
 
-    int idParaderoSeleccionado;
-
-    private TextView datosUsuario;
+    int idParaderoSeleccionado, posicionLineaActual;
 
     AlertDialog alert;
-    RelativeLayout spinnerLayout, buttonLayout;
-    Button btnDeseleccionarParadero, btnSeleccionar;
+    RelativeLayout spinnerLayout;
+    Button btnDeseleccionarParadero;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_map);
+
         session = new UserSessionManager(getApplicationContext());
 
         HashMap<String, String> userid = session.obtenerRolyId();
+        HashMap<String, String> userDatos = session.obtenerDetallesUsuario();
+
+        JSONObject parametros = new JSONObject();
+
         idUser = userid.get(UserSessionManager.KEY_ID);
+        String emailUsuario = userDatos.get(UserSessionManager.KEY_EMAIL);
 
-        spinner = (Spinner) findViewById(R.id.spLineas);
-        spinnerLayout = (RelativeLayout) findViewById(R.id.relativeLayoutSpinner);
-        txtTarifa = (TextView)findViewById(R.id.txtTarifa);
+        try {
 
-        rLayoutTiempo = (RelativeLayout)findViewById(R.id.rLayoutTiempo);
-        rLayoutTiempo.setVisibility(View.GONE);
-        txtTiempoMicro = (TextView)findViewById(R.id.txtTiempoMicro);
+            parametros.put("Email", emailUsuario);
+            Usuario us = new Usuario();
+            us.new validacionEmailUsuario().execute(parametros.toString());
 
-        relativeLayoutInfoMicro = (RelativeLayout) findViewById(R.id.relativeLayoutInfoMicro);
-        relativeLayoutInfoMicro.setVisibility(View.GONE);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-        btnDeseleccionarParadero = (Button) findViewById(R.id.btnDeseleccionarParadero);
-        btnDeseleccionarParadero.setVisibility(View.GONE);
-        btnDeseleccionarParadero.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    public void verificacionUsuario(Boolean existe)
+    {
 
-                spinnerLayout.setVisibility(View.VISIBLE);
-                btnDeseleccionarParadero.setVisibility(View.GONE);
-                txtTiempoMicro.setText("");
-                rLayoutTiempo.setVisibility(View.GONE);
-                deseleccionarParaderoAsync();
-            }
-        });
-
-        cargarSpinner();
-
-        btnCalificarMicro = (Button)findViewById(R.id.btnCalificarMicro);
-        btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                FragmentManager FM = getSupportFragmentManager();
-                FragmentTransaction FT = FM.beginTransaction();
-
-                Bundle bundle = new Bundle();
-                bundle.putInt("idMicro", idMicroGlobal);
-                bundle.putDouble("cGlobal", calificacionGlobal);
-
-                Fragment fragment = new CalificacionFragment();
-                fragment.setArguments(bundle);
-                FT.replace(R.id.frame_content_info, fragment);
-                FT.addToBackStack(null);
-                FT.commit();
-            }
-        });
-
-        patenteView = (TextView)findViewById(R.id.txtPatente);
-        nombreLineaView = (TextView)findViewById(R.id.txtLinea);
-        ratingBarView = (RatingBar)findViewById(R.id.ratingBarGlobalInfo);
-
-        //datosUsuario = (TextView) findViewById(R.id.datosUsuario);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        if (session.checkLogin())
+        if(existe == false)
+        {
+            Intent intent = new Intent(UserMapActivity.this, LoginActivity.class);
+            startActivity(intent);
             finish();
+        }
+        else
+        {
+            spinner = (Spinner) findViewById(R.id.spLineas);
+            spinnerLayout = (RelativeLayout) findViewById(R.id.relativeLayoutSpinner);
 
-        HashMap<String, String> user = session.obtenerDetallesUsuario();
-        name = user.get(UserSessionManager.KEY_NAME);
-        email = user.get(UserSessionManager.KEY_EMAIL);
+            rLayoutTiempo = (RelativeLayout)findViewById(R.id.rLayoutTiempo);
+            rLayoutTiempo.setVisibility(View.GONE);
+            txtTiempoMicro = (TextView)findViewById(R.id.txtTiempoMicro);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+            relativeLayoutInfoMicro = (RelativeLayout) findViewById(R.id.relativeLayoutInfoMicro);
+            relativeLayoutInfoMicro.setVisibility(View.GONE);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+            btnDeseleccionarParadero = (Button) findViewById(R.id.btnDeseleccionarParadero);
+            btnDeseleccionarParadero.setVisibility(View.GONE);
+            btnDeseleccionarParadero.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                    spinnerLayout.setVisibility(View.VISIBLE);
+                    btnDeseleccionarParadero.setVisibility(View.GONE);
+                    txtTiempoMicro.setText("");
+                    rLayoutTiempo.setVisibility(View.GONE);
+                    deseleccionarParaderoAsync();
+                }
+            });
 
-        mapFragment.getMapAsync(this);
+            cargarSpinner();
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            btnCalificarMicro = (Button)findViewById(R.id.btnCalificarMicro);
+            btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                    FragmentManager FM = getSupportFragmentManager();
+                    FragmentTransaction FT = FM.beginTransaction();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("idMicro", idMicroGlobal);
+                    bundle.putDouble("cGlobal", calificacionGlobal);
+
+                    Fragment fragment = new CalificacionFragment();
+                    fragment.setArguments(bundle);
+                    FT.replace(R.id.frame_content_info, fragment);
+                    FT.addToBackStack(null);
+                    FT.commit();
+                }
+            });
+
+            patenteView = (TextView)findViewById(R.id.txtPatente);
+            nombreLineaView = (TextView)findViewById(R.id.txtLinea);
+            ratingBarView = (RatingBar)findViewById(R.id.ratingBarGlobalInfo);
+
+            //datosUsuario = (TextView) findViewById(R.id.datosUsuario);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            nombreLineaAppbar = (TextView)findViewById(R.id.lineaNombreAppbar);
+            tarifaAppbar = (TextView)findViewById(R.id.tarifaAppbar);
+
+            if (session.checkLogin())
+                finish();
+
+            HashMap<String, String> user = session.obtenerDetallesUsuario();
+            name = user.get(UserSessionManager.KEY_NAME);
+            email = user.get(UserSessionManager.KEY_EMAIL);
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+
+            mapFragment.getMapAsync(this);
+
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 
 
-                if (polylineIda != null && polylineVuelta != null) {
-                    polylineIda.remove();
-                    polylineVuelta.remove();
-                    removerParaderos();
-                    removerMicros();
+                    if (polylineIda != null && polylineVuelta != null) {
+                        polylineIda.remove();
+                        polylineVuelta.remove();
+                        removerParaderos();
+                        removerMicros();
+                    }
+
+                    posicionLineaActual = pos;
+                    Object item = parent.getItemAtPosition(pos);
+                    String itemStr = item.toString();
+                    Linea linea = new Linea();
+                    Rutas rutaIda;
+                    Rutas rutaVuelta;
+
+                    //cargandoLinea();
+
+                    //Retorna el Id de la linea que se selecciona en el spinner
+                    idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
+                    Log.e("idLineaUSERPMAP", idLineaSeleccionada + "");
+
+                    //Envío el Id de la linea y recibo la linea completa
+                    linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
+
+                    //Mostrar tarifa
+                    tarifaAppbar.setText(linea.tarifa+"");
+                    nombreLineaAppbar.setText(linea.nombreLinea);
+
+                    rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
+                    rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
+
+                    rutaDeIdaActual = rutaIda;
+                    rutaDeVueltaActual = rutaVuelta;
+
+                    polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
+                    polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+                    //actualizarPosicionMicros();
+                    //removerMicros();
                 }
 
-                Object item = parent.getItemAtPosition(pos);
-                String itemStr = item.toString();
-                Linea linea = new Linea();
-                Rutas rutaIda;
-                Rutas rutaVuelta;
+                public void onNothingSelected(AdapterView<?> parent) {
 
-                //cargandoLinea();
+                }
+            });
 
-                //Retorna el Id de la linea que se selecciona en el spinner
-                idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
-                Log.e("idLineaUSERPMAP", idLineaSeleccionada + "");
 
-                //Envío el Id de la linea y recibo la linea completa
-                linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
+            if(onCreateBool == false)
+            {
 
-                //Mostrar tarifa
-                txtTarifa.setText(linea.tarifa+"");
-
-                rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
-                rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
-
-                polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
-                polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
-                //actualizarPosicionMicros();
-                //removerMicros();
+                //Métodos que se llaman constantemente -------------------------
+                idParaderoSeleccionado = -1;
+                //actualizarPosicionMicros();                                            //Lineas(5)/ObtenerChoferes
+                //actualizarMiMicroAbordada();                                           //Usuarios(5)/ObtenerMiMicroAbordada
+                iniciarServicio();                                                     //Usuarios(5)/ActualizarPosicion
+                iniciarServicioLineaFusion();
             }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        //Métodos que se llaman constantemente -------------------------
-
-        idParaderoSeleccionado = -1;
-
-        //actualizarPosicionMicros();                                            //Lineas(5)/ObtenerChoferes
-        //actualizarMiMicroAbordada();                                           //Usuarios(5)/ObtenerMiMicroAbordada
-
-        iniciarServicio();                                                     //Usuarios(5)/ActualizarPosicion
-        iniciarServicioLineaFusion();
+        }
     }
 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -329,6 +357,16 @@ public class UserMapActivity extends AppCompatActivity
         super.onResume();
         ActivityController.activiyAbiertaActual = this;
 
+        if(SesionPasajero.idParaderoGuardado != -1)
+        {
+            idParaderoSeleccionado = SesionPasajero.idParaderoGuardado;
+            posicionLineaActual = SesionPasajero.idLineaPosicionGuardada;
+
+            polylineIda = crearRuta(SesionPasajero.rutaIda, paraderosRutaIda, Color.RED);
+            polylineVuelta = crearRuta(SesionPasajero.rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+
+            recibirParaderoSeleccionado();
+        }
     }
 
     @Override
@@ -381,6 +419,7 @@ public class UserMapActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             new Usuario.DetenerPosicion().execute(idUser);
             session.logoutUser();
+
             detenerServicio();
             return true;
         }
@@ -453,22 +492,8 @@ public class UserMapActivity extends AppCompatActivity
             public void onInfoWindowClick(Marker paraderoSeleccionado) {
                 if (estabaEnMicro == false) {
 
-                    detenerServicioLineaFusion();
-                    spinnerLayout.setVisibility(View.GONE);
-                    btnDeseleccionarParadero.setVisibility(View.VISIBLE);
-                    //cargandoParadero();
-
                     idParaderoSeleccionado = Integer.parseInt(paraderoSeleccionado.getTag().toString());
-
-                    Paradero paradero = new Paradero();
-
-                    //JSONObject result = paradero.seleccParadero(idUser, idParaderoSeleccionado+"");
-                    //Log.e("PARADEROPRUEBA", result.toString());
-                    //recibirParaderoSeleccionado();
-
-                    new Paradero.SeleccionarParadero().execute(idUser, idParaderoSeleccionado+"");
-
-                    //paradero.new SeleccionarParadero().execute(idUser, idParaderoSeleccionado + "");
+                    procesoSeleccionParadero();
 
                 } else {
                     Toast.makeText(UserMapActivity.this, "No puede selecconar un paradero, si está abordo de una micro.", Toast.LENGTH_SHORT).show();
@@ -476,6 +501,15 @@ public class UserMapActivity extends AppCompatActivity
             }
         });
 
+    }
+
+    public void procesoSeleccionParadero()
+    {
+        detenerServicioLineaFusion();
+        spinnerLayout.setVisibility(View.GONE);
+        btnDeseleccionarParadero.setVisibility(View.VISIBLE);
+
+        new Paradero.SeleccionarParadero().execute(idUser, idParaderoSeleccionado+"");
     }
 
     public void agregarMicros(JSONArray choferes) {
@@ -733,7 +767,7 @@ public class UserMapActivity extends AppCompatActivity
 
     public void cargarSpinner() {
         Linea linea = new Linea();
-        ArrayList<String> items = linea.obtenerNombres();
+        items = linea.obtenerNombres();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -838,12 +872,17 @@ public class UserMapActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        //Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
         super.onStop();
 
-        new Usuario.DetenerPosicion().execute(idUser);
-        detenerServicio();
-        detenerServicioLineaFusion();
+        SesionPasajero.idParaderoGuardado = idParaderoSeleccionado;
+        SesionPasajero.idLineaPosicionGuardada = posicionLineaActual;
+
+        SesionPasajero.rutaIda = rutaDeIdaActual;
+        SesionPasajero.rutaVuelta = rutaDeVueltaActual;
+
+        //spinner.setAdapter(null);
+        //detenerServicio();
+        //detenerServicioLineaFusion();
     }
 
 

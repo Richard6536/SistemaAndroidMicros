@@ -23,8 +23,9 @@ import java.util.ArrayList;
 public class HistorialParaderoActivity extends AppCompatActivity {
 
     public static JSONArray historialParaderosActual;
-    static ArrayList<String> arrayListIdParaderos = new ArrayList<>();
-    private ArrayAdapter<String> adapter;
+    static ArrayList<Integer> ordenParaderos = new ArrayList<>();
+    static ArrayList<Integer> idParaderosLst = new ArrayList<>();
+    private ArrayAdapter<Integer> adapter;
     ListView listView;
     int idParaderos, idIdaVuelta;
     String idParadero;
@@ -46,8 +47,9 @@ public class HistorialParaderoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 String item = parent.getAdapter().getItem(position).toString();
-                String[] split = item.split("\\.");
-                idParadero = split[1];
+                int posicionItem = Integer.parseInt(item);
+                int idBuscado = idParaderosLst.indexOf(posicionItem);
+                idParadero = idBuscado+"";
 
                 FragmentManager FM = getSupportFragmentManager();
                 FragmentTransaction FT = FM.beginTransaction();
@@ -83,8 +85,10 @@ public class HistorialParaderoActivity extends AppCompatActivity {
                     JSONObject h = null;
                     h = historialParaderos.getJSONObject(i);
                     idParaderos = h.getInt("Id");
+                    int orden = h.getInt("Orden")+1;
 
-                    arrayListIdParaderos.add("  "+cont+"                 ."+idParaderos);
+                    ordenParaderos.add(orden);
+                    idParaderosLst.add(idParaderos);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -92,7 +96,7 @@ public class HistorialParaderoActivity extends AppCompatActivity {
 
             }
 
-            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, arrayListIdParaderos);
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, ordenParaderos);
             listView.setAdapter(adapter);
 
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -110,7 +114,7 @@ public class HistorialParaderoActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        arrayListIdParaderos.clear();
+        ordenParaderos.clear();
         cont = 0;
     }
 }

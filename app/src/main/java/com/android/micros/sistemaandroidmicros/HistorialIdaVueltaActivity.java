@@ -89,6 +89,7 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
                     h = historialIdaVuelta.getJSONObject(i);
                     idIdaVuelta = h.getInt("Id");
 
+
                     arrayListId.add("  "+cont+"                  ."+idIdaVuelta);
 
                 } catch (JSONException e) {
