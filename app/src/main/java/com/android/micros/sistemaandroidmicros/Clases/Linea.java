@@ -228,7 +228,7 @@ public class Linea {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL(ip+"/odata/Lineas/RecomendarRutaDX");
+                URL url = new URL(ip+"/Lineas/RecomendarRutaDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

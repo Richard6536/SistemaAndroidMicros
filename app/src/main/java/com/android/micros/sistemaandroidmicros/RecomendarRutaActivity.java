@@ -67,6 +67,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     boolean primeraVez = true;
+    boolean busquedaDetallada  = false;
 
     //Alertas de dialogo
     AlertDialog alert = null;
@@ -77,7 +78,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
     private Marker marcadorTermino;
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
-
+    private boolean enFalse = false;
     String estadoPunto;
 
     //Polylineas
@@ -147,6 +148,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
                         double latTermino = latLngTermino.latitude;
                         double lngTermino = latLngTermino.longitude;
 
+                        coordenadas.put("BusquedaDetallada", busquedaDetallada);
                         coordenadas.put("latInicio", latInicio);
                         coordenadas.put("lngInicio", lngInicio);
                         coordenadas.put("latFinal", latTermino);
@@ -529,8 +531,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
         for (Paradero p : paraderos) {
 
             Marker paradero = mMap.addMarker(new MarkerOptions().position(new LatLng(p.latitud, p.longitud))
-                    .icon(BitmapDescriptorFactory.fromBitmap(icon))
-                    .title("Paradero"));
+                    .icon(BitmapDescriptorFactory.fromBitmap(icon)));
 
             paradero.setTag(p.id);
             marcadoresParaderos.add(paradero);
@@ -599,7 +600,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(RecomendarRutaActivity.this);
         dialog.setCancelable(false);
-        dialog.setMessage("No existe una ruta recomendada para su posición.");
+        dialog.setMessage("Puede existir un problema con su conexión a internet o que no haya una ruta recomendada.");
         dialog.setPositiveButton("Intentar nuevamente", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
@@ -684,9 +685,13 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
         }
 
-        else if (id == R.id.nav_share)
+        else if (id == R.id.nav_false)
         {
-
+            busquedaDetallada = false;
+        }
+        else if(id == R.id.nav_true)
+        {
+            busquedaDetallada = true;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

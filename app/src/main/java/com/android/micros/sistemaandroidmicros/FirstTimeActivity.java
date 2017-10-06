@@ -114,9 +114,9 @@ public class FirstTimeActivity extends AppCompatActivity {
         }
         else
         {
-            String URLRutas = ip+"/odata/Rutas";
-            String URLLineas = ip+"/odata/Lineas";
-            String URLParaderos = ip+"/odata/Paraderos";
+            String URLRutas = ip+"/Rutas";
+            String URLLineas = ip+"/Lineas";
+            String URLParaderos = ip+"/Paraderos";
 
             new Rutas.ObtenerRutas().execute(URLRutas);
             new Linea.ObtenerLineas().execute(URLLineas);

@@ -77,17 +77,38 @@ public class HistorialIdaVueltaFragment extends Fragment {
                         horaTermino = horaFCompleta[0];
 
                         String duracionRecorridoComp = h.getString("DuracionRecorrido");
-                        String[] splitDuracion = duracionRecorridoComp.split("\\.");
-                        String[] minutoSegundos = splitDuracion[0].split("M");
-                        String[] minutosSplit = minutoSegundos[0].split("T");
+                        boolean minutos = false;
+                        for(i=0; i<duracionRecorridoComp.length(); i++)
+                        {
+                            char caracter = duracionRecorridoComp.charAt(i);
+                            if(caracter == 'M')
+                            {
+                                minutos = true;
+                            }
+                        }
 
-                        segRecorridos = minutoSegundos[1];
-                        minRecorrido = minutosSplit[1];
+                        String[] splitDuracion = duracionRecorridoComp.split("\\.");
+
+                        if(minutos == true)
+                        {
+                            String[] minutoSegundos = splitDuracion[0].split("M");
+                            String[] minutosSplit = minutoSegundos[0].split("T");
+
+                            segRecorridos = minutoSegundos[1];
+                            minRecorrido = minutosSplit[1];
+                            txtDuracionRecorrido.setText(minRecorrido +" minutos "+segRecorridos+" segundos");
+                        }
+                        else
+                        {
+                            String[] minutosSplit = splitDuracion[0].split("T");
+
+                            segRecorridos = minutosSplit[1];
+                            txtDuracionRecorrido.setText(segRecorridos+" segundos");
+                        }
 
                         txtPasajerosTrans.setText(pasajerosTransportados+"");
                         txtHoraInicio.setText(fechaInicio + System.getProperty("line.separator") + horaInicio);
                         txtHoraTermino.setText(fechaTermino + System.getProperty("line.separator") + horaTermino);
-                        txtDuracionRecorrido.setText(minRecorrido +" minutos "+segRecorridos+" segundos");
                     }
 
                 }

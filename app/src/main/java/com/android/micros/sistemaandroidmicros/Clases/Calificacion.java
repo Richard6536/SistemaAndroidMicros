@@ -40,7 +40,7 @@ public class Calificacion
             BufferedReader reader = null;
 
             try {
-                URL url = new URL(ip+"/odata/Micros("+microId+")/NuevaCalificacion");
+                URL url = new URL(ip+"/Micros("+microId+")/NuevaCalificacion");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);

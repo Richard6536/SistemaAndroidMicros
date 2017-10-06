@@ -23,9 +23,13 @@
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_false"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="Cambiar a False" />
+            <item
+                android:id="@+id/nav_true"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Cambiar a True" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"

@@ -47,16 +47,9 @@ public class HistorialActivity extends AppCompatActivity{
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial);
-        ActivityController.activiyAbiertaActual = this;
-
-        txtNoExisteHistorial = (TextView)findViewById(R.id.txtNoExisteHistorial);
-        listView = (ListView)findViewById(R.id.listFecha);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        Bundle bundle = getIntent().getExtras();
-        idMicro = bundle.getString("idMicro").toString();
 
         searchViewItems = (SearchView)findViewById(R.id.searchViewItems);
         searchViewItems.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -73,7 +66,17 @@ public class HistorialActivity extends AppCompatActivity{
                 return false;
             }
         });
+    }
 
+    protected void onResume() {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
+
+        txtNoExisteHistorial = (TextView)findViewById(R.id.txtNoExisteHistorial);
+        listView = (ListView)findViewById(R.id.listFecha);
+
+        Bundle bundle = getIntent().getExtras();
+        idMicro = bundle.getString("idMicro").toString();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -99,10 +102,6 @@ public class HistorialActivity extends AppCompatActivity{
         });
 
         new Historial.ObtenerHistorialDiario().execute(idMicro);
-    }
-
-    protected void onResume() {
-        super.onResume();
     }
 
     public void listarHistorial(JSONArray historial){

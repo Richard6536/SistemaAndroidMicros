@@ -177,6 +177,84 @@ public class UserMapActivity extends AppCompatActivity
         idUser = userid.get(UserSessionManager.KEY_ID);
         String emailUsuario = userDatos.get(UserSessionManager.KEY_EMAIL);
 
+        spinner = (Spinner) findViewById(R.id.spLineas);
+        spinnerLayout = (RelativeLayout) findViewById(R.id.relativeLayoutSpinner);
+
+        rLayoutTiempo = (RelativeLayout)findViewById(R.id.rLayoutTiempo);
+        rLayoutTiempo.setVisibility(View.GONE);
+        txtTiempoMicro = (TextView)findViewById(R.id.txtTiempoMicro);
+
+        relativeLayoutInfoMicro = (RelativeLayout) findViewById(R.id.relativeLayoutInfoMicro);
+        relativeLayoutInfoMicro.setVisibility(View.GONE);
+
+        btnDeseleccionarParadero = (Button) findViewById(R.id.btnDeseleccionarParadero);
+        btnDeseleccionarParadero.setVisibility(View.GONE);
+        btnDeseleccionarParadero.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                spinnerLayout.setVisibility(View.VISIBLE);
+                btnDeseleccionarParadero.setVisibility(View.GONE);
+                txtTiempoMicro.setText("");
+                rLayoutTiempo.setVisibility(View.GONE);
+                deseleccionarParaderoAsync();
+            }
+        });
+
+        cargarSpinner();
+
+        btnCalificarMicro = (Button)findViewById(R.id.btnCalificarMicro);
+        btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                FragmentManager FM = getSupportFragmentManager();
+                FragmentTransaction FT = FM.beginTransaction();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("idMicro", idMicroGlobal);
+                bundle.putDouble("cGlobal", calificacionGlobal);
+
+                Fragment fragment = new CalificacionFragment();
+                fragment.setArguments(bundle);
+                FT.replace(R.id.frame_content_info, fragment);
+                FT.addToBackStack(null);
+                FT.commit();
+            }
+        });
+
+        patenteView = (TextView)findViewById(R.id.txtPatente);
+        nombreLineaView = (TextView)findViewById(R.id.txtLinea);
+        ratingBarView = (RatingBar)findViewById(R.id.ratingBarGlobalInfo);
+
+        //datosUsuario = (TextView) findViewById(R.id.datosUsuario);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        nombreLineaAppbar = (TextView)findViewById(R.id.lineaNombreAppbar);
+        tarifaAppbar = (TextView)findViewById(R.id.tarifaAppbar);
+
+        if (session.checkLogin())
+            finish();
+
+        HashMap<String, String> user = session.obtenerDetallesUsuario();
+        name = user.get(UserSessionManager.KEY_NAME);
+        email = user.get(UserSessionManager.KEY_EMAIL);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+
+        mapFragment.getMapAsync(this);
+
         try {
 
             parametros.put("Email", emailUsuario);
@@ -199,83 +277,7 @@ public class UserMapActivity extends AppCompatActivity
         }
         else
         {
-            spinner = (Spinner) findViewById(R.id.spLineas);
-            spinnerLayout = (RelativeLayout) findViewById(R.id.relativeLayoutSpinner);
 
-            rLayoutTiempo = (RelativeLayout)findViewById(R.id.rLayoutTiempo);
-            rLayoutTiempo.setVisibility(View.GONE);
-            txtTiempoMicro = (TextView)findViewById(R.id.txtTiempoMicro);
-
-            relativeLayoutInfoMicro = (RelativeLayout) findViewById(R.id.relativeLayoutInfoMicro);
-            relativeLayoutInfoMicro.setVisibility(View.GONE);
-
-            btnDeseleccionarParadero = (Button) findViewById(R.id.btnDeseleccionarParadero);
-            btnDeseleccionarParadero.setVisibility(View.GONE);
-            btnDeseleccionarParadero.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    spinnerLayout.setVisibility(View.VISIBLE);
-                    btnDeseleccionarParadero.setVisibility(View.GONE);
-                    txtTiempoMicro.setText("");
-                    rLayoutTiempo.setVisibility(View.GONE);
-                    deseleccionarParaderoAsync();
-                }
-            });
-
-            cargarSpinner();
-
-            btnCalificarMicro = (Button)findViewById(R.id.btnCalificarMicro);
-            btnCalificarMicro.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    FragmentManager FM = getSupportFragmentManager();
-                    FragmentTransaction FT = FM.beginTransaction();
-
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("idMicro", idMicroGlobal);
-                    bundle.putDouble("cGlobal", calificacionGlobal);
-
-                    Fragment fragment = new CalificacionFragment();
-                    fragment.setArguments(bundle);
-                    FT.replace(R.id.frame_content_info, fragment);
-                    FT.addToBackStack(null);
-                    FT.commit();
-                }
-            });
-
-            patenteView = (TextView)findViewById(R.id.txtPatente);
-            nombreLineaView = (TextView)findViewById(R.id.txtLinea);
-            ratingBarView = (RatingBar)findViewById(R.id.ratingBarGlobalInfo);
-
-            //datosUsuario = (TextView) findViewById(R.id.datosUsuario);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-
-            nombreLineaAppbar = (TextView)findViewById(R.id.lineaNombreAppbar);
-            tarifaAppbar = (TextView)findViewById(R.id.tarifaAppbar);
-
-            if (session.checkLogin())
-                finish();
-
-            HashMap<String, String> user = session.obtenerDetallesUsuario();
-            name = user.get(UserSessionManager.KEY_NAME);
-            email = user.get(UserSessionManager.KEY_EMAIL);
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.setDrawerListener(toggle);
-            toggle.syncState();
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(this);
-
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-
-            mapFragment.getMapAsync(this);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 

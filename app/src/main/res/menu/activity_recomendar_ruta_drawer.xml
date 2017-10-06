@@ -19,6 +19,14 @@
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="Iniciar Tester" />
+            <item
+                android:id="@+id/nav_false"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Cambiar a False" />
+            <item
+                android:id="@+id/nav_true"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Cambiar a True" />
         </menu>
     </item>
 

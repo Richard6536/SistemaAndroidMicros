@@ -94,7 +94,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios/ExisteMail");
+                URL url = new URL(ip+"/Usuarios/ExisteMail");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -192,7 +192,7 @@ public class Usuario {
             BufferedReader reader = null;
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios");
+                URL url = new URL(ip+"/Usuarios");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -272,7 +272,7 @@ public class Usuario {
             Log.e("usuarioU", JsonUsuario);
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios/EsValido");
+                URL url = new URL(ip+"/Usuarios/EsValido");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
@@ -369,7 +369,7 @@ public class Usuario {
             Boolean boolea = false;
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios(5)/EditarDatos");
+                URL url = new URL(ip+"/Usuarios(5)/EditarDatos");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -477,7 +477,7 @@ public class Usuario {
                     e.printStackTrace();
                 }
 
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerDatosLineaFusion");
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ObtenerDatosLineaFusion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setRequestMethod("POST");
@@ -576,7 +576,7 @@ public class Usuario {
             try {
 
 
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerDatosRecorridoFusion");
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ObtenerDatosRecorridoFusion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setRequestMethod("POST");
@@ -661,7 +661,7 @@ public class Usuario {
             Log.e("IDUSUARIO", idUsuario);
             try {
 
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/ObtenerMiMicroAbordada");
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ObtenerMiMicroAbordada");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -746,7 +746,7 @@ public class Usuario {
 
             try {
 
-                URL url = new URL(ip+"/odata/odata/Usuarios("+idUsuario+")/DetenerPosicionUpdate");
+                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/DetenerPosicionUpdate");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -827,7 +827,7 @@ public class Usuario {
             Log.e("usuarioU", JsonUsuario);
 
             try {
-                URL url = new URL(ip+"/odata/Usuarios/ExisteMail");
+                URL url = new URL(ip+"/Usuarios/ExisteMail");
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);

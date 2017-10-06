@@ -214,7 +214,7 @@ public class Rutas
             BufferedReader reader = null;
 
             try {
-                URL url = new URL(ip+"/odata/Rutas("+idRuta+")/ListaCoordenadas");
+                URL url = new URL(ip+"/Rutas("+idRuta+")/ListaCoordenadas");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

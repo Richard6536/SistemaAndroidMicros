@@ -46,9 +46,9 @@ public class HistorialParaderoActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String item = parent.getAdapter().getItem(position).toString();
-                int posicionItem = Integer.parseInt(item);
-                int idBuscado = idParaderosLst.indexOf(posicionItem);
+                int item = Integer.parseInt(parent.getAdapter().getItem(position).toString());
+                int indexOrden = ordenParaderos.indexOf(item);
+                int idBuscado =idParaderosLst.get(indexOrden);
                 idParadero = idBuscado+"";
 
                 FragmentManager FM = getSupportFragmentManager();
@@ -85,7 +85,7 @@ public class HistorialParaderoActivity extends AppCompatActivity {
                     JSONObject h = null;
                     h = historialParaderos.getJSONObject(i);
                     idParaderos = h.getInt("Id");
-                    int orden = h.getInt("Orden")+1;
+                    int orden = h.getInt("Orden");
 
                     ordenParaderos.add(orden);
                     idParaderosLst.add(idParaderos);
@@ -115,6 +115,7 @@ public class HistorialParaderoActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         ordenParaderos.clear();
+        idParaderosLst.clear();
         cont = 0;
     }
 }

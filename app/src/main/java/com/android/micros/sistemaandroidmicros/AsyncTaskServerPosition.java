@@ -54,7 +54,7 @@ public class AsyncTaskServerPosition
                 OutputStream os = null;
                 InputStream inputStream = null;
 
-                URL url = new URL(ip+"/odata/Usuarios("+usuarioId+")/ActualizarPosicion");
+                URL url = new URL(ip+"/Usuarios("+usuarioId+")/ActualizarPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -120,7 +120,7 @@ public class AsyncTaskServerPosition
                 OutputStream os = null;
                 InputStream inputStream = null;
 
-                URL url = new URL(ip+"/odata/Usuarios("+usuarioId+")/DetenerPosicionUpdate");
+                URL url = new URL(ip+"/Usuarios("+usuarioId+")/DetenerPosicionUpdate");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

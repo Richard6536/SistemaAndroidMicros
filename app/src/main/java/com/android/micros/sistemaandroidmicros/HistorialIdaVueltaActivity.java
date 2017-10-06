@@ -30,12 +30,20 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
     public static JSONArray historialIdaVeultaActual;
     int cont = 0;
 
-    static ArrayList<String> arrayListId = new ArrayList<>();
-    private ArrayAdapter<String> adapter;
+    static ArrayList<Integer> listId = new ArrayList<>();
+    static ArrayList<Integer> listOrden = new ArrayList<>();
+
+    private ArrayAdapter<Integer> adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historial_ida_vuelta);
+
+    }
+
+    protected void onResume() {
+        super.onResume();
+        ActivityController.activiyAbiertaActual = this;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -43,14 +51,14 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         idHistorial = bundle.getInt("idHistorial");
 
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String item = parent.getAdapter().getItem(position).toString();
-                String[] split = item.split("\\.");
-                idIdaVuelta = Integer.parseInt(split[1]);
+                int item = Integer.parseInt(parent.getAdapter().getItem(position).toString());
+                int indexOrden = listOrden.indexOf(item);
+                int idBuscado =listId.get(indexOrden);
+                idIdaVuelta = idBuscado;
 
                 FragmentManager FM = getSupportFragmentManager();
                 FragmentTransaction FT = FM.beginTransaction();
@@ -65,14 +73,7 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
             }
         });
 
-            new Historial.ObtenerHistorialIdaVuelta().execute(idHistorial+"");
-
-    }
-
-    protected void onResume() {
-        super.onResume();
-        ActivityController.activiyAbiertaActual = this;
-
+        new Historial.ObtenerHistorialIdaVuelta().execute(idHistorial+"");
     }
     public void listarHistorial(JSONArray historialIdaVuelta){
 
@@ -80,6 +81,7 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
 
         if(historialIdaVuelta.length() != 0)
         {
+            int orden2 = 0;
             for(int i = 0; i<historialIdaVuelta.length(); i++)
             {
                 try {
@@ -87,10 +89,19 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
                     cont++;
                     JSONObject h = null;
                     h = historialIdaVuelta.getJSONObject(i);
+                    String hi = h.getString("HoraInicio");
+                    String hf = h.getString("HoraTermino");
+
                     idIdaVuelta = h.getInt("Id");
+                    int orden = h.getInt("Orden");
 
+                    if(!hi.equals(hf))
+                    {
 
-                    arrayListId.add("  "+cont+"                  ."+idIdaVuelta);
+                        orden2++;
+                        listOrden.add(orden2);
+                        listId.add(idIdaVuelta);
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -98,12 +109,11 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
 
             }
 
-            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, arrayListId);
-            listView.setAdapter(adapter);
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, listOrden);
 
+            listView.setAdapter(adapter);
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             listView.setItemChecked(0, true);
-
             listView.performItemClick(listView.getSelectedView(), 0, 0);
         }
     }
@@ -126,7 +136,8 @@ public class HistorialIdaVueltaActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        arrayListId.clear();
+        listOrden.clear();
+        listId.clear();
         cont = 0;
     }
 }

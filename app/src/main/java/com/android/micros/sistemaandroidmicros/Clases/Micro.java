@@ -108,7 +108,7 @@ public class Micro {
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerMicro");
+                URL url = new URL(ip + "/Usuarios(" + idUsuario + ")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -216,7 +216,7 @@ public class Micro {
 
             try {
                 //"http://localhost:8081/odata/Usuarios("+idUsuario+")/ObtenerMicro"
-                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerMicro");
+                URL url = new URL(ip + "/Usuarios(" + idUsuario + ")/ObtenerMicro");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -326,7 +326,7 @@ public class Micro {
             Log.e("LINEID", idLinea);
 
             try {
-                URL url = new URL(ip + "/odata/Lineas(" + idLinea + ")/ObtenerChoferes");
+                URL url = new URL(ip + "/Lineas(" + idLinea + ")/ObtenerChoferes");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -418,7 +418,7 @@ public class Micro {
             Log.e("CAMBIARPOSICIONXD", idUsuario);
             try {
 
-                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerPosicion");
+                URL url = new URL(ip + "/Usuarios(" + idUsuario + ")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -506,7 +506,7 @@ public class Micro {
             Log.e("190854531", idMicro);
 
             try {
-                URL url = new URL(ip + "/odata/Micros(" + idMicro + ")/IniciarRecorrido");
+                URL url = new URL(ip + "/Micros(" + idMicro + ")/IniciarRecorrido");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -587,7 +587,7 @@ public class Micro {
             Log.e("OBTENERMIPOSICIONASDF", idUsuario);
 
             try {
-                URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/ObtenerPosicion");
+                URL url = new URL(ip + "/Usuarios(" + idUsuario + ")/ObtenerPosicion");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

@@ -43,7 +43,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL(ip+"/odata/Micros("+idMicro+")/ObtenerHistorialesDiarios");
+                URL url = new URL(ip+"/Micros("+idMicro+")/ObtenerHistorialesDiarios");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -140,7 +140,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL(ip+"/odata/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
+                URL url = new URL(ip+"/HistorialesDiarios("+idHistorial+")/ObtenerHistorialesIdaVuelta");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -237,7 +237,7 @@ public class Historial {
             InputStream inputStream = null;
 
             try {
-                URL url = new URL(ip+"/odata/HistorialesIdaVuelta("+idIdaVuelta+")/ObtenerHistorialesParaderos");
+                URL url = new URL(ip+"/HistorialesIdaVuelta("+idIdaVuelta+")/ObtenerHistorialesParaderos");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 

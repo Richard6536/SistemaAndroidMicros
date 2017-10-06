@@ -188,7 +188,7 @@ public class Paradero
                 Log.e("Paradero232", idParadero);
 
                 try {
-                    URL url = new URL(ip+"/odata/Paraderos("+idParadero+")/MicroParaderoMasCercano");
+                    URL url = new URL(ip+"/Paraderos("+idParadero+")/MicroParaderoMasCercano");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setDoOutput(true);
 
@@ -277,7 +277,7 @@ public class Paradero
 
             Log.e("OBTENERMIPARADERITO", idMicro);
             try {
-                URL url = new URL(ip+"/odata/Micros("+idMicro+")/ObtenerMiParadero");
+                URL url = new URL(ip+"/Micros("+idMicro+")/ObtenerMiParadero");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -361,7 +361,7 @@ public class Paradero
 
             Log.e("DeseleccionarParaderoxd", idUsuario);
             try {
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")DeseleccionarParadero");
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")DeseleccionarParadero");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
 
@@ -548,7 +548,7 @@ public class Paradero
                     e.printStackTrace();
                 }
 
-                URL url = new URL(ip+"/odata/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/SeleccionarParaderoDX");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setRequestMethod("POST");
@@ -645,7 +645,7 @@ public class Paradero
                 e.printStackTrace();
             }
 
-            URL url = new URL(ip + "/odata/Usuarios(" + idUsuario + ")/SeleccionarParaderoDX");
+            URL url = new URL(ip + "/Usuarios(" + idUsuario + ")/SeleccionarParaderoDX");
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setDoOutput(true);
             urlConnection.setRequestMethod("POST");
