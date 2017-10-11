@@ -1130,8 +1130,6 @@ public class UserMapActivity extends AppCompatActivity
             }
             else if(idLineaSeleccionada == idLinea)
             {
-
-                //alertLineas.cancel();
                 obtenerMicrosDelParadero(microPraderoCercano, idLinea);
                 verificarMiMicroAbordada(microAbordada, idLinea);
                 agregarMicros(choferes);
