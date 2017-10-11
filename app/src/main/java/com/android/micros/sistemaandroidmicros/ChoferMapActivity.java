@@ -188,8 +188,9 @@ public class ChoferMapActivity extends AppCompatActivity
     }
     public void validarLinea(Micro micro) {
 
+        lblMensaje.setText("");
         if (micro.id == -1) {
-            lblMensaje.setText("No está asociado a una micro");
+            //lblMensaje.setText("No está asociado a una micro");
             //No está asociado a una micro
         }
         else

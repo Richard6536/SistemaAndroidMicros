@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 
@@ -89,8 +90,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -255,6 +259,55 @@ public class UserMapActivity extends AppCompatActivity
 
         mapFragment.getMapAsync(this);
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+
+                if (polylineIda != null && polylineVuelta != null) {
+                    polylineIda.remove();
+                    polylineVuelta.remove();
+                    removerParaderos();
+                    removerMicros();
+                }
+
+                posicionLineaActual = pos;
+                Object item = parent.getItemAtPosition(pos);
+                String itemStr = item.toString();
+                Linea linea = new Linea();
+                Rutas rutaIda;
+                Rutas rutaVuelta;
+
+                //cargandoLinea();
+
+                //Retorna el Id de la linea que se selecciona en el spinner
+                idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
+                Log.e("idLineaUSERPMAP", idLineaSeleccionada + "");
+
+                //Envío el Id de la linea y recibo la linea completa
+                linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
+
+                //Mostrar tarifa
+                tarifaAppbar.setText(linea.tarifa+"");
+                nombreLineaAppbar.setText(linea.nombreLinea);
+
+                rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
+                rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
+
+                rutaDeIdaActual = rutaIda;
+                rutaDeVueltaActual = rutaVuelta;
+
+                polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
+                polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
+                //actualizarPosicionMicros();
+                //removerMicros();
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         try {
 
             parametros.put("Email", emailUsuario);
@@ -277,57 +330,6 @@ public class UserMapActivity extends AppCompatActivity
         }
         else
         {
-
-
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
-
-                    if (polylineIda != null && polylineVuelta != null) {
-                        polylineIda.remove();
-                        polylineVuelta.remove();
-                        removerParaderos();
-                        removerMicros();
-                    }
-
-                    posicionLineaActual = pos;
-                    Object item = parent.getItemAtPosition(pos);
-                    String itemStr = item.toString();
-                    Linea linea = new Linea();
-                    Rutas rutaIda;
-                    Rutas rutaVuelta;
-
-                    //cargandoLinea();
-
-                    //Retorna el Id de la linea que se selecciona en el spinner
-                    idLineaSeleccionada = linea.buscarLineaSpinner(itemStr);
-                    Log.e("idLineaUSERPMAP", idLineaSeleccionada + "");
-
-                    //Envío el Id de la linea y recibo la linea completa
-                    linea = Linea.BuscarLineaPorId(idLineaSeleccionada);
-
-                    //Mostrar tarifa
-                    tarifaAppbar.setText(linea.tarifa+"");
-                    nombreLineaAppbar.setText(linea.nombreLinea);
-
-                    rutaIda = Rutas.BuscarRutaPorId(linea.idRutaIda);
-                    rutaVuelta = Rutas.BuscarRutaPorId(linea.idRutaVuelta);
-
-                    rutaDeIdaActual = rutaIda;
-                    rutaDeVueltaActual = rutaVuelta;
-
-                    polylineIda = crearRuta(rutaIda, paraderosRutaIda, Color.RED);
-                    polylineVuelta = crearRuta(rutaVuelta, paraderosRutaVuelta, Color.BLUE);
-                    //actualizarPosicionMicros();
-                    //removerMicros();
-                }
-
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
 
             if(onCreateBool == false)
             {
@@ -396,6 +398,7 @@ public class UserMapActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -619,11 +622,14 @@ public class UserMapActivity extends AppCompatActivity
                     String[] metros = String.valueOf(distancia).split("\\.");
                     int metrosInt = Integer.parseInt(metros[0]);
 
+                    boolean estado = layoutCerrado;
                     String tiempoLlegada = calcularTiempo(distancia);
 
-                    if(layoutCerrado == false)
+
+                    if(estado == false)
                     {
 
+                        Log.e("LAYOUTAPARECER","");
                         rLayoutTiempo.setVisibility(View.VISIBLE);
                         txtTiempoMicro.setText(tiempoLlegada);
 
@@ -632,8 +638,9 @@ public class UserMapActivity extends AppCompatActivity
                             menos80mts = true;
                         }
 
-                        if(menos80mts == true && layoutCerrado == false)
+                        if(menos80mts == true && estado == false)
                         {
+                            Log.e("LAYOUTADESAPARECER","");
                             layoutCerrado = true;
                             rLayoutTiempo.setVisibility(View.GONE);
                         }
@@ -657,6 +664,7 @@ public class UserMapActivity extends AppCompatActivity
                     resetMicros();
                     if(swt == true)
                     {
+                        Log.e("LAYOUTADESAPARECER2","");
                         swt = false;
                         rLayoutTiempo.setVisibility(View.GONE);
                     }
@@ -882,7 +890,8 @@ public class UserMapActivity extends AppCompatActivity
         SesionPasajero.rutaIda = rutaDeIdaActual;
         SesionPasajero.rutaVuelta = rutaDeVueltaActual;
 
-        //spinner.setAdapter(null);
+        Linea.listaLineas.clear();
+
         //detenerServicio();
         //detenerServicioLineaFusion();
     }
@@ -1134,49 +1143,6 @@ public class UserMapActivity extends AppCompatActivity
         }
     }
 
-    public void cargandoParadero()
-    {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(UserMapActivity.this);
-        dialog.setCancelable(false);
-        dialog.setMessage("Obteniendo datos, por favor espere.");
-        alertParadero = dialog.create();
-        alertParadero.show();
-    }
-
-    public void cargandoLinea()
-    {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(UserMapActivity.this);
-        dialog.setCancelable(false);
-        dialog.setMessage("Obteniendo datos, por favor espere.");
-        alertLineas = dialog.create();
-        alertLineas.show();
-    }
-
-    //TIMERS
-    private void actualizarPosicionMicros()
-    {
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-
-                Log.e("LineaID", idLineaSeleccionada+"");
-                new Micro.ObtenerMicrosPorLinea().execute(idLineaSeleccionada + "");
-            }
-        }, 0, 2000);
-    }
-
-    private void startTimer() //actualizarMicrosQueSeleccionaronParaderos LA MISMA
-    {
-        timerMicroParaderoMasCercano = new Timer();
-        timerMicroParaderoMasCercano.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-
-                Log.e("ParaderoIDASDF", idParaderoSeleccionado+"");
-                new Paradero.MicrosQueSeleccionaronParadero().execute(idParaderoSeleccionado+"");
-            }
-        }, 0, 1000);
-    }
-
     private void obtenerPosicion() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -1186,16 +1152,5 @@ public class UserMapActivity extends AppCompatActivity
                 new Micro.CambiarPosicion().execute(idUser);
             }
         }, 0, 1000);
-    }
-
-    private void actualizarMiMicroAbordada() {
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-
-                Log.e("UsuarioID", idUser);
-                new Usuario.MiMicroAbordada().execute(idUser);
-            }
-        }, 0, 3000);
     }
 }

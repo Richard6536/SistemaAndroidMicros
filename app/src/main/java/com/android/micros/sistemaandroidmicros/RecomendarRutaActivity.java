@@ -271,11 +271,11 @@ public class RecomendarRutaActivity extends AppCompatActivity
             {
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
-                marcadorInicio = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Punto de llegada")
+                marcadorInicio = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Punto de Inicio")
                         .snippet(nombre+"\n"+direccion)
-                        .icon(BitmapDescriptorFactory.fromBitmap(flag))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                         .draggable(true));
-                marcadorInicio.setTag("llegada");
+                marcadorInicio.setTag("inicio");
                 marcadorInicio.showInfoWindow();
             }
             else
@@ -298,17 +298,24 @@ public class RecomendarRutaActivity extends AppCompatActivity
 
                 Bitmap flag = flagMarker();
 
-                if(marcadorTermino == null)
+                if(marcadorInicio == null)
                 {
-                    marcadorTermino = mMap.addMarker(new MarkerOptions().position(latLng).title("Punto de llegada")
-                            .icon(BitmapDescriptorFactory.fromBitmap(flag))
-                            .draggable(true));
-                    marcadorTermino.setTag("llegada");
-                    marcadorInicio.showInfoWindow();
+                    marcadorDeInicio(latLng);
                 }
                 else
                 {
-                    marcadorTermino.setPosition(latLng);
+                    if(marcadorTermino == null)
+                    {
+                        marcadorTermino = mMap.addMarker(new MarkerOptions().position(latLng).title("Punto de llegada")
+                                .icon(BitmapDescriptorFactory.fromBitmap(flag))
+                                .draggable(true));
+                        marcadorTermino.setTag("llegada");
+                        marcadorTermino.showInfoWindow();
+                    }
+                    else
+                    {
+                        marcadorTermino.setPosition(latLng);
+                    }
                 }
             }
         });
@@ -388,12 +395,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
                 }
                 else
                 {
-                    marcadorInicio = mMap.addMarker(new MarkerOptions().position(miPosicion).title("Punto de inicio")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                            .draggable(true));
-                    marcadorInicio.setTag("inicio");
-                    marcadorInicio.showInfoWindow();
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(miPosicion, 14));
+                    marcadorDeInicio(miPosicion);
                 }
 
                 primeraVez = false;
@@ -699,7 +701,15 @@ public class RecomendarRutaActivity extends AppCompatActivity
         return true;
     }
 
-
+    public void marcadorDeInicio(LatLng posicion)
+    {
+        marcadorInicio = mMap.addMarker(new MarkerOptions().position(posicion).title("Punto de inicio")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .draggable(true));
+        marcadorInicio.setTag("inicio");
+        marcadorInicio.showInfoWindow();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(posicion, 14));
+    }
 }
 
 
