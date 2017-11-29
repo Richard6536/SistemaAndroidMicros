@@ -18,6 +18,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <receiver android:name=".receivers.NetworkChangeReceiver">
+        <intent-filter>
+            <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+        </intent-filter>
+    </receiver>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,7 +34,6 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -143,7 +148,7 @@
         </activity>
         <activity
             android:name=".HistorialIdaVueltaActivity"
-            android:label="Ida y Vuelta"
+            android:label="Historial por Recorrido"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -186,16 +191,18 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_register_dx"
             android:theme="@style/FullscreenTheme" />
-        <activity
-            android:name=".EjemploPlaceAPIActivity"
-            android:label="@string/title_activity_ejemplo_place_api"
-            android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".ServicePositionChofer"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

@@ -26,8 +26,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 public class HistorialActivity extends AppCompatActivity{
 
@@ -112,15 +115,15 @@ public class HistorialActivity extends AppCompatActivity{
 
         if(historial.length() != 0)
         {
-            for(int i = 0; i<historial.length(); i++) {
+            for(int i = historial.length(); i>=0; i--) {
                 try {
 
                     JSONObject h = null;
                     h = historial.getJSONObject(i);
 
                     String fecha = h.getString("Fecha");
-                    String horaInicio = h.getString("HoraInicio"); //DATETIME
-                    String horaFinal = h.getString("HoraFinal");   //DATETIME
+                    String horaInicio = h.getString("HoraInicio");
+                    String horaFinal = h.getString("HoraFinal");
 
 
                     if(!horaInicio.equals(horaFinal))
@@ -129,9 +132,24 @@ public class HistorialActivity extends AppCompatActivity{
                         int id = h.getInt("Id");
 
                         String[] fechaSplit = fecha.split("T");
-                        String fechaId = fechaSplit[0]+"                           ."+id;
-                        arrayListFecha.add(fechaId);
-                        //itemsId.add(id);
+
+                        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+                        Date date = null;
+
+                        try {
+
+                            date = fmt.parse(fechaSplit[0]);
+                            SimpleDateFormat fmtOut = new SimpleDateFormat("dd/MM/yyyy");
+
+
+                            String fechaId = fmtOut.format(date)+"                           ."+id;
+                            arrayListFecha.add(fechaId);
+                            //itemsId.add(id);
+
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
                     }
 
 

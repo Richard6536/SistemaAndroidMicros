@@ -1,23 +1,26 @@
 package com.android.micros.sistemaandroidmicros;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Criteria;
+import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,12 +33,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.micros.sistemaandroidmicros.Clases.ActivityController;
 import com.android.micros.sistemaandroidmicros.Clases.Coordenada;
@@ -63,13 +63,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.os.Handler;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.logging.LogRecord;
+import static com.android.micros.sistemaandroidmicros.networkController.networkCreate;
+import static com.android.micros.sistemaandroidmicros.networkController.networkStatus;
 
 public class ChoferMapActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -86,7 +85,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
     boolean paraderoValido = false;
     boolean modoTest = true;
-    boolean stopRunner;
+    boolean stopRunner = false;
     boolean paraderoEncontrado;
 
     private GoogleMap cMap;
@@ -100,6 +99,9 @@ public class ChoferMapActivity extends AppCompatActivity
     private TextView lblMensaje;
     private Switch switchTest;
 
+    static TextView check_connection;
+    private BroadcastReceiver mNetworkReceiver;
+
     private ArrayList<Marker> usuariosMarker = new ArrayList<>();
 
     UserSessionManager session;
@@ -109,12 +111,17 @@ public class ChoferMapActivity extends AppCompatActivity
     Micro microActual;
     Marker miMicroMarker;
 
+    public static Location ultimaLocalizacion = null;
+
     Button btnIniciarRecorrido;
 
     private List<Marker> paraderosRutaIda = new ArrayList<>();
     private List<Marker> paraderosRutaVuelta = new ArrayList<>();
 
     LinearLayout recorridoLayout;
+
+    private double coorLat;
+    private double coorLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,19 +140,20 @@ public class ChoferMapActivity extends AppCompatActivity
         idSession = chofer.get(UserSessionManager.KEY_ID);
         nombre = user.get(UserSessionManager.KEY_NAME);
         email = user.get(UserSessionManager.KEY_EMAIL);
+        check_connection = (TextView) findViewById(R.id.tv2_check_connection);
 
         btnIniciarRecorrido = (Button) findViewById(R.id.btnComenzarRecorrido);
         btnIniciarRecorrido.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-            detenerServicioRecorridoFusion();
-            btnIniciarRecorrido.setText("Recorrido Iniciado");
-            btnIniciarRecorrido.setEnabled(false);
-            btnIniciarRecorrido.setBackgroundColor(Color.GRAY);
+                detenerServicioRecorridoFusion();
+                btnIniciarRecorrido.setText("Recorrido Iniciado");
+                btnIniciarRecorrido.setEnabled(false);
+                btnIniciarRecorrido.setBackgroundColor(Color.GRAY);
 
 
-            new Micro.IniciarRecorrido().execute(microActual.id+"");
+                new Micro.IniciarRecorrido().execute(microActual.id + "");
 
             }
         });
@@ -153,7 +161,7 @@ public class ChoferMapActivity extends AppCompatActivity
         lblMensaje = (TextView) findViewById(R.id.lblMensaje);
         txtLineaChof = (TextView) findViewById(R.id.txtLineaChof);
         txtPatenteChof = (TextView) findViewById(R.id.txtPatenteChof);
-        txtKilometrosDia = (TextView)findViewById(R.id.txtKilometrosDia);
+        txtKilometrosDia = (TextView) findViewById(R.id.txtKilometrosDia);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -172,29 +180,27 @@ public class ChoferMapActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
 
-        new Micro.ObtenerMicroDeChofer().execute(idSession);
+        new Micro.ObtenerMicroDeChofer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, idSession);
 
-        //Métodos que se ejecutan constantemente --------------
+            mNetworkReceiver = new NetworkChangeReceiverChofer();
 
-        //actualizarMiMicro();             //Usuarios(5)/ObtenerMicro
-        //actualizarRecorrido();
-        iniciarServicioRecorridoFusionDX();
+        registerNetworkBroadcastForNougat();
         iniciarServicio();               //Usuarios(5)/ActualizarPosicion
+        enviarPosicionChofer();
+
     }
 
-    public void iniciarServicioRecorridoFusion()
-    {
+    public void iniciarServicioRecorridoFusion() {
         iniciarServicioRecorridoFusionDX();
     }
+
     public void validarLinea(Micro micro) {
 
         lblMensaje.setText("");
         if (micro.id == -1) {
             //lblMensaje.setText("No está asociado a una micro");
             //No está asociado a una micro
-        }
-        else
-        {
+        } else {
             lblMensaje.setText("");
             microActual = micro;
             patente = micro.patente;
@@ -293,8 +299,8 @@ public class ChoferMapActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.chofer_map, menu);
 
-        txtCorreoNavHeaderChofer = (TextView)findViewById(R.id.txtCorreoNavHeaderChofer);
-        txtNombreNavHeaderChofer = (TextView)findViewById(R.id.txtNombreNavHeaderChofer);
+        txtCorreoNavHeaderChofer = (TextView) findViewById(R.id.txtCorreoNavHeaderChofer);
+        txtNombreNavHeaderChofer = (TextView) findViewById(R.id.txtNombreNavHeaderChofer);
 
         txtNombreNavHeaderChofer.setText(nombre);
         txtCorreoNavHeaderChofer.setText(email);
@@ -321,14 +327,12 @@ public class ChoferMapActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if (event.getAction() == KeyEvent.ACTION_DOWN)
-        {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                    homeIntent.addCategory( Intent.CATEGORY_HOME );
+                    homeIntent.addCategory(Intent.CATEGORY_HOME);
                     homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(homeIntent);
                     return true;
@@ -355,13 +359,12 @@ public class ChoferMapActivity extends AppCompatActivity
 
             Intent intent = new Intent(ChoferMapActivity.this, HistorialActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putString("idMicro", microActual.id+"");
+            bundle.putString("idMicro", microActual.id + "");
             intent.putExtras(bundle);
             startActivity(intent);
             finish();
 
-        } else if (id == R.id.nav_slideshow)
-        {
+        } else if (id == R.id.nav_slideshow) {
             FragmentManager FM = getSupportFragmentManager();
             FragmentTransaction FT = FM.beginTransaction();
 
@@ -378,25 +381,22 @@ public class ChoferMapActivity extends AppCompatActivity
             FT.addToBackStack(null);
             FT.commit();
 
-        }
-        else if (id == R.id.nav_share)
-        {
+        } else if (id == R.id.nav_share) {
 
 
-            if(modoTest == true)
-            {
+            if (modoTest == true) {
 
                 modoTest = false;
-                stopRunner = false;
-                item.setTitle("Desactivar Modo Tester");
-                obtenerPosicion();
-            }
-            else
-            {
-                modoTest = true;
                 stopRunner = true;
-                item.setTitle("Activar Modo Tester");
-                obtenerPosicion();
+                item.setTitle("Desactivar Modo Tester"); //tester activado
+                detenerServicio();
+                obtenerPosicionChofer();
+            } else {
+                modoTest = true;
+                stopRunner = false;
+                item.setTitle("Activar Modo Tester"); //tester desactivado
+                iniciarServicio();
+                enviarPosicionChofer();
             }
 
         }
@@ -427,21 +427,19 @@ public class ChoferMapActivity extends AppCompatActivity
 
     }
 
-    public void detenerServicio()
-    {
-        stopService(new Intent(getBaseContext(), ServicePosition.class));
+    public void detenerServicio() {
+        stopService(new Intent(getBaseContext(), ServicePositionChofer.class));
         new AsyncTaskServerPosition.StopPosition().execute(idSession);
     }
 
-    public void iniciarServicio()
-    {
-        Intent intent = new Intent(getBaseContext(), ServicePosition.class);
+    public void iniciarServicio() {
+        Intent intent = new Intent(getBaseContext(), ServicePositionChofer.class);
         intent.putExtra("usuarioId", idSession);
         startService(intent);
     }
+
     @Override
-    protected void onStop()
-    {
+    protected void onStop() {
         super.onStop();
         //Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
         new Usuario.DetenerPosicion().execute(idSession);
@@ -450,15 +448,13 @@ public class ChoferMapActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onRestart()
-    {
+    protected void onRestart() {
         //Toast.makeText(this, "onRestart", Toast.LENGTH_SHORT).show();
         super.onRestart();
         iniciarServicio();
     }
 
-    public void recibirPosicion(JSONObject posicion)
-    {
+    public void recibirPosicion(JSONObject posicion) {
         try {
             Bitmap icon = microsIcon();
 
@@ -466,99 +462,60 @@ public class ChoferMapActivity extends AppCompatActivity
             double lng = posicion.getDouble("Longitud");
             //Toast.makeText(ChoferMapActivity.this, lat+"-"+lng, Toast.LENGTH_SHORT).show();
 
-            if(miMicroMarker != null)
-            {
-                miMicroMarker.setPosition(new LatLng(lat,lng));
-            }
-            else
-            {
-                miMicroMarker = cMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng))
+            if (miMicroMarker != null) {
+                miMicroMarker.setPosition(new LatLng(lat, lng));
+            } else {
+                miMicroMarker = cMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng))
                         .icon(BitmapDescriptorFactory.fromBitmap(icon))
                         .title("Mi posición"));
             }
 
             String TAG = "RecibirPosicion";
 
-            Log.d(TAG, "lat: " + lat + " lng: "+lng);
+            Log.d(TAG, "lat: " + lat + " lng: " + lng);
 
             //new AsyncTaskServerPosition.SendPosition().execute(latLng.toString(),idSession);
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            String m = e.getMessage();
+            Log.d("ERRORMICROC",m);
         }
     }
 
-    private void obtenerPosicion()
-    {
-        Timer timer = new Timer();
+    private void obtenerPosicionChofer() {
+        final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
+                if (stopRunner == true) {
+                    Log.e("IDSESSION", idSession + "");
+                    new Usuario.ObtenerPosicionChofer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, idSession);
 
-                Log.e("IDSESSION", idSession+"");
-                new Micro.CambiarPosicion().execute(idSession);
+                } else {
+                    timer.cancel();
+                    timer.purge();
+                }
+
             }
         }, 0, 1000);
     }
 
-    private void buscarMiParadero()
-    {
-        Timer timer = new Timer();
+    private void enviarPosicionChofer() {
+        final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
+                if (stopRunner == false) {
+                    Log.e("IDSESSION", idSession + "");
 
-                Log.e("MICROID", microActual+"");
-                new Paradero.ObtenerMiParadero().execute(microActual.id+"");
+                    obtenerCoor();
+
+                } else {
+                    timer.cancel();
+                    timer.purge();
+                }
+
             }
         }, 0, 1000);
     }
-
-    private void buscarMisPasajeros()
-    {
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-
-                Log.e("buscarMisPasajeros", idParaderoSeleccionado+"");
-                new Paradero.UsuariosQueSeleccionaronParadero().execute(idParaderoSeleccionado+"");
-            }
-        }, 0, 1000);
-    }
-
-    private void actualizarRecorrido()
-    {
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                new Usuario.ObtenerDatosRecorridoFusion().execute(idSession);
-            }
-        }, 0, 1000);
-    }
-
-    public void actualizarMiMicro()
-    {
-        final Handler handler = new Handler();
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try
-                        {
-                            new Micro.ObtenerMiMicroConstanteMente().execute(idSession.toString());
-                        }
-                        catch (Exception e)
-                        {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
-            }
-        };
-        timer.schedule(task, 0, 500);
-    }
-
 
     public Bitmap microsIcon() {
 
@@ -587,252 +544,234 @@ public class ChoferMapActivity extends AppCompatActivity
     }
 
 
-    public void recibirMiParadero(int miParadero)
-    {
+    public void recibirMiParadero(int miParadero) {
 
-                paraderoEncontrado = false;
-        Log.e("IDMIPARADERO0", miParadero+""+ paraderoValido);
-                Bitmap MiparaderoIcon = markerParaderoSig();
-                Bitmap paraderoIcon = markerIcon();
+        paraderoEncontrado = false;
+        Log.e("IDMIPARADERO0", miParadero + "" + paraderoValido);
+        Bitmap MiparaderoIcon = markerParaderoSig();
+        Bitmap paraderoIcon = markerIcon();
 
-                String tagId;
-                if (miParadero != -1)
-                {
-                    paraderoValido = true;
-                    Log.e("IDMIPARADERO", miParadero+""+ paraderoValido);
+        String tagId;
+        if (miParadero != -1) {
+            paraderoValido = true;
+            Log.e("IDMIPARADERO", miParadero + "" + paraderoValido);
 
-                    for (Marker pIda : paraderosRutaIda) {
-                        pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
-                        pIda.setTitle("Paradero");
-                        tagId = pIda.getTag().toString();
+            for (Marker pIda : paraderosRutaIda) {
+                pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                pIda.setTitle("Paradero");
+                tagId = pIda.getTag().toString();
 
-                        if (tagId.equals(miParadero + "")) {
-                            paraderoEncontrado = true;
-                            idParaderoSeleccionado = miParadero;
-                            pIda.setTitle("Mi paradero");
-                            pIda.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
-                            //paraderoEncontrado = pIda;
-                        }
+                if (tagId.equals(miParadero + "")) {
+                    paraderoEncontrado = true;
+                    idParaderoSeleccionado = miParadero;
+                    pIda.setTitle("Mi paradero");
+                    pIda.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
+                    //paraderoEncontrado = pIda;
+                }
 
-                    }
+            }
 
-                    if (paraderoEncontrado == false) {
-                        for (Marker pVuelta : paraderosRutaVuelta) {
-                            pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
-                            pVuelta.setTitle("Paradero");
-                            tagId = pVuelta.getTag().toString();
-                            if (tagId.equals(miParadero + "")) {
-                                idParaderoSeleccionado = miParadero;
-                                pVuelta.setTitle("Mi paradero");
-                                pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
-                                //paraderoEncontrado = pVuelta;
-                            }
-                        }
+            if (paraderoEncontrado == false) {
+                for (Marker pVuelta : paraderosRutaVuelta) {
+                    pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+                    pVuelta.setTitle("Paradero");
+                    tagId = pVuelta.getTag().toString();
+                    if (tagId.equals(miParadero + "")) {
+                        idParaderoSeleccionado = miParadero;
+                        pVuelta.setTitle("Mi paradero");
+                        pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(MiparaderoIcon));
+                        //paraderoEncontrado = pVuelta;
                     }
                 }
-                else
-                {
+            }
+        } else {
 
-                    if(paraderoValido == true)
-                    {
-                        Log.e("IDMIPARADERO45", miParadero+""+ paraderoValido);
-                        paraderoValido = false;
-                        for(Marker pIda : paraderosRutaIda)
-                        {
-                            Log.e("PARADERORUTAIDA","asdf");
-                            pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
+            if (paraderoValido == true) {
+                Log.e("IDMIPARADERO45", miParadero + "" + paraderoValido);
+                paraderoValido = false;
+                for (Marker pIda : paraderosRutaIda) {
+                    Log.e("PARADERORUTAIDA", "asdf");
+                    pIda.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
 
-                            for(Marker pVuelta : paraderosRutaVuelta)
-                            {
-                                Log.e("PARADERORUTAVUELTA","asdf");
-                                pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
-                            }
-                        }
+                    for (Marker pVuelta : paraderosRutaVuelta) {
+                        Log.e("PARADERORUTAVUELTA", "asdf");
+                        pVuelta.setIcon(BitmapDescriptorFactory.fromBitmap(paraderoIcon));
                     }
                 }
-            //buscarMisPasajeros();     //Paraderos(5)/UsuariosQueSeleccionaron
+            }
+        }
+        //buscarMisPasajeros();     //Paraderos(5)/UsuariosQueSeleccionaron
     }
 
-    public void recibirUsuariosParadero(JSONArray usuarios)
-    {
+    public void recibirUsuariosParadero(JSONArray usuarios) {
 
-        if(usuarios.length() != 0)
-        {
+        if (usuarios.length() != 0) {
 
             Bitmap iconPasajero = pasajeroIcon();
 
-            try
-            {
+            try {
                 borrarUsuariosMarcadores(usuarios);
-                Log.e("USUARIOSJSONXD2",usuarios.toString());
+                Log.e("USUARIOSJSONXD2", usuarios.toString());
 
-                for(int i=0; i<usuarios.length(); i++)
-                {
+                for (int i = 0; i < usuarios.length(); i++) {
+
                     JSONObject usuario = null;
                     usuario = usuarios.getJSONObject(i);
                     int id = usuario.getInt("UsuarioId");
 
-                    if(id != -1)
-                    {
+                    if (id != -1) {
                         double lat = usuario.getDouble("Latitud");
                         double lng = usuario.getDouble("Longitud");
                         double distancia = usuario.getDouble("Distancia");
-                        String tiempo = calcularTiempo(distancia);
-                        double metros = distancia * 1000;
 
                         Marker usuarioMarker = obtenerMarcadorUsuario(id);
 
-                        if(usuarioMarker != null)
-                        {
-                            usuarioMarker.setPosition(new LatLng(lat,lng));
+                            String tiempo = calcularTiempo(distancia);
+                            String[] metrosString = String.valueOf(distancia).split("\\.");
+                            int metros = Integer.parseInt(metrosString[0]);
+
+                        if (usuarioMarker != null) {
+                            usuarioMarker.setPosition(new LatLng(lat, lng));
                             usuarioMarker.setTitle(tiempo);
-                            usuarioMarker.setSnippet(metros+" mts.");
+                            usuarioMarker.setSnippet(metros+" metros");
                             usuarioMarker.showInfoWindow();
+                        } else {
+
+                                Log.e("USUARIOCHOFER", lat + lng + "");
+                                Marker m = cMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title(tiempo)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(iconPasajero))
+                                        .snippet(metros+" metros"));
+                                m.showInfoWindow();
+                                m.setTag(id);
+                                usuariosMarker.add(m);
+
                         }
-                        else
-                        {
-                            Log.e("USUARIOCHOFER", lat + lng+"");
-                            Marker m = cMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title(tiempo)
-                            .icon(BitmapDescriptorFactory.fromBitmap(iconPasajero))
-                            .snippet(metros+" mts."));
-                            m.showInfoWindow();
-                            m.setTag(id);
-                            usuariosMarker.add(m);
-                        }
+
                     }
                 }
 
-            } catch (JSONException e)
-            {
+            } catch (JSONException e) {
                 Log.e("JSONEXCEPTIONUSUARIOS", e.toString());
                 e.printStackTrace();
+            } catch (Exception e) {
+                Log.e("EXCEPTIONASDF", e.getMessage());
             }
-            catch(Exception e)
-            {
-                Log.e("EXCEPTIONASDF",e.getMessage());
-            }
-        }
-        else
-        {
+        } else {
             borrarUsuariosMarcadores(usuarios);
         }
     }
 
-    private Marker obtenerMarcadorUsuario(int idUsuario)
-    {
+    private Marker obtenerMarcadorUsuario(int idUsuario) {
         Marker usuarioMarker = null;
-        String idUserStr = idUsuario+"";
-        for(Marker u : usuariosMarker)
-        {
-            if(u.getTag().toString().equals(idUserStr))
-            {
+        String idUserStr = idUsuario + "";
+        for (Marker u : usuariosMarker) {
+            if (u.getTag().toString().equals(idUserStr)) {
                 usuarioMarker = u;
             }
         }
         return usuarioMarker;
     }
 
+    private boolean borrarPorPasajero(Marker pasajero)
+    {
+        Marker pasajeroAeliminar = null;
+        for(Marker p : usuariosMarker)
+        {
+            if(p.getTag().toString().equals(pasajero.getTag().toString()))
+            {
+                pasajeroAeliminar = p;
+            }
+        }
+
+        if(pasajeroAeliminar != null)
+        {
+            usuariosMarker.remove(pasajeroAeliminar);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     private void borrarUsuariosMarcadores(JSONArray usuarios) {
 
-        try
-        {
+        try {
 
             ArrayList<Marker> usuariosParaBorrar = new ArrayList<>();
             int rishi = 0;
             rishi = usuariosMarker.size();
-            Log.e("USUARIOSJSONXD",usuarios.toString());
-            Log.e("USUARIOSMARKERSIZE",rishi+"");
+            Log.e("USUARIOSJSONXD", usuarios.toString());
+            Log.e("USUARIOSMARKERSIZE", rishi + "");
 
-            if(usuarios.length() == 0)
-            {
-                Log.e("USUARIOSMARKERSIZE546","entró");
+            if (usuarios.length() == 0) {
+                Log.e("USUARIOSMARKERSIZE546", "entró");
                 ArrayList<Marker> borrarTodo = usuariosMarker;
-                for(Marker bt : borrarTodo)
-                {
+                for (Marker bt : borrarTodo) {
 
                     usuariosMarker.remove(bt);
                     bt.remove();
                 }
-            }
-            else if(rishi != 0)
-            {
-                for(Marker us : usuariosMarker)
-                {
+            } else if (rishi != 0) {
+                for (Marker us : usuariosMarker) {
                     Marker usuarioEncontrado = null;
                     String tagId = us.getTag().toString();
                     Log.e("USUARIOTAG2", tagId);
-                    for(int i = 0; i<usuarios.length(); i++)
-                    {
+                    for (int i = 0; i < usuarios.length(); i++) {
 
                         JSONObject usuario = null;
                         usuario = usuarios.getJSONObject(i);
                         int id = usuario.getInt("UsuarioId");
-                        Log.e("IDUSUARIOJSONXDXD", id+"");
+                        Log.e("IDUSUARIOJSONXDXD", id + "");
 
-                        if(tagId.equals(id+""))
-                        {
+                        if (tagId.equals(id + "")) {
                             Log.e("USUARIOTAG", us.getTag().toString());
                             usuarioEncontrado = us;
                         }
                     }
-                    if(usuarioEncontrado == null)
-                    {
-                        Log.e("USUARIOSJSONXD3",usuarios.toString());
+                    if (usuarioEncontrado == null) {
+                        Log.e("USUARIOSJSONXD3", usuarios.toString());
                         usuariosParaBorrar.add(us);
 
                     }
                 }
 
-                for(Marker usd : usuariosParaBorrar)
-                {
-                    Log.e("USUARIOSJSONXD4",usuarios.toString());
+                for (Marker usd : usuariosParaBorrar) {
+                    Log.e("USUARIOSJSONXD4", usuarios.toString());
                     usuariosMarker.remove(usd);
                     usd.remove();
                 }
             }
-        }
-        catch(Exception e)
-        {
-            Log.e("ExceptionUSUARIOXD",e.getMessage());
+        } catch (Exception e) {
+            Log.e("ExceptionUSUARIOXD", e.getMessage());
         }
 
     }
 
-    public void validarSigCoord(boolean esNull)
-    {
-        if(esNull == true)
-        {
+    public void validarSigCoord(boolean esNull) {
+        if (esNull == true) {
             //btnIniciarRecorrido.setEnabled(false);
-        }
-        else
-        {
+        } else {
             //btnIniciarRecorrido.setEnabled(true);
         }
     }
 
-    public void verificarSiguienteVertice(int idSgtVertice)
-    {
-        Log.e("IDSIGUIENTEVERTICE1", idSgtVertice+"");
-        if(estaEnRecorrido == false && idSgtVertice != -1)
-        {
-            Log.e("IDSIGUIENTEVERTICE2", estaEnRecorrido+"");
+    public void verificarSiguienteVertice(int idSgtVertice) {
+        Log.e("IDSIGUIENTEVERTICE1", idSgtVertice + "");
+        if (estaEnRecorrido == false && idSgtVertice != -1) {
+            Log.e("IDSIGUIENTEVERTICE2", estaEnRecorrido + "");
             estaEnRecorrido = true;
-        }
-
-        else if(estaEnRecorrido == true && idSgtVertice == -1)
-        {
+        } else if (estaEnRecorrido == true && idSgtVertice == -1) {
             int orange = Color.parseColor("#f46e00");
 
             estaEnRecorrido = false;
-            Log.e("IDSIGUIENTEVERTICE3", estaEnRecorrido+"");
+            Log.e("IDSIGUIENTEVERTICE3", estaEnRecorrido + "");
             btnIniciarRecorrido.setText("Iniciar Recorrido");
             btnIniciarRecorrido.setBackgroundColor(orange);
             btnIniciarRecorrido.setEnabled(true);
         }
     }
 
-    public void obtenerParametrosFusionadosChofer(JSONObject parametros)
-    {
+    public void obtenerParametrosFusionadosChofer(JSONObject parametros) {
         try {
             Log.e("JSONPARAMETROS", parametros.toString());
             int idSiguienteParadero = parametros.getInt("IdSiguienteParadero");
@@ -840,8 +779,7 @@ public class ChoferMapActivity extends AppCompatActivity
             int idSgtVertice = parametros.getInt("IdSiguienteVertice");
             verificarSiguienteVertice(idSgtVertice);
 
-            if(idSiguienteParadero != -1)
-            {
+            if (idSiguienteParadero != -1) {
                 Log.e("PARAMETROSCHOFER", parametros.toString());
                 JSONObject miMicro = parametros.getJSONObject("MiMicro");
                 JSONArray usuarioParaderos = parametros.getJSONArray("UsuarioParaderos");
@@ -861,7 +799,7 @@ public class ChoferMapActivity extends AppCompatActivity
                 txtKilometrosDia.setText(km);
                 Log.e("KILOMETROSXDIA", km);
 
-                validarLinea(micro);
+                //validarLinea(micro);
 
             }
 
@@ -871,8 +809,7 @@ public class ChoferMapActivity extends AppCompatActivity
 
     }
 
-    public void iniciarServicioRecorridoFusionDX()
-    {
+    public void iniciarServicioRecorridoFusionDX() {
         Intent intent = new Intent(getBaseContext(), RecorridoFusionService.class);
         intent.putExtra("usuarioId", idSession);
         startService(intent);
@@ -882,7 +819,10 @@ public class ChoferMapActivity extends AppCompatActivity
         stopService(new Intent(getBaseContext(), RecorridoFusionService.class));
     }
 
-    private String calcularTiempo(double kilometros) {
+    private String calcularTiempo(double distancia) {
+        String[] metros = String.valueOf(distancia).split("\\.");
+        double k = Integer.parseInt(metros[0]);
+        double kilometros = k / 1000;
 
         int kmh = 4;
         double tiempo = (kilometros / kmh) * 60; //40 km/h
@@ -892,8 +832,9 @@ public class ChoferMapActivity extends AppCompatActivity
             if ((horasMin - (int) horasMin) != 0) {
                 String[] horasMinArray = String.valueOf(horasMin).split("\\.");
                 int horas = Integer.parseInt(horasMinArray[0]);
-                String m = (0 + "." + Integer.parseInt(horasMinArray[1]));
-                double minutosDecimales = Integer.parseInt(m) * 60;
+                String m = (0 + "." + horasMinArray[1]);
+                double minDecimales = Double.parseDouble(m);
+                double minutosDecimales = minDecimales * 60;
 
                 String[] minutosSplit = String.valueOf(minutosDecimales).split("\\.");
                 int minutos = Integer.parseInt(minutosSplit[0]);
@@ -904,31 +845,24 @@ public class ChoferMapActivity extends AppCompatActivity
                 return horas + " hora/s.";
             }
 
-        }
-        else
-        {
-            if ((tiempo - (int) tiempo) != 0)
-            {
+        } else {
+            if ((tiempo - (int) tiempo) != 0) {
                 int segundosInt;
 
                 //Decimales
                 String[] minSeg = String.valueOf(tiempo).split("\\.");
                 int minutos = Integer.parseInt(minSeg[0]);
-                String s = (0 + "." + Integer.parseInt(minSeg[1]));
+                String s = (0 + "." + minSeg[1]);
                 double segundos = Double.parseDouble(s) * 60;
                 if ((segundos - (int) segundos) != 0) {
                     String[] segDecimals = String.valueOf(segundos).split("\\.");
                     segundosInt = Integer.parseInt(segDecimals[0]);
-                }
-                else
-                {
+                } else {
                     segundosInt = (int) segundos;
                 }
                 return minutos + " minutos " + segundosInt + " segundos.";
 
-            }
-            else
-            {
+            } else {
                 //No decimales
                 int minutos = (int) tiempo;
                 return minutos + " minutos.";
@@ -936,5 +870,86 @@ public class ChoferMapActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterNetworkChanges();
+    }
+
+    public static void dialog(boolean value) {
+
+        if (value) {
+
+            Log.e("0network: ", networkCreate+"");
+            if(networkCreate == networkStatus)
+            {
+                Log.e("network: ", networkCreate+"");
+                check_connection.setText("conectado");
+                check_connection.setBackgroundColor(Color.parseColor("#12ce18"));
+                check_connection.setTextColor(Color.WHITE);
+            }
+            else
+            {
+                networkCreate = true;
+            }
+                Handler handler = new Handler();
+                Runnable delayrunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        check_connection.setVisibility(View.GONE);
+                    }
+                };
+                handler.postDelayed(delayrunnable, 3000);
+
+        } else {
+            Log.e("00network: ", networkCreate+"");
+            if(networkCreate == true)
+            {
+                Log.e("network2: ", networkCreate+"");
+                //networkCreate = true;
+                check_connection.setVisibility(View.VISIBLE);
+                check_connection.setText("No hay acceso a internet, compruebe su conexión.");
+                check_connection.setBackgroundColor(Color.RED);
+                check_connection.setTextColor(Color.WHITE);
+            }
+        }
+    }
+
+
+    private void registerNetworkBroadcastForNougat() {
+        registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+    }
+
+    protected void unregisterNetworkChanges() {
+        try {
+            unregisterReceiver(mNetworkReceiver);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void obtenerCoor() {
+
+        if(ultimaLocalizacion != null)
+        {
+            double latitude = ultimaLocalizacion.getLatitude();
+            double longitude = ultimaLocalizacion.getLongitude();
+
+            JSONObject actualPosition = new JSONObject();
+
+            try {
+
+                actualPosition.put("Latitud", latitude);
+                actualPosition.put("Longitud", longitude);
+                Log.e("coor", latitude+"-"+longitude);
+
+                new Usuario.ActualizarPosicionChofer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, idSession, actualPosition.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 

@@ -65,7 +65,7 @@
                 android:layout_height="75dp"
                 android:keepScreenOn="true"
                 android:gravity="center"
-                android:text="Tu contraseña junto a tu correo te permitirán ingresar la próxima vez que visites AndroidMicros."
+                android:text="Tu contraseña junto a tu correo te permitirán ingresar la próxima vez que visites STAPP."
                 android:textColor="#a5a8a4"
                 android:textSize="15sp"
                 android:textStyle="bold" />

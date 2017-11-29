@@ -27,7 +27,7 @@ public class AsyncTaskServerPosition
 
     private static final String TAG = "ASYNCTASK";
 
-
+/*
     public static class SendPosition extends AsyncTask<String, String, String>
     {
         String latLng;
@@ -98,7 +98,7 @@ public class AsyncTaskServerPosition
         }
 
     }
-
+*/
     public static class StopPosition extends AsyncTask<String, String, String>
     {
 

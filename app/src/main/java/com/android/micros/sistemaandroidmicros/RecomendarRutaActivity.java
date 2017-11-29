@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -154,7 +155,7 @@ public class RecomendarRutaActivity extends AppCompatActivity
                         coordenadas.put("latFinal", latTermino);
                         coordenadas.put("lngFinal", lngTermino);
 
-                        new Linea.RecomendarRuta().execute(coordenadas.toString());
+                        new Linea.RecomendarRuta().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, coordenadas.toString());
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -284,13 +285,14 @@ public class RecomendarRutaActivity extends AppCompatActivity
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 14));
             }
         }
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        LatLng hcmus = new LatLng(-40.5769389, -73.1260218);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 14));
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -540,6 +542,8 @@ public class RecomendarRutaActivity extends AppCompatActivity
             //marker.position(new LatLng(p.latitud,p.longitud));
             //marcadorVuelta = mMap.addMarker(marker);
         }
+
+
         return nuevaPolyline;
     }
 

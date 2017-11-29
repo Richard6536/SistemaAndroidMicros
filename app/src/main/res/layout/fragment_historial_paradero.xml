@@ -69,11 +69,11 @@
                 <TextView
                     android:id="@+id/txtHoraTerminoIdaVuelta"
                     android:layout_width="227dp"
-                    android:layout_height="20dp"
+                    android:layout_height="50dp"
                     android:layout_alignLeft="@+id/txtPasajerosTransportados"
                     android:layout_alignStart="@+id/txtPasajerosTransportados"
                     android:layout_below="@+id/txtvHoraInicioIdaVuelta"
-                    android:text="Pasajeros Recibidos"
+                    android:text="Pasajeros transportados que usan STAPP"
                     android:textSize="18dp"
                     android:textStyle="bold" />
 

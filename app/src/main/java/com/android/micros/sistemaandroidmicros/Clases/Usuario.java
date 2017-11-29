@@ -211,15 +211,6 @@ public class Usuario {
                 os.flush();
 
                 inputStream = urlConnection.getInputStream();
-                /*
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-
-                    return "Error 1";
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                */
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -450,7 +441,7 @@ public class Usuario {
         }
 
     }
-
+/*
     public static class ObtenerDatosLineaFusion extends AsyncTask<String,String,JSONObject>
     {
         @Override
@@ -557,6 +548,396 @@ public class Usuario {
 
     }
 
+    */
+
+    public static class ObtenerPosicionPasajero extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+            String idLinea = params[1];
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            Log.e("RECORRIDOFUSIONXD ",idUsuario);
+
+            JSONObject linea = new JSONObject();
+            try {
+
+                linea.put("IdLinea", idLinea);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            try {
+
+
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ObtenerPosicionPasajero");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(linea.toString().getBytes());
+                os.flush();
+
+                inputStream = urlConnection.getInputStream();
+
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject parametros = new JSONObject(value);
+
+                return parametros;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject parametros)
+        {
+            try
+            {
+                UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
+                uMap.recibirPosicion(parametros);
+                uMap.obtenerParametrosFusionados(parametros);
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
+    }
+
+    public static class ActualizarPosicionPasajero extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+            String idLineaCoordenadas = params[1];
+
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            Log.e("RECORRIDOFUSIONXD ",idUsuario);
+
+            try {
+
+
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ActualizarPosicionPasajero");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(idLineaCoordenadas.toString().getBytes());
+                os.flush();
+
+                inputStream = urlConnection.getInputStream();
+
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject parametros = new JSONObject(value);
+
+                return parametros;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject parametros)
+        {
+            try
+            {
+                UserMapActivity uMap = (UserMapActivity) ActivityController.activiyAbiertaActual;
+                uMap.obtenerParametrosFusionados(parametros);
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
+    }
+
+    public static class ActualizarPosicionChofer extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+            String coordenadas = params[1];
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            Log.e("RECORRIDOFUSIONXD ",idUsuario);
+
+            try {
+
+
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ActualizarPosicionChofer");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                os = new BufferedOutputStream(urlConnection.getOutputStream());
+                os.write(coordenadas.toString().getBytes());
+                os.flush();
+
+                inputStream = urlConnection.getInputStream();
+
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject parametros = new JSONObject(value);
+
+                return parametros;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject parametros)
+        {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.obtenerParametrosFusionadosChofer(parametros);
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
+    }
+
+    public static class ObtenerPosicionChofer extends AsyncTask<String,String,JSONObject>
+    {
+        @Override
+        protected JSONObject doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+
+            //Parámetros
+            String idUsuario =params[0];
+
+            BufferedReader reader = null;
+            OutputStream os = null;
+            InputStream inputStream = null;
+
+            Log.e("RECORRIDOFUSIONXD ",idUsuario);
+
+            try {
+
+
+                URL url = new URL(ip+"/Usuarios("+idUsuario+")/ObtenerPosicionChofer");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+                urlConnection.connect();
+
+                inputStream = urlConnection.getInputStream();
+
+
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String inputLine = "";
+                while ((inputLine = reader.readLine()) != null)
+                {
+                    buffer.append(inputLine);
+                }
+
+                String value = buffer.toString();
+
+                JSONObject parametros = new JSONObject(value);
+
+                return parametros;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("Mensaje2", "Error closing stream", e);
+                    }
+                }
+                if(os != null)
+                {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject parametros)
+        {
+            try
+            {
+                ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
+                cMap.obtenerParametrosFusionadosChofer(parametros);
+                cMap.recibirPosicion(parametros);
+
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
+    }
+/*
     public static class ObtenerDatosRecorridoFusion extends AsyncTask<String,String,JSONObject>
     {
         @Override
@@ -638,6 +1019,7 @@ public class Usuario {
             {
                 ChoferMapActivity cMap = (ChoferMapActivity)ActivityController.activiyAbiertaActual;
                 cMap.obtenerParametrosFusionadosChofer(parametros);
+
             }
             catch(Exception e)
             {
@@ -646,7 +1028,7 @@ public class Usuario {
         }
 
     }
-
+*/
     public static class MiMicroAbordada extends AsyncTask<String,String,JSONObject>
     {
         @Override

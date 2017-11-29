@@ -11,9 +11,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -22,29 +19,15 @@ import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
+import static com.android.micros.sistemaandroidmicros.ChoferMapActivity.ultimaLocalizacion;
 
-import static android.content.ContentValues.TAG;
-import static com.android.micros.sistemaandroidmicros.UserMapActivity.ultimaLocalizacion;
-
-/**
- * Created by Richard on 31/05/2017.
- */
-
-public class ServicePosition extends Service
-{
-
+public class ServicePositionChofer extends Service {
     private static final String TAG = "TESTGPS";
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 500;
     private static final float LOCATION_DISTANCE = 1;
     String userId="";
+
 
     UserSessionManager session;
 
@@ -63,8 +46,9 @@ public class ServicePosition extends Service
 
             Log.e(TAG, "onLocationChanged: " + location);
             mLastLocation.set(location);
-
         }
+
+
         @Override
         public void onProviderDisabled(String provider)
         {

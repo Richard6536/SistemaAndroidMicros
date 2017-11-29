@@ -71,7 +71,7 @@ public class LineaFusionService extends Service {
             public void run() {
 
                 Log.e("IDLINEAXDXDXD", idLineaSeleccionada+"");
-                new Usuario.ObtenerDatosLineaFusion().execute(userId, idLineaSeleccionada+"");
+                //new Usuario.ObtenerDatosLineaFusion().execute(userId, idLineaSeleccionada+"");
 
             }
         }, 0, 1000);

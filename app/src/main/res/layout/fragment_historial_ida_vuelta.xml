@@ -21,14 +21,14 @@
                 <TextView
                     android:id="@+id/txtPasajerosTransportados"
                     android:layout_width="227dp"
-                    android:layout_height="20dp"
+                    android:layout_height="50dp"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginLeft="18dp"
                     android:layout_marginStart="18dp"
                     android:layout_marginTop="27dp"
-                    android:text="Pasajeros Transportados"
+                    android:text="Pasajeros transportados que usan STAPP"
                     android:textSize="18dp"
                     android:textStyle="bold" />
 
@@ -50,16 +50,14 @@
                     android:textSize="18dp"
                     android:textStyle="bold"
                     android:layout_below="@+id/txtPasajerosTransp"
-                    android:layout_alignLeft="@+id/textView16"
-                    android:layout_alignStart="@+id/textView16" />
+                    android:layout_alignLeft="@+id/txtHoraTerminoIdaVuelta"
+                    android:layout_alignStart="@+id/txtHoraTerminoIdaVuelta" />
 
 
                 <TextView
                     android:id="@+id/txtHoraInicioIdaVuelta"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginTop="137dp"
+                    android:layout_height="60dp"
                     android:text="Text"
                     android:layout_alignLeft="@+id/txtvHoraInicioIdaVuelta"
                     android:layout_alignStart="@+id/txtvHoraInicioIdaVuelta"

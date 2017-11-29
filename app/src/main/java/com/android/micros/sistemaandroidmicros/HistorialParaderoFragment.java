@@ -12,6 +12,10 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.android.micros.sistemaandroidmicros.HistorialIdaVueltaActivity.historialIdaVeultaActual;
 import static com.android.micros.sistemaandroidmicros.HistorialParaderoActivity.historialParaderosActual;
 
@@ -55,7 +59,9 @@ public class HistorialParaderoFragment extends Fragment {
                     String[] fechaHoraInicioSplit = hLlegada.split("T");
                     String[] horaCompleta = fechaHoraInicioSplit[1].split("\\."); //0
 
-                    fechaLlegada = fechaHoraInicioSplit[0];
+                    SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date = null;
+
                     horaLlegada = horaCompleta[0];
 
                     String tiempoDetenidoCompleto = h.getString("TiempoDetenido");
@@ -85,7 +91,7 @@ public class HistorialParaderoFragment extends Fragment {
             }
         }
 
-        txtHoraLlegada.setText(fechaLlegada + System.getProperty("line.separator")+ horaLlegada);
+        txtHoraLlegada.setText(horaLlegada);
         txtTiempoDetenido.setText(minutosDetenidos + " minutos "+ segundosDetenidos+" segundos");
         txtPasajerosRecibidos.setText(pasajerosRecibidos+"");
 

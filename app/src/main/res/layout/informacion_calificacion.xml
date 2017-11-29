@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomSheetInfoMicro"
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:orientation="vertical"
+    android:background="#023e43"
+    app:layout_behavior="com.android.micros.sistemaandroidmicros.Clases.UserLockBottomSheetBehavior"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="120dp">
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:padding="2dp"
+        android:text="Patente:"
+        android:textColor="#ffffff"
+        android:textSize="17dp"
+        android:layout_marginLeft="14dp"
+        android:layout_marginStart="14dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/tetd"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textSize="17dp"
+        android:padding="2dp"
+        android:textColor="#ffffff"
+        android:text="Línea:"
+        android:layout_below="@+id/textView6"
+        android:layout_alignLeft="@+id/textView6"
+        android:layout_alignStart="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textSize="17dp"
+        android:padding="2dp"
+        android:textColor="#ffffff"
+        android:text="Calificación:"
+        android:layout_alignTop="@+id/ratingBarGlobalInfo"
+        android:layout_alignLeft="@+id/tetd"
+        android:layout_alignStart="@+id/tetd"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/txtPatente"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="17dp"
+        android:padding="2dp"
+        android:textColor="#ffffff"
+        android:text="TextView"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignBottom="@+id/textView6"
+        android:layout_toRightOf="@+id/textView6"
+        android:layout_toEndOf="@+id/textView6"
+        android:layout_marginLeft="14dp"
+        android:layout_marginStart="14dp" />
+
+    <TextView
+        android:id="@+id/txtLinea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="17dp"
+        android:padding="2dp"
+        android:textColor="#ffffff"
+        android:layout_alignLeft="@+id/txtPatente"
+        android:layout_alignStart="@+id/txtPatente"
+        android:layout_below="@+id/txtPatente"
+        android:text="TextView" />
+
+    <RatingBar
+        android:id="@+id/ratingBarGlobalInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:max="5"
+        android:scaleX=".8"
+        android:scaleY=".8"
+        android:layout_below="@+id/btnCalificarMicro"
+        android:layout_alignRight="@+id/btnCalificarMicro"
+        android:layout_alignEnd="@+id/btnCalificarMicro" />
+    <Button
+        android:id="@+id/btnCalificarMicro"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginRight="14dp"
+        android:text="CALIFICAR"
+        android:layout_alignTop="@+id/txtPatente"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+</RelativeLayout>

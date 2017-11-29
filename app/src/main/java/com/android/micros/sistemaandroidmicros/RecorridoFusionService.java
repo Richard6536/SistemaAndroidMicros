@@ -2,6 +2,7 @@ package com.android.micros.sistemaandroidmicros;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -56,7 +57,7 @@ public class RecorridoFusionService extends Service {
             public void run() {
 
                 Log.e("IDUSUARIOXDXDDX",userId);
-                new Usuario.ObtenerDatosRecorridoFusion().execute(userId);
+                //new Usuario.ObtenerDatosRecorridoFusion().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userId);
 
             }
         }, 0, 1000);

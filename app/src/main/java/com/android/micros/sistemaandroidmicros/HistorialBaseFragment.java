@@ -20,6 +20,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.android.micros.sistemaandroidmicros.HistorialActivity.historialActual;
 
 
@@ -81,9 +85,7 @@ public class HistorialBaseFragment extends Fragment {
                     String[] horaCompleta = fechaHoraInicioSplit[1].split("\\.");
                     String[] horaFCompleta = fechaHoraTerminoSplit[1].split("\\.");
 
-                    fechaInicio = fechaHoraInicioSplit[0];
                     horaInicio = horaCompleta[0];
-                    fechaFinal = fechaHoraTerminoSplit[0];
                     horaFinal = horaFCompleta[0];
 
                     kilometrosRecorridos = h.getDouble("KilometrosRecorridos");
@@ -110,8 +112,8 @@ public class HistorialBaseFragment extends Fragment {
             }
         }
 
-        txtInicio.setText(fechaInicio + System.getProperty("line.separator") + horaInicio);
-        txtTermino.setText(fechaFinal + System.getProperty("line.separator")+ horaFinal);
+        txtInicio.setText(horaInicio);
+        txtTermino.setText(horaFinal);
         txtKilometrosR.setText(kilometrosRecorridos+"");
         txtnCalificaciones.setText(calificacionesRecibidas+"");
         txtNumIdaVueltas.setText(numeroVueltas+"");

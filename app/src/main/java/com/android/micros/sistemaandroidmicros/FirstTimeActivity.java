@@ -114,13 +114,15 @@ public class FirstTimeActivity extends AppCompatActivity {
         }
         else
         {
+            Linea.listaLineas.clear();
+
             String URLRutas = ip+"/Rutas";
             String URLLineas = ip+"/Lineas";
             String URLParaderos = ip+"/Paraderos";
 
-            new Rutas.ObtenerRutas().execute(URLRutas);
-            new Linea.ObtenerLineas().execute(URLLineas);
-            new Paradero.ObtenerParaderos().execute(URLParaderos);
+            new Rutas.ObtenerRutas().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URLRutas);
+            new Linea.ObtenerLineas().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URLLineas);
+            new Paradero.ObtenerParaderos().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URLParaderos);
         }
     }
 

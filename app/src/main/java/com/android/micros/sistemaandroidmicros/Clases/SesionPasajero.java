@@ -14,7 +14,9 @@ public class SesionPasajero
     public static int idLineaPosicionGuardada;
     public static Rutas rutaIda;
     public static Rutas rutaVuelta;
-
+    public static Linea lineaGuardada;
+    public static boolean onCreateBool = false;
+    public static boolean estadoGuardado = false;
 
     public static Rutas getRutaIda() {
         return rutaIda;

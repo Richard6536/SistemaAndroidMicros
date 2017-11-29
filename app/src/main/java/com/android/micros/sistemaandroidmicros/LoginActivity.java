@@ -119,10 +119,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         progressBarLogin = (ProgressBar)findViewById(R.id.progressBarLogin);
         progressBarLogin.setVisibility(View.GONE);
 
-        Toast.makeText(getApplicationContext(),
-                        		       "User Login Status: " + session.isUserLoggedIn(),
-                        		       Toast.LENGTH_LONG).show();
-
         btnRegister.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -271,10 +267,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             //Verifica si hay coneción a internet antes de iniciar sesión
             new InternetConnection.hasInternetAccess().execute(getApplicationContext());
-
-            //showProgress(true);
-            //mAuthTask = new UserLoginTask(email, password);
-            //mAuthTask.execute((Void) null);
         }
     }
     public void internetAlert()
@@ -502,22 +494,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
 
-                //Intent in = new Intent(LoginActivity.this, UserMapActivity.class);
-                //startActivity(in);
-
-                JSONObject parametros = new JSONObject();
-
-                try {
-
-                    parametros.put("Email", email);
-                    parametros.put("Password", password);
-
-                    Usuario us = new Usuario();
-                    us.new ValidarUsuario().execute(parametros.toString());
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -548,7 +524,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-
+                mEmailSignInButton.setEnabled(true);
                 dialog.cancel();
             }
         });

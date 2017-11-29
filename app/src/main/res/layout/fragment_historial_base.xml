@@ -124,7 +124,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="18dp"
                     android:textStyle="bold"
-                    android:text="Pasajeros:"
+                    android:text="Pasajeros STAPP:"
                     android:layout_marginTop="10dp"
                     android:layout_below="@+id/textView17"
                     android:layout_alignLeft="@+id/textView17"
@@ -219,7 +219,7 @@
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
                         android:clickable="true"
-                        android:text="Historial Ida y vuelta"
+                        android:text="Historial por Recorrido"
                         android:textColor="#ffff" />
 
                 </LinearLayout>

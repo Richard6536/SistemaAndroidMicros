@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,11 @@ public class CalificacionFragment extends Fragment {
 
         idMicro = this.getArguments().getInt("idMicro");
         Double calificacion = this.getArguments().getDouble("cGlobal");
+
         calificacionGlobal = calificacion.floatValue();
+
+        Log.e("calf", calificacionGlobal+"");
+
         ratingBarGlobal.setRating(calificacionGlobal);
 
         btnCalificar.setOnClickListener(new View.OnClickListener() {

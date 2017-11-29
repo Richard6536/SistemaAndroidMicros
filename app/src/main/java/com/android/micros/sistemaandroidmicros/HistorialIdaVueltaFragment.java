@@ -15,6 +15,10 @@ import com.android.micros.sistemaandroidmicros.Clases.HistorialIdaVuelta;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.android.micros.sistemaandroidmicros.HistorialActivity.historialActual;
 import static com.android.micros.sistemaandroidmicros.HistorialIdaVueltaActivity.historialIdaVeultaActual;
 
@@ -71,10 +75,8 @@ public class HistorialIdaVueltaFragment extends Fragment {
                         String[] horaCompleta = fechaHoraInicioSplit[1].split("\\.");
                         String[] horaFCompleta = fechaHoraTerminoSplit[1].split("\\.");
 
-                        fechaInicio = fechaHoraInicioSplit[0];
-                        horaInicio = horaCompleta[0];
-                        fechaTermino = fechaHoraTerminoSplit[0];
-                        horaTermino = horaFCompleta[0];
+                            horaInicio = horaCompleta[0];
+                            horaTermino = horaFCompleta[0];
 
                         String duracionRecorridoComp = h.getString("DuracionRecorrido");
                         boolean minutos = false;
@@ -107,8 +109,8 @@ public class HistorialIdaVueltaFragment extends Fragment {
                         }
 
                         txtPasajerosTrans.setText(pasajerosTransportados+"");
-                        txtHoraInicio.setText(fechaInicio + System.getProperty("line.separator") + horaInicio);
-                        txtHoraTermino.setText(fechaTermino + System.getProperty("line.separator") + horaTermino);
+                        txtHoraInicio.setText(horaInicio);
+                        txtHoraTermino.setText(horaTermino);
                     }
 
                 }
