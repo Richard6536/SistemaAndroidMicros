@@ -265,6 +265,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView.requestFocus();
         } else {
 
+            progressBarLogin.setVisibility(View.VISIBLE);
+            mEmailSignInButton.setBackgroundColor(Color.GRAY);
+            mEmailSignInButton.setEnabled(false);
             //Verifica si hay coneción a internet antes de iniciar sesión
             new InternetConnection.hasInternetAccess().execute(getApplicationContext());
         }
@@ -298,6 +301,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if(isConnectionEnable == false)
         {
             internetAlert();
+            mEmailSignInButton.setEnabled(true);
+            mEmailSignInButton.setBackgroundColor(Color.GREEN);
+            progressBarLogin.setVisibility(View.GONE);
         }
         else
         {
@@ -311,10 +317,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 parametros.put("Password", password);
 
                 Log.e(LOG_TAG, "Está conectado a internet");
-
-                progressBarLogin.setVisibility(View.VISIBLE);
-                mEmailSignInButton.setBackgroundColor(Color.GRAY);
-                mEmailSignInButton.setEnabled(false);
 
                 Usuario us = new Usuario();
                 us.new ValidarUsuario().execute(parametros.toString());

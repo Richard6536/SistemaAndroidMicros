@@ -82,6 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:max="5"
+        android:progressTint="@color/com_facebook_button_text_color"
         android:scaleX=".8"
         android:scaleY=".8"
         android:layout_below="@+id/btnCalificarMicro"

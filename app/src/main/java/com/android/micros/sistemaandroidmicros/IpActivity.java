@@ -59,7 +59,7 @@ public class IpActivity extends AppCompatActivity {
                 ipPrm = ipPrimeraParte.getText().toString();
                 ipPrimeraParte.setEnabled(false);
 
-                ip = "http://"+ ipPrm + ipt +":8080/odata";
+                ip = "http://"+ ipPrm + ipt +":80/odata";
                 Intent  intent = new Intent(IpActivity.this, CheckSessionActivity.class);
                 startActivity(intent);
                 finish();

@@ -40,6 +40,7 @@ import com.android.micros.sistemaandroidmicros.Clases.Paradero;
 import com.android.micros.sistemaandroidmicros.Clases.Rutas;
 import com.android.micros.sistemaandroidmicros.Clases.Usuario;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -459,6 +460,11 @@ public class RecomendarRutaActivity extends AppCompatActivity
                 alert.cancel();
 
             }
+            else if(idLineaSeleccionada == -5)
+            {
+                fueraLimiteDialog();
+                alert.cancel();
+            }
             else
             {
 
@@ -623,6 +629,23 @@ public class RecomendarRutaActivity extends AppCompatActivity
         AlertDialog.Builder dialog = new AlertDialog.Builder(RecomendarRutaActivity.this);
         dialog.setCancelable(false);
         dialog.setMessage("Caminar hasta el siguiente punto, es lo más recomendado.");
+        dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                alerta.cancel();
+            }
+        });
+        alerta = dialog.create();
+        alerta.show();
+    }
+
+
+    public void fueraLimiteDialog()
+    {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(RecomendarRutaActivity.this);
+        dialog.setCancelable(false);
+        dialog.setMessage("Verifique que ambos puntos estén dentro de la ciudad de Osorno.");
         dialog.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {

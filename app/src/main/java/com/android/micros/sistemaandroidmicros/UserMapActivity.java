@@ -1312,10 +1312,6 @@ public class UserMapActivity extends AppCompatActivity
     public static void dialog(boolean value){
 
         if(value){
-            check_connection.setText("conectado");
-            check_connection.setBackgroundColor(Color.parseColor("#12ce18"));
-            check_connection.setTextColor(Color.WHITE);
-
             Handler handler = new Handler();
             Runnable delayrunnable = new Runnable() {
                 @Override

@@ -884,9 +884,6 @@ public class ChoferMapActivity extends AppCompatActivity
             if(networkCreate == networkStatus)
             {
                 Log.e("network: ", networkCreate+"");
-                check_connection.setText("conectado");
-                check_connection.setBackgroundColor(Color.parseColor("#12ce18"));
-                check_connection.setTextColor(Color.WHITE);
             }
             else
             {
